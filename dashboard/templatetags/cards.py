@@ -352,9 +352,10 @@ def card_sleep_last(context, child):
         .first()
     )
     empty = not instance
-    timer = models.Timer.objects.filter(
-        child=child, name=models.Timer.SLEEP_NAME
-    ).first()
+    # Read the current timer state from the database on every render. Timers
+    # created by external clients (e.g. Home Assistant) are not guaranteed to
+    # use Baby Buddy's internal sleep timer name.
+    timer = models.Timer.objects.filter(child=child).order_by("-start").first()
     user = context["request"].user
 
     return {

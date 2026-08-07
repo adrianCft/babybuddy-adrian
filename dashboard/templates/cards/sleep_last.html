@@ -26,12 +26,15 @@
     {% if timer %}
         <div>{{ timer.duration|duration_string }}</div>
         {% if can_finish %}
-            <div class="mt-2">
-                <a class="btn btn-sm btn-dashboard-sleep"
-                   href="{% url 'core:sleep-add' %}?timer={{ timer.pk }}&child={{ child.slug }}">
+            <form action="{% url 'core:sleep-finish-quick' timer.pk %}"
+                  method="post"
+                  class="mt-2">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+                <button type="submit" class="btn btn-sm btn-dashboard-sleep">
                     {% trans "Woke up" %}
-                </a>
-            </div>
+                </button>
+            </form>
         {% endif %}
     {% else %}
         {% if sleep %}{{ sleep.duration|duration_string }}{% endif %}

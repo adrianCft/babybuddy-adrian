@@ -218,6 +218,66 @@ class ViewsTestCase(TestCase):
         page = self.c.post("/timers/{}/restart/".format(entry.id), follow=True)
         self.assertEqual(page.status_code, 200)
 
+    def test_sleep_timer_start_and_finish_quick(self):
+        child = models.Child.objects.create(
+            first_name="Timer",
+            last_name="Child",
+            birth_date="2026-01-01",
+        )
+
+        page = self.c.post(
+            "/timers/add/quick/?next=/",
+            {"child": child.pk, "kind": "sleep"},
+        )
+        self.assertRedirects(page, "/", fetch_redirect_response=False)
+        timer = models.Timer.objects.get(child=child)
+        self.assertEqual(timer.name, models.Timer.SLEEP_NAME)
+
+        page = self.c.get("/sleep/timer/{}/finish/".format(timer.pk))
+        self.assertEqual(page.status_code, 405)
+
+        page = self.c.post(
+            "/sleep/timer/{}/finish/".format(timer.pk),
+            {"next": "/"},
+        )
+        self.assertRedirects(page, "/", fetch_redirect_response=False)
+        self.assertFalse(models.Timer.objects.filter(pk=timer.pk).exists())
+        sleep = models.Sleep.objects.get(child=child)
+        self.assertEqual(sleep.start, timer.start)
+        self.assertGreaterEqual(sleep.end, sleep.start)
+
+    def test_sleep_timer_finish_quick_accepts_external_timer(self):
+        child = models.Child.objects.create(
+            first_name="External",
+            last_name="Timer",
+            birth_date="2026-01-01",
+        )
+        timer = models.Timer.objects.create(
+            child=child,
+            user=self.user,
+            name=None,
+            start=timezone.now() - timezone.timedelta(minutes=30),
+        )
+
+        page = self.c.post(
+            "/sleep/timer/{}/finish/".format(timer.pk),
+            {"next": "/"},
+        )
+        self.assertRedirects(page, "/", fetch_redirect_response=False)
+        self.assertFalse(models.Timer.objects.filter(pk=timer.pk).exists())
+        sleep = models.Sleep.objects.get(child=child)
+        self.assertEqual(sleep.start, timer.start)
+
+    def test_sleep_timer_finish_quick_handles_external_completion(self):
+        page = self.c.post(
+            "/sleep/timer/999999/finish/",
+            {"next": "/"},
+        )
+        self.assertRedirects(page, "/", fetch_redirect_response=False)
+        self.assertFalse(
+            models.Sleep.objects.filter(child__first_name="External").exists()
+        )
+
     def test_timeline_views(self):
         child = models.Child.objects.first()
         response = self.c.get("/timeline/")

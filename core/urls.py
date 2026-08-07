@@ -84,6 +84,11 @@ urlpatterns = [
     path("notes/<int:pk>/delete/", views.NoteDelete.as_view(), name="note-delete"),
     path("sleep/", views.SleepList.as_view(), name="sleep-list"),
     path("sleep/add/", views.SleepAdd.as_view(), name="sleep-add"),
+    path(
+        "sleep/timer/<int:pk>/finish/",
+        views.SleepFinishQuick.as_view(),
+        name="sleep-finish-quick",
+    ),
     path("sleep/<int:pk>/", views.SleepUpdate.as_view(), name="sleep-update"),
     path("sleep/<int:pk>/delete/", views.SleepDelete.as_view(), name="sleep-delete"),
     path("temperature/", views.TemperatureList.as_view(), name="temperature-list"),

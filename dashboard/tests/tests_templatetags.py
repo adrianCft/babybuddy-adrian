@@ -274,6 +274,22 @@ class TemplateTagsTestCase(TestCase):
         data = cards.card_sleep_last(self.context, self.child)
         self.assertEqual(data["timer"], timer)
 
+        # Home Assistant timers may not use Baby Buddy's internal sleep name.
+        timer.delete()
+        external_timer = models.Timer.objects.create(
+            child=self.child,
+            user=self.context["request"].user,
+            name=None,
+        )
+        data = cards.card_sleep_last(self.context, self.child)
+        self.assertEqual(data["timer"], external_timer)
+
+        # The state is read from the database again after an external client
+        # finishes and removes the timer.
+        external_timer.delete()
+        data = cards.card_sleep_last(self.context, self.child)
+        self.assertIsNone(data["timer"])
+
     def test_card_sleep_last_empty(self):
         models.Sleep.objects.all().delete()
         data = cards.card_sleep_last(self.context, self.child)

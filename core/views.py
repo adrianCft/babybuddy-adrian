@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Count, Exists, F, Max, Min, OuterRef, Prefetch, Q
 from django.db.models.functions import Lower, TruncDate
 from django.forms import Form
@@ -592,6 +594,49 @@ class SleepDelete(CoreDeleteView):
     model = models.Sleep
     permission_required = ("core.delete_sleep",)
     success_url = reverse_lazy("core:sleep-list")
+
+
+class SleepFinishQuick(PermissionRequiredMixin, RedirectView):
+    """Create a Sleep entry from the current state of a child timer."""
+
+    http_method_names = ["post"]
+    permission_required = ("core.add_sleep",)
+
+    def post(self, request, *args, **kwargs):
+        with transaction.atomic():
+            timer = (
+                models.Timer.objects.select_for_update()
+                .filter(pk=kwargs["pk"])
+                .first()
+            )
+            if timer is None:
+                # An external client may have completed the timer after this
+                # page was rendered. There is nothing left to do.
+                pass
+            elif timer.child is None:
+                messages.error(request, _("No timer entries found."))
+            else:
+                sleep = models.Sleep(
+                    child=timer.child,
+                    start=timer.start,
+                    end=timezone.now(),
+                    nap=None,
+                )
+                try:
+                    sleep.full_clean()
+                except ValidationError as error:
+                    messages.error(request, "; ".join(error.messages))
+                else:
+                    sleep.save()
+                    timer.stop()
+                    messages.success(
+                        request,
+                        _("Sleep entry for %(child)s added!")
+                        % {"child": sleep.child},
+                    )
+
+        self.url = request.POST.get("next") or reverse("core:sleep-list")
+        return super().get(request, *args, **kwargs)
 
 
 class TagAdminList(
