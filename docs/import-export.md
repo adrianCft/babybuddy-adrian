@@ -63,6 +63,12 @@ The referenced foods must exist before importing meals. The `food_names`,
 and are ignored during import. Child food profiles similarly use `food_id` and
 include a read-only `food_name` column.
 
+Meals also include `dish_names`, a JSON list of the dish names recorded at the
+time of the meal. These names and the meal's `food_ids` remain independent of
+later changes to saved dishes. An empty list (`[]`) means no dish was recorded.
+The reusable dish catalog is managed separately under **Meals → Saved dishes**;
+meal exports preserve the recorded meals, not the reusable recipes.
+
 Keep the exported IDs when transferring related files. Imports are previewed
 and validated before being committed, and a failed transactional import does
 not leave partially imported rows.

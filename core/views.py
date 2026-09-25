@@ -262,6 +262,49 @@ class FoodQuickAdd(PermissionRequiredMixin, View):
         )
 
 
+class DishList(PermissionRequiredMixin, BabyBuddyPaginatedView, BabyBuddyFilterView):
+    model = models.Dish
+    template_name = "core/dish_list.html"
+    permission_required = ("core.view_dish",)
+    filterset_class = filters.DishFilter
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related("foods")
+
+
+class DishAdd(CoreAddView):
+    model = models.Dish
+    permission_required = ("core.add_dish",)
+    form_class = forms.DishForm
+    success_url = reverse_lazy("core:dish-list")
+
+
+class DishUpdate(CoreUpdateView):
+    model = models.Dish
+    permission_required = ("core.change_dish",)
+    form_class = forms.DishForm
+    success_url = reverse_lazy("core:dish-list")
+
+
+class DishQuickAdd(PermissionRequiredMixin, View):
+    permission_required = ("core.add_dish",)
+
+    def post(self, request, *args, **kwargs):
+        form = forms.DishForm(request.POST)
+        if not form.is_valid():
+            return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+        with transaction.atomic():
+            dish = form.save()
+        return JsonResponse(
+            {
+                "id": dish.pk,
+                "name": dish.name,
+                "foods": list(dish.foods.values_list("pk", flat=True)),
+            },
+            status=201,
+        )
+
+
 class MealList(PermissionRequiredMixin, BabyBuddyPaginatedView, BabyBuddyFilterView):
     model = models.Meal
     template_name = "core/meal_list.html"

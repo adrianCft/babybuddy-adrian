@@ -16,6 +16,7 @@
         {% endif %}
     </h1>
     {% include 'babybuddy/filter.html' %}
+    {% if perms.core.view_dish %}<a class="btn btn-outline-primary mb-3" href="{% url 'core:dish-list' %}">{% trans "Saved dishes" %}</a>{% endif %}
     <div class="table-responsive">
         <table class="table table-instances table-borderless table-striped table-hover align-middle">
             <thead>
@@ -95,6 +96,7 @@
                         {% endif %}
                         <td>{{ meal.get_meal_type_display }}</td>
                         <td>
+                            {% if meal.dish_names %}<strong class="d-block">{{ meal.dish_names|join:", " }}</strong>{% endif %}
                             {% for meal_food in meal.mealfood_set.all %}
                                 {{ meal_food.food.name }}
                                 {% if meal_food.is_first_introduction %}

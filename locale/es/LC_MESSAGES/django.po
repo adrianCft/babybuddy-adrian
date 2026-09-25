@@ -3379,3 +3379,72 @@ msgstr "Crear alimento"
 
 msgid "Create and select"
 msgstr "Crear y seleccionar"
+
+msgid "Saved dish"
+msgstr "Plato guardado"
+
+msgid "Saved dishes"
+msgstr "Platos guardados"
+
+msgid "Invalid saved dish names."
+msgstr "Los nombres de los platos guardados no son válidos."
+
+msgid "A dish with this name already exists."
+msgstr "Ya existe un plato con este nombre."
+
+msgid "Add dish"
+msgstr "Añadir plato"
+
+msgid "Edit dish"
+msgstr "Editar plato"
+
+msgid "Changing or deactivating a dish does not change previous meals."
+msgstr "Modificar o desactivar un plato no cambia las comidas anteriores."
+
+msgid "Save a dish with its ingredients to reuse it when recording meals."
+msgstr ""
+"Guarda un plato con sus ingredientes para reutilizarlo al registrar comidas."
+
+msgid "No saved dishes yet."
+msgstr "Todavía no hay platos guardados."
+
+msgid "Selected"
+msgstr "Seleccionados"
+
+msgid "Choose a dish"
+msgstr "Elige un plato"
+
+msgid "Manage dishes"
+msgstr "Gestionar platos"
+
+msgid ""
+"Add a dish to select its ingredients, then adjust them below. Dishes with "
+"inactive ingredients are unavailable."
+msgstr ""
+"Añade un plato para marcar sus ingredientes y ajústalos debajo si lo "
+"necesitas. Los platos con ingredientes inactivos no están disponibles."
+
+msgid "Removing a dish name keeps the ingredients selected."
+msgstr "Quitar el nombre de un plato mantiene sus ingredientes seleccionados."
+
+msgid "Save selection as dish"
+msgstr "Guardar selección como plato"
+
+msgid "Dish name"
+msgstr "Nombre del plato"
+
+msgid "Save dish"
+msgstr "Guardar plato"
+
+msgid "Remove dish name"
+msgstr "Quitar nombre del plato"
+
+msgid "Could not save the dish. Please try again."
+msgstr "No se ha podido guardar el plato. Vuelve a intentarlo."
+
+msgid ""
+"Enable JavaScript to add saved dishes. You can still select ingredients "
+"below."
+msgstr ""
+"Activa JavaScript para añadir platos guardados. Puedes seleccionar los "
+"ingredientes debajo."

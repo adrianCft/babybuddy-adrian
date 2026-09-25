@@ -420,8 +420,61 @@ class Food(models.Model):
         super().save(*args, **kwargs)
 
 
+class Dish(models.Model):
+    """Reusable ingredient selection. Meals keep their own historical snapshot."""
+
+    name = models.CharField(max_length=255, verbose_name=_("Name"))
+    foods = models.ManyToManyField(Food, through="DishFood", verbose_name=_("Foods"))
+    active = models.BooleanField(default=True, verbose_name=_("Active"))
+
+    class Meta:
+        ordering = [Lower("name")]
+        constraints = [
+            models.UniqueConstraint(Lower("name"), name="core_dish_name_ci_unique")
+        ]
+        verbose_name = _("Saved dish")
+        verbose_name_plural = _("Saved dishes")
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        self.name = self.name.strip()
+        super().save(*args, **kwargs)
+
+
+class DishFood(models.Model):
+    dish = models.ForeignKey(Dish, on_delete=models.CASCADE)
+    food = models.ForeignKey(Food, on_delete=models.PROTECT)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["dish", "food"], name="core_dish_food_unique"
+            )
+        ]
+
+
+def validate_dish_names(value):
+    if (
+        not isinstance(value, list)
+        or len(value) > 50
+        or any(
+            not isinstance(name, str) or not name.strip() or len(name) > 255
+            for name in value
+        )
+    ):
+        raise ValidationError(_("Invalid saved dish names."))
+
+
 class Meal(models.Model):
     model_name = "meal"
+    dish_names = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=_("Saved dishes"),
+        validators=[validate_dish_names],
+    )
     child = models.ForeignKey(
         "Child",
         on_delete=models.CASCADE,

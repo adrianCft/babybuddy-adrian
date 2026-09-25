@@ -1,0 +1,55 @@
+{% extends "babybuddy/page.html" %}
+{% load i18n %}
+{% block title %}
+    {% trans "Saved dishes" %}
+{% endblock %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'core:meal-list' %}">{% trans "Meals" %}</a></li>
+    <li class="breadcrumb-item active">{% trans "Saved dishes" %}</li>
+{% endblock %}
+{% block content %}
+    <h1>{% trans "Saved dishes" %}</h1>
+    {% if perms.core.add_dish %}
+        <a class="btn btn-success mb-3" href="{% url 'core:dish-add' %}">{% trans "Add dish" %}</a>
+    {% endif %}
+    <p>{% trans "Save a dish with its ingredients to reuse it when recording meals." %}</p>
+    {% include "babybuddy/filter.html" %}
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>{% trans "Name" %}</th>
+                    <th>{% trans "Foods" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dish in object_list %}
+                    <tr>
+                        <th scope="row">{{ dish.name }}</th>
+                        <td>{% for food in dish.foods.all %}{{ food.name }}{% if not food.active %} ({% trans "Inactive" %}){% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                        <td>
+                            {% if dish.active %}
+                                {% trans "Active" %}
+                            {% else %}
+                                {% trans "Inactive" %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if perms.core.change_dish %}
+                                <a class="btn btn-sm btn-primary"
+                                   href="{% url 'core:dish-update' dish.pk %}">{% trans "Edit dish" %}</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4">{% trans "No saved dishes yet." %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include "babybuddy/paginator.html" %}
+{% endblock %}

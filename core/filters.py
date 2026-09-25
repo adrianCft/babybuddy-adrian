@@ -46,6 +46,14 @@ class FoodFilter(django_filters.FilterSet):
         fields = ["name", "category", "allergen", "active"]
 
 
+class DishFilter(django_filters.FilterSet):
+    name = django_filters.CharFilter(lookup_expr="icontains", label=_("Name"))
+
+    class Meta:
+        model = models.Dish
+        fields = ["name", "active"]
+
+
 class MealFilter(TagFilter):
     date_from = django_filters.DateFilter(
         field_name="time",

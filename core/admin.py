@@ -151,6 +151,20 @@ class MealFoodInline(admin.TabularInline):
     extra = 1
 
 
+class DishFoodInline(admin.TabularInline):
+    model = models.DishFood
+    autocomplete_fields = ("food",)
+    extra = 1
+
+
+@admin.register(models.Dish)
+class DishAdmin(admin.ModelAdmin):
+    list_display = ("name", "active")
+    list_filter = ("active",)
+    search_fields = ("name",)
+    inlines = (DishFoodInline,)
+
+
 class MealImportExportResource(ImportExportResourceBase):
     food_ids = fields.Field(
         attribute="foods",
@@ -171,6 +185,7 @@ class MealImportExportResource(ImportExportResourceBase):
             "meal_type",
             "food_ids",
             "food_names",
+            "dish_names",
             "quantity",
             "preparation",
             "notes",

@@ -1,0 +1,18 @@
+{% extends "babybuddy/page.html" %}
+{% load i18n %}
+{% block title %}
+    {% if object %}
+        {% trans "Edit dish" %}
+    {% else %}
+        {% trans "Add dish" %}
+    {% endif %}
+{% endblock %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'core:meal-list' %}">{% trans "Meals" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'core:dish-list' %}">{% trans "Saved dishes" %}</a></li>
+{% endblock %}
+{% block content %}
+    <h1>{% if object %}{% trans "Edit dish" %}: {{ object }}{% else %}{% trans "Add dish" %}{% endif %}</h1>
+    <p class="text-muted">{% trans "Changing or deactivating a dish does not change previous meals." %}</p>
+    {% include "babybuddy/form.html" %}
+{% endblock %}

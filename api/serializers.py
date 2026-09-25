@@ -201,6 +201,11 @@ class FoodSerializer(serializers.ModelSerializer):
 
 
 class MealSerializer(CoreModelSerializer, TaggableSerializer):
+    dish_names = serializers.ListField(
+        child=serializers.CharField(max_length=255),
+        max_length=50,
+        required=False,
+    )
     foods = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=models.Food.objects.all(),
@@ -213,6 +218,7 @@ class MealSerializer(CoreModelSerializer, TaggableSerializer):
             "child",
             "time",
             "meal_type",
+            "dish_names",
             "foods",
             "quantity",
             "preparation",

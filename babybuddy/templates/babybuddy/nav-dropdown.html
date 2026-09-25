@@ -299,6 +299,10 @@
 {% trans "Meals" %}
 </a>
 {% endif %}
+{% if perms.core.view_dish %}
+<a class="dropdown-item ps-5{% if request.path == '/dishes/' %} active{% endif %}"
+   href="{% url 'core:dish-list' %}">{% trans "Saved dishes" %}</a>
+{% endif %}
 {% if perms.core.add_meal %}
 <a class="dropdown-item ps-5{% if request.path == '/meals/add/' %} active{% endif %}"
    href="{% url 'core:meal-add' %}"><i class="icon-add" aria-hidden="true"></i>

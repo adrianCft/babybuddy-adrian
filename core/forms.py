@@ -14,10 +14,10 @@ from core.models import Timer
 from core.widgets import (
     ChildRadioSelect,
     FoodMultiCheckboxSelect,
+    MealDishesWidget,
     PillRadioSelect,
     TagsEditor,
 )
-
 
 def set_initial_values(kwargs, form_type):
     """
@@ -305,6 +305,35 @@ class FoodForm(CoreModelForm):
         return name
 
 
+class DishForm(CoreModelForm):
+    foods = forms.ModelMultipleChoiceField(
+        queryset=models.Food.objects.none(),
+        label=_("Foods"),
+        widget=FoodMultiCheckboxSelect(),
+    )
+    fieldsets = [{"fields": ["name", "foods", "active"], "layout": "required"}]
+
+    class Meta:
+        model = models.Dish
+        fields = ["name", "foods", "active"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        available = Q(active=True)
+        if self.instance.pk:
+            available |= Q(dish=self.instance)
+        self.fields["foods"].queryset = models.Food.objects.filter(available).distinct()
+
+    def clean_name(self):
+        name = self.cleaned_data["name"].strip()
+        existing = models.Dish.objects.exclude(pk=self.instance.pk).values_list(
+            "name", flat=True
+        )
+        if any(value.casefold() == name.casefold() for value in existing):
+            raise forms.ValidationError(_("A dish with this name already exists."))
+        return name
+
+
 class MealForm(CoreModelForm, TaggableModelForm):
     foods = forms.ModelMultipleChoiceField(
         queryset=models.Food.objects.none(),
@@ -314,7 +343,7 @@ class MealForm(CoreModelForm, TaggableModelForm):
 
     fieldsets = [
         {
-            "fields": ["child", "time", "meal_type", "foods", "quantity"],
+            "fields": ["child", "time", "meal_type", "dish_names", "foods", "quantity"],
             "layout": "required",
         },
         {"fields": ["preparation", "tags"]},
@@ -327,6 +356,7 @@ class MealForm(CoreModelForm, TaggableModelForm):
             "child",
             "time",
             "meal_type",
+            "dish_names",
             "foods",
             "quantity",
             "preparation",
@@ -340,6 +370,7 @@ class MealForm(CoreModelForm, TaggableModelForm):
             "quantity": PillRadioSelect(),
             "preparation": PillRadioSelect(),
             "notes": forms.Textarea(attrs={"rows": 5}),
+            "dish_names": MealDishesWidget(),
         }
 
     def __init__(self, *args, **kwargs):
@@ -364,6 +395,30 @@ class MealForm(CoreModelForm, TaggableModelForm):
             if food_id not in child_foods and len(child_foods) < 8:
                 child_foods.append(food_id)
         widget.recent_by_child = recent_by_child
+        dish_widget = MealDishesWidget()
+        dish_widget.can_add_dish = bool(user and user.has_perm("core.add_dish"))
+        dish_widget.can_view_dish = bool(user and user.has_perm("core.view_dish"))
+        if dish_widget.can_view_dish:
+            # Never silently omit an inactive ingredient from a saved recipe.
+            dish_widget.dishes = [
+                {
+                    "id": dish.pk,
+                    "name": dish.name,
+                    "foods": [food.pk for food in dish.foods.all()],
+                }
+                for dish in models.Dish.objects.filter(active=True).prefetch_related(
+                    "foods"
+                )
+                if dish.foods.all() and all(food.active for food in dish.foods.all())
+            ]
+        self.fields["dish_names"].widget = dish_widget
+
+    def clean_dish_names(self):
+        value = self.cleaned_data["dish_names"]
+        if value is None:
+            return self.instance.dish_names if self.instance.pk else []
+        models.validate_dish_names(value)
+        return list(dict.fromkeys(name.strip() for name in value))
 
 
 class ChildFoodProfileForm(CoreModelForm):

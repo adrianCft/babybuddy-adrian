@@ -12,7 +12,10 @@
     {% endif %}
 {% endblock %}
 {% block content %}
-    {% if meal %}<div>{{ meal.foods.all|join:", " }}</div>{% endif %}
+    {% if meal %}
+        {% if meal.dish_names %}<div class="fw-bold">{{ meal.dish_names|join:", " }}</div>{% endif %}
+        <div>{{ meal.foods.all|join:", " }}</div>
+    {% endif %}
     <div class="mt-2">
         <strong>{% trans "Today" %}:</strong>
         {% blocktrans with total=meal_count %}Meals: {{ total }}{% endblocktrans %}

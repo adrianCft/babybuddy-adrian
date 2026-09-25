@@ -69,6 +69,24 @@ class FoodAPITestCase(FoodAPIBase):
 class MealAPITestCase(FoodAPIBase):
     endpoint = reverse("api:meal-list")
 
+    def test_dish_names_round_trip_and_older_client_update(self):
+        response = self.client.post(
+            self.endpoint, self.meal_data(dish_names=["Plato de prueba"]), format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertEqual(response.data["dish_names"], ["Plato de prueba"])
+        url = reverse("api:meal-detail", args=[response.data["id"]])
+        response = self.client.patch(url, self.meal_data(), format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data["dish_names"], ["Plato de prueba"])
+        response = self.client.patch(url, {"dish_names": []}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data["dish_names"], [])
+        response = self.client.patch(
+            url, {"dish_names": {"bad": "value"}}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def meal_data(self, **overrides):
         data = {
             "child": self.child.pk,

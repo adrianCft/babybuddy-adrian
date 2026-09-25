@@ -1,0 +1,136 @@
+{% load i18n %}
+{% trans "Remove dish name" as remove_dish_label %}
+{% trans "Could not save the dish. Please try again." as save_dish_error %}
+<div data-meal-dishes>
+    <input type="hidden"
+           name="{{ widget.name }}"
+           id="{{ widget.attrs.id }}_value"
+           value="{{ widget.value|default:'[]' }}"
+           data-dish-names>
+    <div class="d-flex flex-wrap gap-2 mb-2" data-dish-applied></div>
+    <div class="d-flex flex-wrap gap-2 mb-2">
+        <select id="{{ widget.attrs.id }}"
+                class="form-select w-auto mw-100"
+                aria-label="{% trans 'Saved dishes' %}"
+                data-dish-picker>
+            <option value="">{% trans "Choose a dish" %}</option>
+            {% for dish in widget.dishes %}<option value="{{ dish.id }}"
+        data-name="{{ dish.name }}"
+        data-foods="{{ dish.foods|join:',' }}">{{ dish.name }}</option>{% endfor %}
+        </select>
+        <button class="btn btn-outline-primary" type="button" data-dish-add>{% trans "Add dish" %}</button>
+        {% if widget.can_view_dish %}
+            <a class="btn btn-link"
+               href="{% url 'core:dish-list' %}"
+               target="_blank"
+               rel="noopener">{% trans "Manage dishes" %}</a>
+        {% endif %}
+    </div>
+    <p class="small text-muted">{% trans "Add a dish to select its ingredients, then adjust them below. Dishes with inactive ingredients are unavailable." %}</p>
+    <p class="small text-muted">{% trans "Removing a dish name keeps the ingredients selected." %}</p>
+    {% if widget.can_add_dish %}
+        <details class="mb-2" data-dish-save-panel>
+            <summary>{% trans "Save selection as dish" %}</summary>
+            <label class="form-label mt-2" for="{{ widget.attrs.id }}_new">{% trans "Dish name" %}</label>
+            <input class="form-control mb-2"
+                   id="{{ widget.attrs.id }}_new"
+                   type="text"
+                   maxlength="255"
+                   data-dish-new-name>
+            <button type="button" class="btn btn-outline-success" data-dish-save>{% trans "Save dish" %}</button>
+        </details>
+    {% endif %}
+    <div class="alert alert-danger" role="alert" data-dish-error hidden></div>
+    <noscript>{% trans "Enable JavaScript to add saved dishes. You can still select ingredients below." %}</noscript>
+</div>
+<script>
+    (() => {
+        const panel = document.currentScript.previousElementSibling;
+        const init = () => {
+            const form = panel.closest("form");
+            const foods = form.querySelector("[data-food-multicheck]");
+            const input = panel.querySelector("[data-dish-names]");
+            const picker = panel.querySelector("[data-dish-picker]");
+            const applied = panel.querySelector("[data-dish-applied]");
+            const errorBox = panel.querySelector("[data-dish-error]");
+            let names;
+            try { names = JSON.parse(input.value); } catch { names = []; }
+            if (!Array.isArray(names)) names = [];
+            const render = () => {
+                input.value = JSON.stringify(names);
+                applied.replaceChildren();
+                names.forEach((name) => {
+                    const button = document.createElement("button");
+                    button.type = "button";
+                    button.className = "btn btn-sm btn-outline-secondary";
+                    button.textContent = `${name} ×`;
+                    button.setAttribute("aria-label", "{{ remove_dish_label|escapejs }}: " + name);
+                    button.addEventListener("click", () => {
+                        names = names.filter((value) => value !== name);
+                        render();
+                    });
+                    applied.append(button);
+                });
+            };
+            const addName = (name) => {
+                if (!names.includes(name)) names.push(name);
+                render();
+            };
+            panel.querySelector("[data-dish-add]").addEventListener("click", () => {
+                const option = picker.selectedOptions[0];
+                if (!option.value) return;
+                const ids = option.dataset.foods.split(",");
+                foods.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+                    if (ids.includes(checkbox.value)) checkbox.checked = true;
+                });
+                foods.dispatchEvent(new Event("change", { bubbles: true }));
+                addName(option.dataset.name);
+                picker.value = "";
+            });
+            const save = panel.querySelector("[data-dish-save]");
+            if (save) save.addEventListener("click", async () => {
+                errorBox.hidden = true;
+                const name = panel.querySelector("[data-dish-new-name]");
+                const data = new FormData();
+                data.append("name", name.value);
+                data.append("active", "on");
+                foods.querySelectorAll('input[type="checkbox"]:checked').forEach((checkbox) => {
+                    data.append("foods", checkbox.value);
+                });
+                save.disabled = true;
+                try {
+                    const response = await fetch("{% url 'core:dish-quick-add' %}", {
+                        method: "POST",
+                        headers: { "X-CSRFToken": form.querySelector('[name="csrfmiddlewaretoken"]').value },
+                        body: data,
+                    });
+                    const result = await response.json();
+                    if (!response.ok) {
+                        errorBox.textContent = result.errors
+                            ? Object.values(result.errors).flat().map((error) => error.message).join(" ")
+                            : "{{ save_dish_error|escapejs }}";
+                        errorBox.hidden = false;
+                        return;
+                    }
+                    const option = document.createElement("option");
+                    option.value = result.id;
+                    option.textContent = result.name;
+                    option.dataset.name = result.name;
+                    option.dataset.foods = result.foods.join(",");
+                    picker.append(option);
+                    addName(result.name);
+                    name.value = "";
+                    panel.querySelector("[data-dish-save-panel]").open = false;
+                } catch {
+                    errorBox.textContent = "{{ save_dish_error|escapejs }}";
+                    errorBox.hidden = false;
+                } finally {
+                    save.disabled = false;
+                }
+            });
+            render();
+        };
+        if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
+        else init();
+    })();
+</script>

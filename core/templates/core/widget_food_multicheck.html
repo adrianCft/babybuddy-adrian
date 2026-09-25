@@ -1,5 +1,9 @@
 {% load i18n %}
 <div class="food-multicheck border rounded bg-body p-3" data-food-multicheck>
+    <div class="mb-3" data-food-selected-panel>
+        <div class="fw-bold mb-2" aria-live="polite">{% translate "Selected" %} (<span data-food-selected-count>0</span>)</div>
+        <div class="row g-2 mx-0" data-food-selected></div>
+    </div>
     <div class="food-multicheck__panel"
          style="max-height: 24rem; overflow-x: hidden; overflow-y: auto">
         <label class="visually-hidden" for="{{ widget.attrs.id }}_search">{% translate "Search foods" %}</label>
@@ -81,6 +85,8 @@
         const search = widget.querySelector("[data-food-search]");
         const options = Array.from(widget.querySelectorAll("[data-food-option]"));
         const noResults = widget.querySelector("[data-food-no-results]");
+        const selectedOptions = widget.querySelector("[data-food-selected]");
+        const availableOptions = widget.querySelector("[data-food-options]");
         const recentByChild = {
             {% for child_id, food_ids in widget.recent_by_child.items %}
                 "{{ child_id }}": [{% for food_id in food_ids %}{{ food_id }}{% if not forloop.last %}, {% endif %}{% endfor %}],
@@ -91,24 +97,37 @@
             .replace(/[\u0300-\u036f]/g, "")
             .toLocaleLowerCase();
 
-        search.addEventListener("input", () => {
+        const updateSelection = () => {
             const query = normalize(search.value.trim());
             let visible = 0;
+            let selected = 0;
+            const focused = document.activeElement;
             options.forEach((option) => {
+                const checked = option.querySelector('input[type="checkbox"]').checked;
+                const parent = checked ? selectedOptions : availableOptions;
+                if (option.parentElement !== parent) parent.append(option);
                 const matches = normalize(option.dataset.foodName).includes(query);
-                option.hidden = !matches;
-                visible += matches ? 1 : 0;
+                option.hidden = !checked && !matches;
+                selected += checked ? 1 : 0;
+                visible += !checked && matches ? 1 : 0;
             });
+            widget.querySelector("[data-food-selected-count]").textContent = selected;
             noResults.hidden = visible !== 0;
-        });
+            if (focused && widget.contains(focused) && document.activeElement !== focused) {
+                focused.focus({ preventScroll: true });
+            }
+        };
+        search.addEventListener("input", updateSelection);
+        widget.addEventListener("change", updateSelection);
 
         const updateRecentFoods = () => {
             const selectedChild = document.querySelector('input[name="child"]:checked, select[name="child"]');
             const recentIds = selectedChild ? (recentByChild[selectedChild.value] || []) : [];
+            const alphabetical = [...options].sort((a, b) => a.dataset.foodName.localeCompare(b.dataset.foodName));
             options.forEach((option) => {
                 const checkbox = option.querySelector('input[type="checkbox"]');
                 const position = recentIds.indexOf(Number(checkbox.value));
-                option.style.order = position === -1 ? 1000 : position;
+                option.style.order = position === -1 ? 1000 + alphabetical.indexOf(option) : position;
                 const badge = option.querySelector("[data-food-recent-badge]");
                 if (badge) badge.hidden = position === -1;
             });
@@ -117,6 +136,7 @@
             field.addEventListener("change", updateRecentFoods);
         });
         updateRecentFoods();
+        updateSelection();
 
         {% if widget.can_add_food %}
             const modalElement = widget.nextElementSibling;
@@ -167,6 +187,8 @@
                 option.append(label);
                 widget.querySelector("[data-food-options]").append(option);
                 options.push(option);
+                updateRecentFoods();
+                updateSelection();
                 nameInput.value = "";
                 modal.hide();
             });

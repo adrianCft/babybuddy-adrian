@@ -119,6 +119,20 @@ class PillRadioSelect(RadioSelect):
         return attrs
 
 
+class MealDishesWidget(widgets.TextInput):
+    template_name = "core/widget_meal_dishes.html"
+    dishes = ()
+    can_add_dish = False
+    can_view_dish = False
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context["widget"]["dishes"] = self.dishes
+        context["widget"]["can_add_dish"] = self.can_add_dish
+        context["widget"]["can_view_dish"] = self.can_view_dish
+        return context
+
+
 class FoodMultiCheckboxSelect(CheckboxSelectMultiple):
     template_name = "core/widget_food_multicheck.html"
     recent_by_child = None

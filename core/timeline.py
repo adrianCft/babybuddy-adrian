@@ -62,6 +62,8 @@ def _add_meals(min_date, max_date, events, child=None, can_edit=True):
         instances = instances.filter(child=child)
     for instance in instances:
         details = [", ".join(food.name for food in instance.foods.all())]
+        if instance.dish_names:
+            details.insert(0, ", ".join(instance.dish_names))
         if instance.quantity:
             details.append(
                 _("Approximate quantity")

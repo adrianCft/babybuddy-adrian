@@ -71,6 +71,10 @@ urlpatterns = [
         name="child-food-profile-update",
     ),
     path("meals/", views.MealList.as_view(), name="meal-list"),
+    path("dishes/", views.DishList.as_view(), name="dish-list"),
+    path("dishes/add/", views.DishAdd.as_view(), name="dish-add"),
+    path("dishes/quick-add/", views.DishQuickAdd.as_view(), name="dish-quick-add"),
+    path("dishes/<int:pk>/", views.DishUpdate.as_view(), name="dish-update"),
     path("meals/add/", views.MealAdd.as_view(), name="meal-add"),
     path("meals/<int:pk>/", views.MealUpdate.as_view(), name="meal-update"),
     path(
