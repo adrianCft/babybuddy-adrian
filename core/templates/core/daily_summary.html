@@ -1,0 +1,169 @@
+{% extends "babybuddy/page.html" %}
+{% load i18n l10n %}
+{% block title %}
+    {% trans "Daily overview" %}
+{% endblock %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Daily overview" %}</li>
+{% endblock %}
+{% block content %}
+    {% include "core/daily_styles.html" %}
+    <div class="daily-overview" data-daily-overview>
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+            <div>
+                <h1 class="mb-1">{% trans "Daily overview" %}</h1>
+                <p class="text-body-secondary mb-0">{% trans "The whole day, at a glance." %}</p>
+            </div>
+            {% if day %}
+                <a class="btn btn-outline-secondary" href="">{% trans "Refresh" %}</a>
+            {% endif %}
+        </div>
+        <form method="get"
+              class="daily-filters mb-4"
+              aria-label="{% trans 'Daily overview filters' %}">
+            <div>
+                <label class="form-label" for="{{ form.child.id_for_label }}">{{ form.child.label }}</label>
+                {{ form.child }}
+                {{ form.child.errors }}
+            </div>
+            <div>
+                <label class="form-label" for="{{ form.date.id_for_label }}">{{ form.date.label }}</label>
+                {{ form.date }}
+                {{ form.date.errors }}
+            </div>
+            <button class="btn btn-primary" type="submit">{% trans "Show day" %}</button>
+        </form>
+        {% if day %}
+            <nav class="d-flex flex-wrap align-items-center gap-2 mb-3"
+                 aria-label="{% trans 'Day navigation' %}">
+                {% if previous_url %}<a class="btn btn-outline-secondary"
+   href="{{ previous_url }}"
+   data-daily-previous>← {% trans "Previous day" %}</a>{% endif %}
+                <h2 class="h5 mb-0 mx-1">{{ day|date:"l, j F Y" }}</h2>
+                {% if next_url %}<a class="btn btn-outline-secondary"
+   href="{{ next_url }}"
+   data-daily-next>{% trans "Next day" %} →</a>{% endif %}
+                {% if not is_today %}
+                    <a class="btn btn-link" href="{{ today_url }}">{% trans "Today" %}</a>
+                {% endif %}
+            </nav>
+            {% if daily.day_hours != 24 %}
+                <p class="alert alert-info">{% blocktrans with hours=daily.day_hours %}This day has {{ hours }} hours due to the clock change. Durations use elapsed time.{% endblocktrans %}</p>
+            {% endif %}
+            {% if not daily.has_permissions %}
+                <p class="alert alert-info">{% trans "You do not have permission to view daily records." %}</p>
+            {% endif %}
+            {% for group in daily.groups %}
+                <section class="daily-child mb-5"
+                         aria-labelledby="daily-child-{{ group.child.pk }}">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                        <h2 id="daily-child-{{ group.child.pk }}" class="h3 mb-0">{{ group.child }}</h2>
+                        <a class="btn btn-sm btn-outline-secondary"
+                           href="{% url 'dashboard:dashboard-child' group.child.slug %}">{% trans "Dashboard" %}</a>
+                    </div>
+                    <div class="daily-cards mb-4">
+                        {% for card in group.cards %}
+                            <div class="daily-card daily-color-{{ card.kind }}"
+                                 data-daily-card="{{ card.kind }}">
+                                <div class="small text-body-secondary">{{ card.label }}</div>
+                                <div class="daily-card-value">{{ card.value }}</div>
+                                {% if card.detail %}<div class="small text-body-secondary">{{ card.detail }}</div>{% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if group.events %}
+                        <h3 class="h5">{% trans "Visual timeline" %}</h3>
+                        <p class="small text-body-secondary mb-2">{% trans "Tap a block or marker to read its details. Empty spaces mean no records." %}</p>
+                        <p class="small text-body-secondary daily-mobile-hint">{% trans "Swipe sideways to explore the hours." %}</p>
+                        {# Positions are calculated for this day's elapsed hours, including DST. #}
+                        <!-- djlint:off H021 -->
+                        <div class="daily-chart mb-3"
+                             role="region"
+                             tabindex="0"
+                             aria-label="{% blocktrans with child=group.child %}Daily timeline for {{ child }}{% endblocktrans %}">
+                            <div class="daily-chart-inner">
+                                <div class="daily-axis">
+                                    <div class="daily-axis-label">{% trans "Time" %}</div>
+                                    <div class="daily-track">
+                                        {% for tick in daily.ticks %}<span class="daily-tick"
+      style="left: {{ tick.left|unlocalize }}%">{{ tick.label }}</span>{% endfor %}
+                                    </div>
+                                </div>
+                                {% for lane in group.lanes %}
+                                    <div class="daily-lane daily-color-{{ lane.kind }}">
+                                        <div class="daily-lane-label">{{ lane.label }}</div>
+                                        <div class="daily-track" style="height: {{ lane.height }}px">
+                                            {% for tick in daily.ticks %}
+                                                <span aria-hidden="true"
+                                                      class="daily-gridline"
+                                                      style="left: {{ tick.left|unlocalize }}%"></span>
+                                            {% endfor %}
+                                            {% if daily.now_left != None %}
+                                                <span class="daily-now"
+                                                      style="left: {{ daily.now_left|unlocalize }}%"
+                                                      title="{% trans 'Now' %}"></span>
+                                            {% endif %}
+                                            {% for event in lane.events %}
+                                                <a class="daily-mark{% if event.is_interval %} daily-mark-interval{% endif %}{% if event.ongoing %} daily-mark-ongoing{% endif %}"
+                                                   href="#{{ event.id }}"
+                                                   style="left: {{ event.hit_left|unlocalize }}%;
+                                                          width: {{ event.hit_width|unlocalize }}%;
+                                                          top: {{ event.top }}px"
+                                                   aria-label="{{ event.title }} · {{ event.start|date:'j M H:i' }}{% if event.is_interval %} · {{ event.duration }}{% endif %}"
+                                                   title="{{ event.title }} · {{ event.start|date:'j M H:i' }}{% if event.is_interval %} · {{ event.duration }}{% endif %}">
+                                                    {% if event.is_interval %}
+                                                        <span class="daily-bar"
+                                                              style="left: {{ event.marker_left|unlocalize }}%;
+                                                                     width: {% widthratio event.width event.hit_width 100 %}%"></span>
+                                                    {% else %}
+                                                        <span class="daily-dot"
+                                                              style="left: {{ event.marker_left|unlocalize }}%"></span>
+                                                    {% endif %}
+                                                </a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <!-- djlint:on -->
+                        <p class="small text-body-secondary">{% trans "Only the part of each sleep within this day is counted. Running timers are provisional." %}</p>
+                        <h3 class="h5 mt-4">{% trans "Day details" %} <span class="text-body-secondary">({{ group.event_count }})</span></h3>
+                        <ol class="daily-events">
+                            {% for event in group.events %}
+                                <li>
+                                    <article id="{{ event.id }}"
+                                             tabindex="-1"
+                                             class="daily-event daily-color-{{ event.kind }}">
+                                        <div class="daily-event-time">
+                                            <time datetime="{{ event.start|date:'c' }}">{% if event.continued_before %}{{ event.start|date:"j M" }} {% endif %}{{ event.start|date:"H:i" }}</time>
+                                            {% if event.ongoing %}
+                                                <span class="badge text-bg-secondary">{% trans "In progress" %}</span>
+                            {% elif event.is_interval %}<span>– <time datetime="{{ event.end|date:'c' }}">{% if event.continued_after %}{{ event.end|date:"j M" }} {% endif %}{{ event.end|date:"H:i" }}</time></span>{% endif %}
+                                </div>
+                                <div class="daily-event-body">
+                                    <h4 class="h6 mb-1">{{ event.title }}</h4>
+                                    {% if event.is_interval %}<div class="small text-body-secondary">{% trans "Duration in this day" %}: {{ event.duration }}</div>{% endif %}
+                                    {% for detail in event.details %}<div class="daily-detail">{{ detail|linebreaksbr }}</div>{% endfor %}
+                                    {% if event.tags %}
+                                        {% include "core/render_tag_list.html" with tags=event.tags %}
+                                    {% endif %}
+                                    {% if event.edit_url %}
+                                        <a class="btn btn-sm btn-outline-secondary mt-2"
+                                           href="{{ event.edit_url }}">{% trans "Edit" %}</a>
+                                    {% endif %}
+                                </div>
+                                </article>
+                                </li>
+                            {% endfor %}
+                        </ol>
+                    {% elif daily.has_permissions %}
+                        <div class="daily-empty">{% trans "No records for this day." %}</div>
+                    {% endif %}
+                </section>
+            {% empty %}
+                <p class="daily-empty">{% trans "No children found." %}</p>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endblock %}

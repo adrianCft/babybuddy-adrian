@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from django.urls import path
 
-from . import views
+from . import daily_views, views
 
 app_name = "core"
 
 urlpatterns = [
+    path("daily/", daily_views.DailySummary.as_view(), name="daily-summary"),
     path("pumping/", views.PumpingList.as_view(), name="pumping-list"),
     path("pumping/add/", views.PumpingAdd.as_view(), name="pumping-add"),
     path(

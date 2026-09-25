@@ -3448,3 +3448,93 @@ msgid ""
 msgstr ""
 "Activa JavaScript para añadir platos guardados. Puedes seleccionar los "
 "ingredientes debajo."
+
+msgid "Daily overview"
+msgstr "Resumen diario"
+
+msgid "The whole day, at a glance."
+msgstr "Todo el día de un vistazo."
+
+msgid "Refresh"
+msgstr "Actualizar"
+
+msgid "Daily overview filters"
+msgstr "Filtros del resumen diario"
+
+msgid "All children"
+msgstr "Todos los niños"
+
+msgid "Show day"
+msgstr "Ver día"
+
+msgid "Day navigation"
+msgstr "Navegación entre días"
+
+msgid "Previous day"
+msgstr "Día anterior"
+
+msgid "Next day"
+msgstr "Día siguiente"
+
+msgid "This day has %(hours)s hours due to the clock change. Durations use elapsed time."
+msgstr "Este día tiene %(hours)s horas por el cambio de hora. Las duraciones reflejan el tiempo transcurrido."
+
+msgid "You do not have permission to view daily records."
+msgstr "No tienes permiso para consultar los registros diarios."
+
+msgid "Visual timeline"
+msgstr "Cronología visual"
+
+msgid "Tap a block or marker to read its details. Empty spaces mean no records."
+msgstr "Pulsa un bloque o un marcador para consultar sus detalles. Los espacios vacíos indican que no hay registros."
+
+msgid "Swipe sideways to explore the hours."
+msgstr "Desliza hacia los lados para recorrer las horas."
+
+msgid "Daily timeline for %(child)s"
+msgstr "Cronología diaria de %(child)s"
+
+msgid "Now"
+msgstr "Ahora"
+
+msgid "Only the part of each sleep within this day is counted. Running timers are provisional."
+msgstr "Solo se suma la parte de cada sueño que corresponde a este día. Los temporizadores en curso son provisionales."
+
+msgid "Day details"
+msgstr "Detalle del día"
+
+msgid "In progress"
+msgstr "En curso"
+
+msgid "Duration in this day"
+msgstr "Duración en este día"
+
+msgid "No records for this day."
+msgstr "No hay registros para este día."
+
+msgid "Sleep in progress"
+msgstr "Sueño en curso"
+
+msgid "Provisional time, excluded from recorded sleep."
+msgstr "Tiempo provisional, no incluido en el sueño registrado."
+
+msgid "Recorded sleep"
+msgstr "Sueño registrado"
+
+msgid "Naps: %(count)s"
+msgstr "Siestas: %(count)s"
+
+msgid "Feedings started"
+msgstr "Tomas iniciadas"
+
+msgid "Bottle amount recorded: %(amount)s"
+msgstr "Cantidad registrada en biberón: %(amount)s"
+
+msgid "No bottle amount recorded"
+msgstr "Sin cantidad registrada en biberón"
+
+msgid "Wet: %(wet)s · Solid: %(solid)s"
+msgstr "Mojados: %(wet)s · Con deposición: %(solid)s"
+
+msgid "Choose a date between 1900 and today."
+msgstr "Elige una fecha entre 1900 y hoy."

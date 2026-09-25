@@ -1,4 +1,7 @@
 {% load i18n %}
+{% if perms.core.view_child %}
+    <p class="text-center"><a class="btn btn-outline-primary" href="{% url 'core:daily-summary' %}?date={{ date|date:'Y-m-d' }}{% if object.pk %}&amp;child={{ object.pk }}{% endif %}">{% trans "Daily overview" %}</a></p>
+{% endif %}
 <h3 class="text-center">
     {% if date_previous %}
         <a class="btn btn-sm btn-default"

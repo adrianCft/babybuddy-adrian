@@ -114,6 +114,13 @@
                 {% trans "Timeline" %}
             </a>
         </li>
+        {% if perms.core.view_child %}
+            <li class="nav-item">
+                <a class="nav-link{% if request.path == '/daily/' %} active{% endif %}" href="{% url 'core:daily-summary' %}">
+                    <i class="icon-timeline" aria-hidden="true"></i> {% trans "Daily overview" %}
+                </a>
+            </li>
+        {% endif %}
         <li class="nav-item dropdown">
         <a id="nav-children-menu-link"
            class="nav-link dropdown-toggle"

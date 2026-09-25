@@ -1,0 +1,52 @@
+<style>
+    .daily-overview { max-width: 1280px; margin: 0 auto; padding: 1rem 0 2rem; }
+    .daily-filters { display: flex; align-items: end; flex-wrap: wrap; gap: .75rem; padding: 1rem; background: var(--bs-tertiary-bg); border-radius: .75rem; }
+    .daily-filters > div { min-width: 11rem; flex: 1; }
+    .daily-filters .errorlist { color: var(--bs-danger); margin: .5rem 0 0; }
+    .daily-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+    .daily-card { border: 1px solid var(--bs-border-color); border-top: 3px solid var(--daily-color); border-radius: .65rem; padding: 1rem; background: var(--bs-body-bg); }
+    .daily-card-value { font-size: clamp(1.2rem, 2vw, 1.65rem); font-weight: 650; margin: .25rem 0; }
+    .daily-color-sleep { --daily-color: #6957c2; }
+    .daily-color-feeding { --daily-color: #147a67; }
+    .daily-color-meal { --daily-color: #a55a12; }
+    .daily-color-diaperchange { --daily-color: #277cab; }
+    .daily-color-medication { --daily-color: #b1385a; }
+    .daily-color-note { --daily-color: #63727c; }
+    .daily-color-temperature { --daily-color: #bc3544; }
+    .daily-color-pumping { --daily-color: #427048; }
+    .daily-color-tummytime { --daily-color: #77538c; }
+    .daily-chart { overflow-x: auto; border: 1px solid var(--bs-border-color); border-radius: .65rem; padding-right: 1.5rem; background: var(--bs-body-bg); }
+    .daily-chart-inner { min-width: 820px; }
+    .daily-lane, .daily-axis { display: grid; grid-template-columns: 9rem minmax(0, 1fr); }
+    .daily-axis { height: 2.5rem; }
+    .daily-axis-label, .daily-lane-label { padding: .8rem .65rem; position: sticky; left: 0; background: var(--bs-body-bg); z-index: 2; font-size: .85rem; border-right: 1px solid var(--bs-border-color); }
+    .daily-lane { border-top: 1px solid var(--bs-border-color); }
+    .daily-lane-label { display: flex; align-items: center; gap: .4rem; }
+    .daily-lane-label::before { content: ''; flex: 0 0 .4rem; height: 1rem; border-radius: .25rem; background: var(--daily-color); }
+    .daily-track { position: relative; min-width: 0; }
+    .daily-tick { position: absolute; top: .8rem; transform: translateX(-50%); font-size: .75rem; }
+    .daily-tick:first-child { transform: none; }
+    .daily-gridline { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--bs-border-color); opacity: .5; }
+    .daily-now { position: absolute; top: 0; bottom: 0; border-left: 2px dashed var(--bs-emphasis-color); opacity: .6; pointer-events: none; }
+    .daily-mark { position: absolute; height: 32px; border-radius: .3rem; }
+    .daily-bar { display: block; position: absolute; height: 24px; top: 4px; min-width: 3px; background: var(--daily-color); border-radius: .3rem; }
+    .daily-dot { position: absolute; top: 7px; width: 18px; height: 18px; transform: translateX(-50%); border-radius: 50%; background: var(--daily-color); border: 2px solid var(--bs-body-bg); box-shadow: 0 0 0 1px var(--daily-color); }
+    .daily-mark-ongoing .daily-bar { background: repeating-linear-gradient(135deg, var(--daily-color), var(--daily-color) 5px, var(--bs-secondary-bg) 5px, var(--bs-secondary-bg) 9px); }
+    .daily-mark:hover, .daily-mark:focus-visible { outline: 2px solid var(--bs-emphasis-color); outline-offset: 2px; background: var(--bs-secondary-bg); z-index: 1; }
+    .daily-events { list-style: none; padding: 0; }
+    .daily-events > li { margin: .65rem 0; }
+    .daily-event { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); gap: .75rem; padding: 1rem; border: 1px solid var(--bs-border-color); border-left: 4px solid var(--daily-color); border-radius: .5rem; scroll-margin-top: 5rem; }
+    .daily-event:target, .daily-event:focus-visible { outline: 2px solid var(--daily-color); background: var(--bs-tertiary-bg); }
+    .daily-event-time { display: flex; flex-direction: column; align-items: start; gap: .25rem; font-size: .85rem; font-variant-numeric: tabular-nums; }
+    .daily-event-body { min-width: 0; overflow-wrap: anywhere; }
+    .daily-detail { margin-top: .25rem; }
+    .daily-empty { padding: 2rem; text-align: center; border: 1px dashed var(--bs-border-color); border-radius: .75rem; color: var(--bs-secondary-color); }
+    .daily-mobile-hint { display: none; }
+    @media (max-width: 767px) {
+        .daily-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .daily-card { padding: .75rem; }
+        .daily-event { grid-template-columns: minmax(0, 1fr); }
+        .daily-event-time { flex-direction: row; flex-wrap: wrap; }
+        .daily-mobile-hint { display: block; }
+    }
+</style>
