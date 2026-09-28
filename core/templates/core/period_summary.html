@@ -1,0 +1,99 @@
+{% extends "babybuddy/page.html" %}
+{% load i18n %}
+{% block title %}
+    {% trans "Week and month" %}
+{% endblock %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Week and month" %}</li>
+{% endblock %}
+{% block content %}
+    {% include "core/daily_styles.html" %}
+    <div class="daily-overview" data-period-overview>
+        <h1>{% trans "Week and month" %}</h1>
+        <p class="text-body-secondary">{% trans "Recorded routines, changes over time and a look ahead." %}</p>
+        <nav class="d-flex flex-wrap gap-2 mb-3"
+             aria-label="{% trans 'Summaries' %}">
+            <a class="btn btn-outline-primary"
+               href="{% url 'core:daily-summary' %}?date={{ day|date:'Y-m-d' }}&amp;child={{ selected_child.pk }}">{% trans "Day" %}</a>
+            <a class="btn {% if period == 'week' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+               href="?period=week&amp;date={{ day|date:'Y-m-d' }}&amp;child={{ selected_child.pk }}">{% trans "Week" %}</a>
+            <a class="btn {% if period == 'month' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+               href="?period=month&amp;date={{ day|date:'Y-m-d' }}&amp;child={{ selected_child.pk }}">{% trans "Month" %}</a>
+        </nav>
+        <form method="get" class="daily-filters mb-4">
+            {% for field in form %}<div><label class="form-label"
+       for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endfor %}
+            <button class="btn btn-primary" type="submit">{% trans "Show summary" %}</button>
+        </form>
+        {% if summary %}
+            <nav class="d-flex flex-wrap align-items-center gap-2 mb-3"
+                 aria-label="{% trans 'Period navigation' %}">
+                {% if previous_url %}<a class="btn btn-outline-secondary"
+   href="{{ previous_url }}">← {% trans "Previous period" %}</a>{% endif %}
+                <h2 class="h5 mb-0">{{ summary.first|date:"j M Y" }} – {{ summary.last|date:"j M Y" }}</h2>
+                {% if next_url %}<a class="btn btn-outline-secondary"
+   href="{{ next_url }}">{% trans "Next period" %} →</a>{% endif %}
+                <a class="btn btn-link" href="{{ today_url }}">{% trans "Today" %}</a>
+            </nav>
+            {% if summary.partial %}
+                <p class="alert alert-info">{% trans "Period in progress: today's records are partial and future days are excluded." %}</p>
+            {% endif %}
+            <p class="small text-body-secondary">{% trans "Averages use days with records of each activity. A missing day is unknown, not zero; even recorded days may be incomplete." %}</p>
+            <p class="small">{% trans "Comparison period" %}: {{ summary.previous_first|date:"j M Y" }} – {{ summary.previous_cutoff|date:"j M Y" }}.</p>
+            {% if not summary.has_permissions %}
+                <p class="alert alert-info">{% trans "You do not have permission to view daily records." %}</p>
+            {% endif %}
+            {% for group in summary.groups %}
+                <section class="daily-child mb-5"
+                         aria-labelledby="period-child-{{ group.child.pk }}">
+                    <h2 id="period-child-{{ group.child.pk }}">{{ group.child }}</h2>
+                    <p><a href="{% url 'core:growth-summary' group.child.slug %}">{% trans "Growth and percentiles" %} →</a></p>
+                    <div class="daily-cards mb-4">
+                        {% for card in group.cards %}
+                            <div class="daily-card daily-color-{{ card.kind }}"
+                                 data-period-card="{{ card.kind }}">
+                                <div class="text-body-secondary">{{ card.label }}</div>
+                                <div class="daily-card-value">{{ card.total }}</div>
+                                <p class="small mb-1">{% trans "Days with records" %}: {{ card.days }}/{{ card.calendar_days }}</p>
+                                <p class="small mb-1">{% trans "Average per recorded day" %}: <strong>{{ card.average }}</strong></p>
+                                <p class="small mb-0">{% trans "Previous average" %}: {{ card.previous_average }} ({{ card.previous_days }} {% trans "days" %}){% if card.change != None %} · {{ card.change }}%{% endif %}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if group.rows %}
+                        <h3 class="h5">{% trans "Day by day" %}</h3>
+                        <div class="table-responsive mb-4"
+                             tabindex="0"
+                             role="region"
+                             aria-label="{% trans 'Daily totals' %}">
+                            <table class="table table-sm align-middle">
+                                <caption>{% trans "Select a date to open its visual timeline. A dash means no records." %}</caption>
+                                <thead><tr><th scope="col">{% trans "Date" %}</th>{% for card in group.cards %}<th scope="col">{{ card.label }}</th>{% endfor %}</tr></thead>
+                                <tbody>{% for row in group.rows %}<tr><th scope="row"><a href="{% url 'core:daily-summary' %}?date={{ row.date|date:'Y-m-d' }}&amp;child={{ group.child.pk }}">{{ row.date|date:"D j" }}</a>{% if row.partial %} *{% endif %}</th>{% for value in row.values %}<td>{{ value.value }}</td>{% endfor %}</tr>{% endfor %}</tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="daily-empty">{% trans "No days in this period after the child's birth." %}</p>
+                    {% endif %}
+                    {% if group.forecasts %}
+                        <h3 class="h5">{% trans "Looking ahead: daily routine" %}</h3>
+                        <p class="small">{% trans "If the recorded routine continues, these are typical daily values for the following 7 days, through" %} {{ summary.forecast_until|date:"j M Y" }}.</p>
+                        <p class="small text-body-secondary">{% trans "Based on the median and observed minimum–maximum of recorded days in the previous 28 days. Today is excluded. These are descriptive estimates, not schedules, targets or confidence intervals." %} {{ summary.forecast_start|date:"j M" }} – {{ summary.forecast_end|date:"j M Y" }}.</p>
+                        <div class="daily-cards">
+                            {% for forecast in group.forecasts %}
+                                <div class="daily-card daily-color-{{ forecast.kind }}"
+                                     data-routine-forecast>
+                                    <h4 class="h6">{{ forecast.label }}</h4>
+                                    {% if forecast.ready %}<div class="daily-card-value">{{ forecast.typical }}</div><p class="small mb-1">{% trans "Observed range" %}: {{ forecast.low }} – {{ forecast.high }}</p>{% else %}<p>{% trans "Not enough records: at least 7 recorded days are needed." %}</p>{% endif %}
+                                    <p class="small text-body-secondary mb-0">{% trans "Days with records" %}: {{ forecast.days }}/28</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </section>
+            {% empty %}
+                <p class="daily-empty">{% trans "No children found." %}</p>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endblock %}

@@ -18,6 +18,14 @@
                 <a class="btn btn-outline-secondary" href="">{% trans "Refresh" %}</a>
             {% endif %}
         </div>
+        <nav class="d-flex flex-wrap gap-2 mb-3"
+             aria-label="{% trans 'Summaries' %}">
+            <span class="btn btn-primary" aria-current="page">{% trans "Day" %}</span>
+            <a class="btn btn-outline-primary"
+               href="{% url 'core:period-summary' %}?period=week&amp;date={{ day|date:'Y-m-d' }}&amp;child={{ selected_child.pk }}">{% trans "Week" %}</a>
+            <a class="btn btn-outline-primary"
+               href="{% url 'core:period-summary' %}?period=month&amp;date={{ day|date:'Y-m-d' }}&amp;child={{ selected_child.pk }}">{% trans "Month" %}</a>
+        </nav>
         <form method="get"
               class="daily-filters mb-4"
               aria-label="{% trans 'Daily overview filters' %}">
@@ -61,6 +69,7 @@
                         <a class="btn btn-sm btn-outline-secondary"
                            href="{% url 'dashboard:dashboard-child' group.child.slug %}">{% trans "Dashboard" %}</a>
                     </div>
+                    <p><a href="{% url 'core:growth-summary' group.child.slug %}">{% trans "Growth and percentiles" %} →</a></p>
                     <div class="daily-cards mb-4">
                         {% for card in group.cards %}
                             <div class="daily-card daily-color-{{ card.kind }}"

@@ -246,6 +246,40 @@ class Child(models.Model):
         return cache.get_or_set(cls.cache_key_count, Child.objects.count, None)
 
 
+class GrowthProfile(models.Model):
+    """Explicit interpretation of existing measurements; never converts stored data."""
+
+    child = models.OneToOneField(
+        Child, on_delete=models.CASCADE, related_name="growth_profile"
+    )
+    reference_system = models.CharField(
+        max_length=16,
+        default="aragon",
+        choices=[
+            ("aragon", _("Aragon Child Health Record (WHO, birth to 2 years)")),
+            ("who", _("WHO 2006 (birth to 5 years)")),
+        ],
+    )
+    sex = models.CharField(
+        max_length=4, blank=True, choices=[("girl", _("Girl")), ("boy", _("Boy"))]
+    )
+    weight_unit = models.CharField(
+        max_length=2, blank=True, choices=[("kg", "kg"), ("g", "g")]
+    )
+    height_unit = models.CharField(max_length=2, default="cm", choices=[("cm", "cm")])
+    birth_status = models.CharField(
+        max_length=7,
+        blank=True,
+        choices=[("term", _("Born at term")), ("preterm", _("Born prematurely"))],
+    )
+    gestational_weeks = models.PositiveSmallIntegerField(null=True, blank=True)
+    gestational_days = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        # Reading/editing is governed by view_child/change_child respectively.
+        default_permissions = ()
+
+
 class DiaperChange(models.Model):
     model_name = "diaperchange"
     child = models.ForeignKey(

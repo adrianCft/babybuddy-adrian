@@ -3538,3 +3538,349 @@ msgstr "Mojados: %(wet)s · Con deposición: %(solid)s"
 
 msgid "Choose a date between 1900 and today."
 msgstr "Elige una fecha entre 1900 y hoy."
+
+msgid ""
+"A percentile compares a measurement with children of the same reference sex "
+"and age. P50 is the middle of the reference, not a goal. A higher percentile"
+" is not better."
+msgstr ""
+"Un percentil compara una medida con niños del mismo sexo de referencia y "
+"edad. P50 es el centro de la referencia, no una meta. Un percentil más alto "
+"no es mejor."
+
+msgid ""
+"A scenario needs two valid dates at least 14 days apart, a measurement in "
+"the last 60 days and a confirmed birth history."
+msgstr ""
+"Para mostrar el escenario hacen falta dos medidas válidas separadas al menos"
+" 14 días, una medida en los últimos 60 días y confirmar los datos del "
+"nacimiento."
+
+msgid "Add a Height"
+msgstr "Añadir talla"
+
+msgid "Add a Weight"
+msgstr "Añadir peso"
+
+msgid "Additional gestational days"
+msgstr "Días adicionales de gestación"
+
+msgid ""
+"Applies to all existing measurements; does not change their stored values."
+msgstr ""
+"Se aplica a todas las medidas existentes; no modifica los valores guardados."
+
+msgid ""
+"Ask someone with permission to edit this child to configure the reference "
+"and units."
+msgstr ""
+"Pide a alguien con permiso para editar los datos del niño que configure la "
+"referencia y las unidades."
+
+msgid "Average per recorded day"
+msgstr "Media por día registrado"
+
+msgid ""
+"Averages use days with records of each activity. A missing day is unknown, "
+"not zero; even recorded days may be incomplete."
+msgstr ""
+"Las medias usan los días con registros de cada actividad. Un día sin "
+"registros es desconocido, no equivale a cero; los días registrados también "
+"pueden estar incompletos."
+
+msgid ""
+"Based on the median and observed minimum–maximum of recorded days in the "
+"previous 28 days. Today is excluded. These are descriptive estimates, not "
+"schedules, targets or confidence intervals."
+msgstr ""
+"Se usa la mediana y el mínimo–máximo observado en los días registrados "
+"durante los 28 días anteriores. Se excluye hoy. Son estimaciones "
+"descriptivas, no horarios, objetivos ni intervalos de confianza."
+
+msgid "Birth history"
+msgstr "Datos del nacimiento"
+
+msgid ""
+"Birth history unconfirmed: percentiles use age since birth and growth "
+"scenarios are disabled. Premature babies may need corrected age."
+msgstr ""
+"Nacimiento pendiente de confirmar: los percentiles usan la edad desde el "
+"nacimiento y no se muestra un escenario futuro. Los bebés prematuros pueden "
+"necesitar edad corregida."
+
+msgid "Born at term"
+msgstr "Nacido a término"
+
+msgid "Born prematurely"
+msgstr "Nacido prematuro"
+
+msgid "Change since previous measurement"
+msgstr "Cambio desde la medida anterior"
+
+msgid "Comparison period"
+msgstr "Periodo de comparación"
+
+msgid ""
+"Confirm the units used throughout the history. If they are mixed, correct "
+"individual entries first. Existing measurements are never rewritten by this "
+"setting."
+msgstr ""
+"Confirma las unidades usadas en todo el historial. Si hay unidades "
+"mezcladas, corrige primero los registros correspondientes. Esta "
+"configuración nunca modifica las medidas existentes."
+
+msgid "Daily totals"
+msgstr "Totales diarios"
+
+msgid "Day"
+msgstr "Día"
+
+msgid "Day by day"
+msgstr "Día a día"
+
+msgid "Days with records"
+msgstr "Días con registros"
+
+msgid "Enter 22 to 36 completed weeks for a premature birth."
+msgstr "Indica entre 22 y 36 semanas completas para un nacimiento prematuro."
+
+msgid "Enter a value from 0 to 6."
+msgstr "Introduce un valor de 0 a 6."
+
+msgid "Gestational weeks at birth"
+msgstr "Semanas de gestación al nacer"
+
+msgid "Growth and percentiles"
+msgstr "Crecimiento y percentiles"
+
+msgid "Growth reference saved. Measurements were not changed."
+msgstr "Referencia de crecimiento guardada. Las medidas no se han modificado."
+
+msgid "If the latest percentile is maintained"
+msgstr "Si mantiene el último percentil"
+
+msgid ""
+"If the recorded routine continues, these are typical daily values for the "
+"following 7 days, through"
+msgstr ""
+"Si continúa la rutina registrada, estos son los valores diarios habituales "
+"para los próximos 7 días, hasta el"
+
+msgid "Latest measurement"
+msgstr "Última medida"
+
+msgid "Length / height"
+msgstr "Longitud / talla"
+
+msgid ""
+"Length assumes measurement lying down below 24 months and standing height "
+"thereafter. Measurements made differently need review before interpreting "
+"percentiles."
+msgstr ""
+"La longitud supone una medición tumbado antes de los 24 meses y la talla, de"
+" pie a partir de esa edad. Revisa las medidas tomadas de otra forma antes de"
+" interpretar los percentiles."
+
+msgid "Length/height-for-age"
+msgstr "Longitud/talla para la edad"
+
+msgid "Looking ahead: daily routine"
+msgstr "Previsión de la rutina diaria"
+
+msgid "Measurement history"
+msgstr "Historial de medidas"
+
+msgid ""
+"Measurements against reference percentiles P3, P15, P50, P85 and P97. Exact "
+"values are available in the history table below."
+msgstr ""
+"Medidas frente a los percentiles de referencia P3, P15, P50, P85 y P97. Los "
+"valores exactos están en la tabla del historial."
+
+msgid "Month"
+msgstr "Mes"
+
+msgid "Next period"
+msgstr "Periodo siguiente"
+
+msgid "No days in this period after the child's birth."
+msgstr "Este periodo no contiene días posteriores al nacimiento."
+
+msgid "No measurements recorded yet."
+msgstr "Todavía no hay medidas registradas."
+
+msgid "Not enough records: at least 7 recorded days are needed."
+msgstr "Faltan registros: se necesitan al menos 7 días registrados."
+
+msgid "Observed range"
+msgstr "Rango observado"
+
+msgid "Only for premature births: 22 to 36 completed weeks."
+msgstr "Solo para nacimientos prematuros: de 22 a 36 semanas completas."
+
+msgid ""
+"Original measurements with percentiles calculated at the age on each date. "
+"Charts show the latest age-correction and measurement-method segment."
+msgstr ""
+"Medidas originales con el percentil calculado para la edad de cada fecha. El"
+" gráfico muestra el último tramo con la misma corrección de edad y método de"
+" medición."
+
+msgid "Percentile"
+msgstr "Percentil"
+
+msgid ""
+"Percentile unavailable. Confirm reference and units, and check the date and "
+"value. The supported age range is birth to 5 years."
+msgstr ""
+"Percentil no disponible. Confirma la referencia y las unidades, y revisa la "
+"fecha y el valor. La referencia abarca desde el nacimiento hasta los 5 años."
+
+msgid "Period"
+msgstr "Periodo"
+
+msgid ""
+"Period in progress: today's records are partial and future days are "
+"excluded."
+msgstr ""
+"Periodo en curso: los registros de hoy son parciales y se excluyen los días "
+"futuros."
+
+msgid "Period navigation"
+msgstr "Navegación entre periodos"
+
+msgid ""
+"Premature birth: age is corrected to 40 weeks until 24 months of "
+"chronological age. Negative corrected ages are outside this reference. "
+"Confirm the correction with your pediatrician."
+msgstr ""
+"Nacimiento prematuro: se corrige la edad hasta las 40 semanas, hasta cumplir"
+" 24 meses de edad cronológica. Las edades corregidas negativas quedan fuera "
+"de esta referencia. Confirma la corrección con pediatría."
+
+msgid "Previous average"
+msgstr "Media anterior"
+
+msgid "Previous period"
+msgstr "Periodo anterior"
+
+msgid "Recorded routines, changes over time and a look ahead."
+msgstr "Rutinas registradas, evolución y una mirada a los próximos días."
+
+msgid "Reference age in days"
+msgstr "Edad de referencia en días"
+
+msgid "Reference and measurement units"
+msgstr "Referencia y unidades de las medidas"
+
+msgid "Reference: WHO 2006, birth to 5 years."
+msgstr "Referencia: OMS 2006, desde el nacimiento hasta los 5 años."
+
+msgid "Save reference"
+msgstr "Guardar referencia"
+
+msgid "Scenario in 30 days"
+msgstr "Escenario dentro de 30 días"
+
+msgid ""
+"Scenario unavailable: check recency, birth history and the reference age "
+"range. Scenarios do not cross changes in age correction or measurement "
+"method, or extend extreme values."
+msgstr ""
+"Escenario no disponible: revisa la antigüedad de las medidas, los datos del "
+"nacimiento y el rango de edad. No se cruzan cambios de corrección de edad o "
+"de método de medición, ni se prolongan valores extremos."
+
+msgid "Select a date to open its visual timeline. A dash means no records."
+msgstr ""
+"Pulsa una fecha para abrir su cronología visual. Un guion indica que no hay "
+"registros."
+
+msgid "Selected reference"
+msgstr "Referencia elegida"
+
+msgid "Show summary"
+msgstr "Ver resumen"
+
+msgid "Summaries"
+msgstr "Resúmenes"
+
+msgid ""
+"These charts describe growth; they do not diagnose health or predict adult "
+"size. Review the series of measurements with your pediatrician."
+msgstr ""
+"Estas gráficas describen el crecimiento; no diagnostican el estado de salud "
+"ni predicen la talla adulta. Revisa la evolución de las medidas con "
+"pediatría."
+
+msgid ""
+"Thin lines: WHO reference. Solid line and dots: measurements. Dashed line: "
+"conditional scenario, not a prediction or recommended target."
+msgstr ""
+"Líneas finas: referencia OMS. Línea continua y puntos: medidas. Línea "
+"discontinua: escenario condicionado, no una predicción ni un objetivo "
+"recomendado."
+
+msgid "Two valid measurement dates are needed."
+msgstr "Se necesitan medidas válidas en dos fechas diferentes."
+
+msgid "Unit of saved lengths / heights"
+msgstr "Unidad de las longitudes / tallas guardadas"
+
+msgid "Unit of saved weights"
+msgstr "Unidad de los pesos guardados"
+
+msgid "WHO reference"
+msgstr "Referencia OMS"
+
+msgid "Week and month"
+msgstr "Semana y mes"
+
+msgid "Weight-for-age"
+msgstr "Peso para la edad"
+
+msgid "You do not have permission to view growth measurements."
+msgstr "No tienes permiso para consultar las medidas de crecimiento."
+
+msgid "corrected"
+msgstr "corregida"
+
+msgid "days"
+msgstr "días"
+
+msgid "percentile points"
+msgstr "puntos de percentil"
+
+msgid "weeks + days at birth"
+msgstr "semanas + días al nacer"
+
+msgid "Swipe sideways to explore the chart."
+msgstr "Desliza hacia los lados para explorar el gráfico."
+
+msgid "Aragon Child Health Record (WHO, birth to 2 years)"
+msgstr "Documento de Salud Infantil de Aragón (OMS, de 0 a 2 años)"
+
+msgid "WHO 2006 (birth to 5 years)"
+msgstr "OMS 2006 (de 0 a 5 años)"
+
+msgid "Growth reference"
+msgstr "Referencia de crecimiento"
+
+msgid "Reference sex"
+msgstr "Sexo de referencia"
+
+msgid "Available references"
+msgstr "Referencias disponibles"
+
+msgid "Aragon Child Health Record"
+msgstr "Documento de Salud Infantil de Aragón"
+
+msgid "WHO curves from birth to 2 years"
+msgstr "curvas OMS desde el nacimiento hasta los 2 años"
+
+msgid "WHO 2006, birth to 5 years"
+msgstr "OMS 2006, desde el nacimiento hasta los 5 años"
+
+#, python-format
+msgid "Percentile unavailable. Confirm reference and units, and check the date and value. Selected range: %(reference)s."
+msgstr "Percentil no disponible. Confirma la referencia y las unidades, y revisa la fecha y el valor. Rango seleccionado: %(reference)s."

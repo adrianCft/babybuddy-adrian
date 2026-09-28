@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 from django.urls import path
 
-from . import daily_views, views
+from . import daily_views, growth_views, period_views, views
 
 app_name = "core"
 
 urlpatterns = [
     path("daily/", daily_views.DailySummary.as_view(), name="daily-summary"),
+    path("summary/", period_views.PeriodSummary.as_view(), name="period-summary"),
+    path(
+        "children/<str:slug>/growth/",
+        growth_views.GrowthOverview.as_view(),
+        name="growth-summary",
+    ),
     path("pumping/", views.PumpingList.as_view(), name="pumping-list"),
     path("pumping/add/", views.PumpingAdd.as_view(), name="pumping-add"),
     path(

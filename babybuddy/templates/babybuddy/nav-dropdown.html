@@ -116,8 +116,9 @@
         </li>
         {% if perms.core.view_child %}
             <li class="nav-item">
-                <a class="nav-link{% if request.path == '/daily/' %} active{% endif %}" href="{% url 'core:daily-summary' %}">
-                    <i class="icon-timeline" aria-hidden="true"></i> {% trans "Daily overview" %}
+                <a class="nav-link{% if request.path == '/daily/' or request.path == '/summary/' %} active{% endif %}"
+                   href="{% url 'core:daily-summary' %}">
+                    <i class="icon-timeline" aria-hidden="true"></i> {% trans "Summaries" %}
                 </a>
             </li>
         {% endif %}
