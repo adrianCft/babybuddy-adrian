@@ -28,7 +28,7 @@
                 <p class="mt-3 mb-0">{% trans "Ask someone with permission to edit this child to configure the reference and units." %}</p>
             {% endif %}
         </details>
-        <p class="small text-body-secondary">{% trans "Selected reference" %}: {{ growth.reference_label }} · {{ growth.profile.get_sex_display|default:"—" }} · {% trans "Weight" %}: {{ growth.profile.weight_unit|default:"—" }} · {% trans "Length / height" %}: cm.</p>
+        <p class="small text-body-secondary">{% trans "Selected reference" %}: {{ growth.reference_label }} · {{ growth.profile.get_sex_display|default:"—" }} · {% trans "Weight" %}: {{ growth.profile.weight_unit|default:"—" }} · {% trans "Length / height" %}: cm · {% trans "Head Circumference" %}: cm.</p>
         {% if growth.profile.birth_status == "preterm" %}
             <p class="alert alert-info">{% trans "Premature birth: age is corrected to 40 weeks until 24 months of chronological age. Negative corrected ages are outside this reference. Confirm the correction with your pediatrician." %} {{ growth.profile.gestational_weeks }} + {{ growth.profile.gestational_days }} {% trans "weeks + days at birth" %}.</p>
         {% elif not growth.profile.birth_status %}
@@ -91,6 +91,10 @@
                 {% if metric.kind == "height" and perms.core.add_height %}
                     <a class="btn btn-outline-primary mt-3"
                        href="{% url 'core:height-add' %}?child={{ child.pk }}">{% trans "Add a Height" %}</a>
+                {% endif %}
+                {% if metric.kind == "head_circumference" and perms.core.add_headcircumference %}
+                    <a class="btn btn-outline-primary mt-3"
+                       href="{% url 'core:head-circumference-add' %}?child={{ child.pk }}">{% trans "Add Head Circumference" %}</a>
                 {% endif %}
             </section>
         {% empty %}

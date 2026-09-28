@@ -17,6 +17,7 @@ MAX_AGE = 1826  # Five years; do not extrapolate beyond the WHO infant standard.
 FACTORS = {
     "weight": {"kg": 1, "g": 0.001},
     "height": {"cm": 1},
+    "head_circumference": {"cm": 1},
 }
 REFERENCE_MAX_AGE = {"aragon": 730, "who": MAX_AGE}
 
@@ -84,13 +85,20 @@ def build_growth(child, user, as_of=None):
         "reference_label": profile.get_reference_system_display(),
         "metrics": [],
     }
-    for kind, model, label, unit in [
-        ("weight", models.Weight, _("Weight"), "kg"),
-        ("height", models.Height, _("Length / height"), "cm"),
+    for kind, model, permission, label, unit in [
+        ("weight", models.Weight, "weight", _("Weight"), "kg"),
+        ("height", models.Height, "height", _("Length / height"), "cm"),
+        (
+            "head_circumference",
+            models.HeadCircumference,
+            "headcircumference",
+            _("Head Circumference"),
+            "cm",
+        ),
     ]:
-        if not user.has_perm(f"core.view_{kind}"):
+        if not user.has_perm(f"core.view_{permission}"):
             continue
-        chosen_unit = getattr(profile, f"{kind}_unit")
+        chosen_unit = getattr(profile, f"{kind}_unit", unit)
         factor = FACTORS[kind].get(chosen_unit)
         table = reference(kind, profile.sex)
         metric = {

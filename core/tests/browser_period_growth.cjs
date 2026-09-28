@@ -63,7 +63,7 @@ const fixture = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
               ).includes("/daily/"),
             );
           } else {
-            assert.equal(await page.locator("svg[role=img]").count(), 2);
+            assert.equal(await page.locator("svg[role=img]").count(), 3);
             await page.locator("details summary").first().focus();
             await page.keyboard.press("Enter");
             assert.equal(

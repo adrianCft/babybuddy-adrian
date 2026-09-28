@@ -189,14 +189,21 @@ class PeriodGrowthTests(TestCase):
             models.Height.objects.create(
                 child=self.child, date=when, height=reference("height", "girl")[days][1]
             )
+            models.HeadCircumference.objects.create(
+                child=self.child,
+                date=when,
+                head_circumference=reference("head_circumference", "girl")[days][1],
+            )
 
     def test_who_lms_matches_shipped_percentiles(self):
-        for kind in ("weight", "height"):
+        for kind in ("weight", "height", "head_circumference"):
             for sex in ("boy", "girl"):
                 table = reference(kind, sex)
                 self.assertEqual(
                     percentile_label(z_score(table[100][1], table[100])), "P50.0"
                 )
+                if kind == "head_circumference":
+                    continue
                 model = (
                     models.WeightPercentile
                     if kind == "weight"
@@ -229,7 +236,7 @@ class PeriodGrowthTests(TestCase):
         )
 
     def test_growth_history_and_conditional_projection(self):
-        self.grant("view_weight", "view_height")
+        self.grant("view_weight", "view_height", "view_headcircumference")
         self.seed_growth()
         result = build_growth(self.child, self.user, self.day)
         for metric in result["metrics"]:
@@ -274,6 +281,34 @@ class PeriodGrowthTests(TestCase):
                 "percentile"
             ]
         )
+
+    def test_head_circumference_history_and_projection(self):
+        self.grant("view_headcircumference")
+        self.profile()
+        for days in (100, 130):
+            models.HeadCircumference.objects.create(
+                child=self.child,
+                date=self.child.birth_date + timedelta(days=days),
+                head_circumference=reference("head_circumference", "girl")[days][1],
+            )
+        metric = build_growth(self.child, self.user, self.day)["metrics"][0]
+        self.assertEqual(metric["kind"], "head_circumference")
+        self.assertEqual(metric["latest"]["percentile"], "P50.0")
+        self.assertEqual(metric["projection"]["percentile"], "P50.0")
+
+    def test_growth_page_includes_head_circumference_curve_and_entry_link(self):
+        self.grant("view_child", "view_headcircumference", "add_headcircumference")
+        self.profile()
+        models.HeadCircumference.objects.create(
+            child=self.child,
+            date=self.child.birth_date + timedelta(days=100),
+            head_circumference=reference("head_circumference", "girl")[100][1],
+        )
+        page = self.client.get(
+            reverse("core:growth-summary", args=[self.child.slug])
+        )
+        self.assertContains(page, 'data-growth-metric="head_circumference"')
+        self.assertContains(page, reverse("core:head-circumference-add"))
 
     def test_preterm_and_age_limits(self):
         self.grant("view_weight")
@@ -363,6 +398,7 @@ class PeriodGrowthTests(TestCase):
             "view_child",
             "view_weight",
             "view_height",
+            "view_headcircumference",
             "view_sleep",
             "view_feeding",
             "view_meal",

@@ -15,8 +15,8 @@
        href="{% url 'core:daily-summary' %}?child={{ object.pk }}">{% trans "Daily overview" %}</a>
     <a class="btn btn-outline-primary mb-3"
        href="{% url 'core:period-summary' %}?child={{ object.pk }}">{% trans "Week and month" %}</a>
-    <a class="btn btn-outline-primary mb-3"
-       href="{% url 'core:growth-summary' object.slug %}">{% trans "Growth and percentiles" %}</a>
+    <a class="btn btn-primary mb-3"
+       href="{% url 'core:growth-summary' object.slug %}"><i class="icon-graph" aria-hidden="true"></i> {% trans "Growth and percentiles" %}</a>
     <div id="dashboard-child"
          class="row"
          data-masonry='{"percentPosition": true }'>
