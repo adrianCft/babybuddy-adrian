@@ -64,6 +64,9 @@ for config in development.py ci.py clever-cloud.py test.py production.example.py
     rm -f -- "$STAGE/babybuddy/settings/$config"
 done
 
+# Never copy a local virtual environment from a release archive.
+rm -rf -- "$STAGE/.venv"
+
 test -f "$STAGE/core/migrations/0043_health_records.py"
 test -f "$STAGE/core/health_views.py"
 test -d "$STAGE/core/templates/core/health"
@@ -71,9 +74,10 @@ test -d "$STAGE/core/templates/core/health"
 systemctl stop uwsgi
 SERVICES_STOPPED=1
 
-# The archive contains only repository files. Local data and production.py are
-# outside the archive and are deliberately left in place.
-cp -a "$STAGE/." "$APP_DIR/"
+# Copy archive entries without copying the temporary staging directory's mode
+# (mktemp creates it as 0700). Local data and production.py stay untouched.
+find "$STAGE" -mindepth 1 -maxdepth 1 -exec cp -a -- {} "$APP_DIR/" \;
+chmod 755 "$APP_DIR"
 
 cd "$APP_DIR"
 "$PYTHON" manage.py migrate --noinput --settings="$SETTINGS"
