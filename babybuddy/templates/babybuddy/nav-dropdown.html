@@ -160,13 +160,78 @@
 {% endif %}
 </div>
 </li>
-{% if perms.core.view_healthvisit or perms.core.view_vaccination or perms.core.view_prescription or perms.core.view_medication or perms.core.view_weight or perms.core.view_height or perms.core.view_head_circumference %}
-<li class="nav-item">
+{% if perms.core.view_healthvisit or perms.core.view_vaccination or perms.core.view_prescription or perms.core.view_medication or perms.core.view_childfoodprofile %}
+<li class="nav-item dropdown">
 <a id="nav-health-menu-link"
-   class="nav-link{% if request.path|slice:':8' == '/health/' %} active{% endif %}"
-   href="{% url 'core:health-overview' %}"><i class="icon-medication" aria-hidden="true"></i>
+   class="nav-link dropdown-toggle{% if request.path|slice:':8' == '/health/' or request.path|slice:':15' == '/food-profiles/' or request.path|slice:':12' == '/medication/' %} active{% endif %}"
+   href="#"
+   data-bs-toggle="dropdown"
+   aria-haspopup="true"
+   aria-expanded="false"><i class="icon-medication" aria-hidden="true"></i>
 {% trans "Health" %}
 </a>
+<div class="dropdown-menu" aria-labelledby="nav-health-menu-link">
+    {% if perms.core.view_healthvisit or perms.core.view_vaccination or perms.core.view_prescription or perms.core.view_medication %}
+    <a class="dropdown-item{% if request.path == '/health/' %} active{% endif %}"
+       href="{% url 'core:health-overview' %}"><i class="icon-medication" aria-hidden="true"></i>
+        {% trans "Health" %}
+    </a>
+    {% endif %}
+    {% if perms.core.view_healthvisit %}
+    <a class="dropdown-item{% if request.path == '/health/visits/' %} active{% endif %}"
+       href="{% url 'core:visit-list' %}"><i class="icon-medication" aria-hidden="true"></i>
+        {% trans "Medical visits" %}
+    </a>
+    {% endif %}
+    {% if perms.core.add_healthvisit %}
+    <a class="dropdown-item ps-5{% if request.path == '/health/visits/add/' %} active{% endif %}"
+       href="{% url 'core:visit-add' %}"><i class="icon-add" aria-hidden="true"></i>
+        {% trans "Medical visit" %}
+    </a>
+    {% endif %}
+    {% if perms.core.view_vaccination %}
+    <a class="dropdown-item{% if request.path == '/health/vaccinations/' %} active{% endif %}"
+       href="{% url 'core:vaccination-list' %}"><i class="icon-medication" aria-hidden="true"></i>
+        {% trans "Vaccinations" %}
+    </a>
+    {% endif %}
+    {% if perms.core.add_vaccination %}
+    <a class="dropdown-item ps-5{% if request.path == '/health/vaccinations/add/' %} active{% endif %}"
+       href="{% url 'core:vaccination-add' %}"><i class="icon-add" aria-hidden="true"></i>
+        {% trans "Vaccination" %}
+    </a>
+    {% endif %}
+    {% if perms.core.view_prescription %}
+    <a class="dropdown-item{% if request.path == '/health/prescriptions/' %} active{% endif %}"
+       href="{% url 'core:prescription-list' %}"><i class="icon-medication" aria-hidden="true"></i>
+        {% trans "Prescriptions" %}
+    </a>
+    {% endif %}
+    {% if perms.core.view_medication %}
+    <a class="dropdown-item{% if request.path|slice:':12' == '/medication/' %} active{% endif %}"
+       href="{% url 'core:medication-list' %}"><i class="icon-medication" aria-hidden="true"></i>
+        {% trans "Administered doses" %}
+    </a>
+    {% endif %}
+    {% if perms.core.add_medication %}
+    <a class="dropdown-item ps-5{% if request.path == '/medication/add/' %} active{% endif %}"
+       href="{% url 'core:medication-add' %}"><i class="icon-add" aria-hidden="true"></i>
+        {% trans "Medication" %}
+    </a>
+    {% endif %}
+    {% if perms.core.view_childfoodprofile %}
+    <a class="dropdown-item{% if request.path == '/food-profiles/' %} active{% endif %}"
+       href="{% url 'core:child-food-profile-list' %}"><i class="icon-child" aria-hidden="true"></i>
+        {% trans "Food profiles" %}
+    </a>
+    {% endif %}
+    {% if perms.core.add_childfoodprofile %}
+    <a class="dropdown-item ps-5{% if request.path == '/food-profiles/add/' %} active{% endif %}"
+       href="{% url 'core:child-food-profile-add' %}"><i class="icon-add" aria-hidden="true"></i>
+        {% trans "Food profile" %}
+    </a>
+    {% endif %}
+</div>
 </li>
 {% endif %}
 <li class="nav-item dropdown">
@@ -244,17 +309,11 @@
 {% trans "Weight entry" %}
 </a>
 {% endif %}
-{% if perms.core.view_childfoodprofile %}
-<a class="dropdown-item{% if request.path == '/food-profiles/' %} active{% endif %}"
-   href="{% url 'core:child-food-profile-list' %}"><i class="icon-child" aria-hidden="true"></i>
-{% trans "Food profiles" %}
-</a>
-{% endif %}
-{% if perms.core.add_childfoodprofile %}
-<a class="dropdown-item ps-5{% if request.path == '/food-profiles/add/' %} active{% endif %}"
-   href="{% url 'core:child-food-profile-add' %}"><i class="icon-add" aria-hidden="true"></i>
-{% trans "Food profile" %}
-</a>
+{% if perms.core.view_weight or perms.core.view_height or perms.core.view_head_circumference %}
+    <a class="dropdown-item" href="{% url 'core:health-overview' %}#growth">
+        <i class="icon-measurements" aria-hidden="true"></i>
+        {% trans "Growth and percentiles" %}
+    </a>
 {% endif %}
 </div>
 </li>

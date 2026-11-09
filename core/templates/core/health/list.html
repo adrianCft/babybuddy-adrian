@@ -1,22 +1,53 @@
-{% extends "babybuddy/page.html" %}
-{% load i18n %}
+{% extends 'babybuddy/page.html' %}
+{% load datetime i18n %}
 {% block title %}{{ title }}{% endblock %}
-{% block breadcrumbs %}<li class="breadcrumb-item"><a href="{% url 'core:health-overview' %}">{% trans "Health" %}</a></li><li class="breadcrumb-item active">{{ title }}</li>{% endblock %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'core:health-overview' %}">{% trans "Health" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+{% endblock %}
 {% block content %}
-    <h1>{{ title }}</h1>
-    {% if can_add and add_url %}<a class="btn btn-success mb-3" href="{{ add_url }}"><i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}</a>{% endif %}
-    {% if route == 'prescription' %}<p>{% trans "Add prescriptions from a medical visit. Recording a prescription does not record an administered dose." %}</p>{% endif %}
-    {% include "babybuddy/filter.html" %}
-    <div class="row g-3 mb-4">
-        {% for record in records %}
-            <div class="col-12 col-lg-6"><article class="card h-100"><div class="card-body">
-                <h2 class="h5"><a href="{{ record.url }}">{{ record.object }}</a></h2>
-                <p>{{ record.child }} · {{ record.date }}</p>
-                {% if record.object.status %}<span class="badge bg-secondary">{{ record.object.get_status_display }}</span>{% endif %}
-                {% if record.object.kind %}<span class="badge bg-info text-dark">{{ record.object.get_kind_display }}</span>{% endif %}
-                <a href="{{ record.url }}" class="btn btn-outline-primary d-block mt-3">{% trans "Details" %}</a>
-            </div></article></div>
-        {% empty %}<p>{% trans "No health records found." %}</p>{% endfor %}
+    <h1>
+        {{ title }}
+        {% if can_add and add_url %}<a class="btn btn-sm btn-success" href="{{ add_url }}"><i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}</a>{% endif %}
+    </h1>
+    {% if route == 'prescription' %}<p class="text-muted">{% trans "Add prescriptions from a medical visit. Recording a prescription does not record an administered dose." %}</p>{% endif %}
+    {% include 'babybuddy/filter.html' %}
+    <div class="table-responsive">
+        <table class="table table-instances table-borderless table-striped table-hover align-middle">
+            <thead><tr>
+                <th>{% trans "Actions" %}</th><th>{% trans "Date" %}</th><th>{% trans "Child" %}</th>
+                {% if route == 'visit' %}
+                    <th>{% trans "Reason for visit" %}</th><th>{% trans "Visit type" %}</th><th>{% trans "Status" %}</th>
+                {% elif route == 'vaccination' %}
+                    <th>{% trans "Vaccine" %}</th><th>{% trans "Vaccine dose" %}</th><th>{% trans "Status" %}</th><th>{% trans "Next vaccination date" %}</th>
+                {% else %}
+                    <th>{% trans "Medication Name" %}</th><th>{% trans "Prescribed instructions" %}</th><th>{% trans "Medical visit" %}</th>
+                {% endif %}
+            </tr></thead>
+            <tbody>
+                {% for record in records %}
+                    <tr>
+                        <td><div class="btn-group btn-group-sm" role="group" aria-label="{% trans 'Actions' %}">
+                            <a href="{{ record.url }}" class="btn btn-outline-primary">{% trans "Details" %}</a>
+                            {% if can_change %}<a href="{{ record.update_url }}" class="btn btn-primary" title="{% trans 'Update' %}"><i class="icon-update" aria-hidden="true"></i><span class="visually-hidden">{% trans "Update" %}</span></a>{% endif %}
+                            {% if can_delete %}<a href="{{ record.delete_url }}" class="btn btn-danger" title="{% trans 'Delete' %}"><i class="icon-delete" aria-hidden="true"></i><span class="visually-hidden">{% trans "Delete" %}</span></a>{% endif %}
+                        </div></td>
+                        <th scope="row">{% if route == 'vaccination' %}{{ record.date|date:"SHORT_DATE_FORMAT" }}{% else %}{{ record.date|datetime_short }}{% endif %}</th>
+                        <td><a href="{% url 'core:child' record.child.slug %}">{{ record.child }}</a></td>
+                        {% if route == 'visit' %}
+                            <td><a href="{{ record.url }}">{{ record.object.reason }}</a></td><td>{{ record.object.get_kind_display }}</td><td><span class="badge bg-secondary">{{ record.object.get_status_display }}</span></td>
+                        {% elif route == 'vaccination' %}
+                            <td><a href="{{ record.url }}">{{ record.object.name }}</a></td><td>{{ record.object.dose|default:'—' }}</td><td><span class="badge bg-secondary">{{ record.object.get_status_display }}</span></td><td>{{ record.object.next_date|default:'—' }}</td>
+                        {% else %}
+                            <td><a href="{{ record.url }}">{{ record.object.name }}</a></td><td class="text-break">{{ record.object.instructions }}</td><td><a href="{% url 'core:visit-detail' record.object.visit_id %}">{{ record.object.visit.reason }}</a></td>
+                        {% endif %}
+                    </tr>
+                    {% if route == 'visit' and record.object.assessment or route == 'vaccination' and record.object.notes or route == 'prescription' and record.object.notes %}
+                        <tr class="row-details"><td colspan="{% if route == 'vaccination' %}7{% else %}6{% endif %}"><i class="icon-note me-2" aria-hidden="true"></i>{% if route == 'visit' %}{{ record.object.assessment }}{% elif route == 'vaccination' %}{{ record.object.notes }}{% else %}{{ record.object.notes }}{% endif %}</td></tr>
+                    {% endif %}
+                {% empty %}<tr><th colspan="{% if route == 'vaccination' %}7{% else %}6{% endif %}">{% trans "No health records found." %}</th></tr>{% endfor %}
+            </tbody>
+        </table>
     </div>
-    {% include "babybuddy/paginator.html" %}
+    {% include 'babybuddy/paginator.html' %}
 {% endblock %}

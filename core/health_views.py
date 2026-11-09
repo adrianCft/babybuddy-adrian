@@ -127,6 +127,8 @@ class RecordList(HealthRecordContext, PermissionRequiredMixin, BabyBuddyPaginate
             "object": obj, "child": obj.visit.child if self.route == "prescription" else obj.child,
             "date": obj.visit.date if self.route == "prescription" else obj.date,
             "url": reverse("core:" + self.route + "-detail", args=[obj.pk]),
+            "update_url": reverse("core:" + self.route + "-update", args=[obj.pk]),
+            "delete_url": reverse("core:" + self.route + "-delete", args=[obj.pk]),
         } for obj in context["object_list"]]
         return context
 
