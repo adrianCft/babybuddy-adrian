@@ -2,7 +2,6 @@
 {% load babybuddy i18n %}
 {% block title %}{% trans "Delete" %} — {{ object }}{% endblock %}
 {% block content %}
-    {% include "core/health/nav.html" %}
     <h1>{% confirm_delete_text object %}</h1>
     <form method="post">
         {% csrf_token %}

@@ -7,7 +7,6 @@
     <li class="breadcrumb-item active" aria-current="page">{% trans "Medication" %}</li>
 {% endblock %}
 {% block content %}
-    {% include 'core/health/nav.html' %}
     <h1>
         {% trans "Medication" %}
         {% if perms.core.add_medication %}

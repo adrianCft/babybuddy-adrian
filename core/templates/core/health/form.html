@@ -4,7 +4,6 @@
 {% block breadcrumbs %}<li class="breadcrumb-item"><a href="{% url 'core:health-overview' %}">{% trans "Health" %}</a></li><li class="breadcrumb-item"><a href="{{ list_url }}">{{ title }}</a></li><li class="breadcrumb-item active">{% if object %}{% trans "Update" %}{% else %}{% trans "Add" %}{% endif %}</li>{% endblock %}
 {% block content %}
     <h1>{{ title }} — {% if object %}{% trans "Update" %}{% else %}{% trans "Add" %}{% endif %}</h1>
-    {% include "core/health/nav.html" %}
     {% if form.instance.visit_id %}<p>{{ form.instance.visit.child }} · {{ form.instance.visit }}</p>{% endif %}
     {{ form.non_field_errors }}
     {% include "core/health/photos.html" with photos=object.photos.all %}

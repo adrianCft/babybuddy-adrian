@@ -18,7 +18,6 @@
     {% endif %}
 {% endblock %}
 {% block content %}
-    {% include 'core/health/nav.html' %}
     {% include 'core/health/photos.html' with photos=object.photos.all %}
     {% if object %}
         <h1>

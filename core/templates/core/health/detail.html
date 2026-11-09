@@ -4,7 +4,6 @@
 {% block breadcrumbs %}<li class="breadcrumb-item"><a href="{% url 'core:health-overview' %}">{% trans "Health" %}</a></li><li class="breadcrumb-item"><a href="{{ list_url }}">{{ title }}</a></li><li class="breadcrumb-item active">{{ object }}</li>{% endblock %}
 {% block content %}
     <h1>{{ object }}</h1>
-    {% include "core/health/nav.html" %}
     <div class="d-flex flex-wrap gap-2 mb-4">
         {% if can_change %}<a class="btn btn-primary" href="{{ update_url }}"><i class="icon-update" aria-hidden="true"></i> {% trans "Update" %}</a>{% endif %}
         {% if can_delete %}<a class="btn btn-danger" href="{{ delete_url }}"><i class="icon-delete" aria-hidden="true"></i> {% trans "Delete" %}</a>{% endif %}

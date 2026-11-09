@@ -4,7 +4,6 @@
 {% block breadcrumbs %}<li class="breadcrumb-item"><a href="{% url 'core:health-overview' %}">{% trans "Health" %}</a></li><li class="breadcrumb-item active">{{ title }}</li>{% endblock %}
 {% block content %}
     <h1>{{ title }}</h1>
-    {% include "core/health/nav.html" %}
     {% if can_add and add_url %}<a class="btn btn-success mb-3" href="{{ add_url }}"><i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}</a>{% endif %}
     {% if route == 'prescription' %}<p>{% trans "Add prescriptions from a medical visit. Recording a prescription does not record an administered dose." %}</p>{% endif %}
     {% include "babybuddy/filter.html" %}

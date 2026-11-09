@@ -160,6 +160,15 @@
 {% endif %}
 </div>
 </li>
+{% if perms.core.view_healthvisit or perms.core.view_vaccination or perms.core.view_prescription or perms.core.view_medication or perms.core.view_weight or perms.core.view_height or perms.core.view_head_circumference %}
+<li class="nav-item">
+<a id="nav-health-menu-link"
+   class="nav-link{% if request.path|slice:':8' == '/health/' %} active{% endif %}"
+   href="{% url 'core:health-overview' %}"><i class="icon-medication" aria-hidden="true"></i>
+{% trans "Health" %}
+</a>
+</li>
+{% endif %}
 <li class="nav-item dropdown">
 <a id="nav-measurements-menu-link"
    class="nav-link dropdown-toggle"
@@ -167,17 +176,9 @@
    data-bs-toggle="dropdown"
    aria-haspopup="true"
    aria-expanded="false"><i class="icon-measurements" aria-hidden="true"></i>
-{% trans "Health" %}
+{% trans "Measurements" %}
 </a>
 <div class="dropdown-menu" aria-labelledby="nav-measurements-menu-link">
-    <a class="dropdown-item" href="{% url 'core:health-overview' %}">{% trans "Health" %}</a>
-    {% if perms.core.view_healthvisit %}<a class="dropdown-item" href="{% url 'core:visit-list' %}">{% trans "Medical visits" %}</a>{% endif %}
-    {% if perms.core.view_vaccination %}<a class="dropdown-item" href="{% url 'core:vaccination-list' %}">{% trans "Vaccinations" %}</a>{% endif %}
-    {% if perms.core.view_prescription %}<a class="dropdown-item" href="{% url 'core:prescription-list' %}">{% trans "Prescriptions" %}</a>{% endif %}
-    {% if perms.core.view_medication %}<a class="dropdown-item" href="{% url 'core:medication-list' %}">{% trans "Administered doses" %}</a>{% endif %}
-    {% if perms.core.add_medication %}<a class="dropdown-item ps-5" href="{% url 'core:medication-add' %}">{% trans "Add Medication" %}</a>{% endif %}
-    {% if perms.core.view_weight or perms.core.view_height or perms.core.view_head_circumference %}<a class="dropdown-item" href="{% url 'core:health-overview' %}#growth">{% trans "Growth and percentiles" %}</a>{% endif %}
-    <div class="dropdown-divider"></div>
     {% if perms.core.view_bmi %}
         <a class="dropdown-item{% if request.path == '/bmi/' %} active{% endif %}"
            href="{% url 'core:bmi-list' %}">

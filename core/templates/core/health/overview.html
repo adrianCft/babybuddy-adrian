@@ -4,7 +4,6 @@
 {% block breadcrumbs %}<li class="breadcrumb-item active">{% trans "Health" %}</li>{% endblock %}
 {% block content %}
     <h1>{% trans "Health" %}</h1>
-    {% include "core/health/nav.html" %}
     <form method="get" class="d-flex flex-wrap gap-2 mb-4">
         <label for="health-child" class="col-form-label">{% trans "Child" %}</label>
         <select id="health-child" name="child" class="form-select w-auto">
@@ -19,13 +18,13 @@
     </div>
     <div class="row g-3 mb-4">
         {% if perms.core.view_healthvisit %}<section class="col-12 col-lg-6"><div class="card h-100"><div class="card-body">
-            <h2 class="h4">{% trans "Scheduled visits" %}</h2>
+            <h2 class="h4">{% trans "Scheduled visits" %} {% if perms.core.view_healthvisit %}<a class="btn btn-sm btn-outline-primary float-end" href="{% url 'core:visit-list' %}">{% trans "View all" %}</a>{% endif %}</h2>
             {% for visit in upcoming_visits %}<p><a href="{% url 'core:visit-detail' visit.pk %}">{{ visit.reason }}</a><br>{{ visit.child }} · {{ visit.date }} · {{ visit.get_status_display }}</p>{% empty %}<p>{% trans "No scheduled visits." %}</p>{% endfor %}
             <h3 class="h5">{% trans "Follow-up" %}</h3>
             {% for visit in follow_ups %}<p><a href="{% url 'core:visit-detail' visit.pk %}">{{ visit.child }} · {{ visit.reason }}</a> · {{ visit.follow_up }}</p>{% empty %}<p>—</p>{% endfor %}
         </div></div></section>{% endif %}
         {% if perms.core.view_vaccination %}<section class="col-12 col-lg-6"><div class="card h-100"><div class="card-body">
-            <h2 class="h4">{% trans "Scheduled vaccinations" %}</h2>
+            <h2 class="h4">{% trans "Scheduled vaccinations" %} {% if perms.core.view_vaccination %}<a class="btn btn-sm btn-outline-primary float-end" href="{% url 'core:vaccination-list' %}">{% trans "View all" %}</a>{% endif %}</h2>
             {% for vaccine in upcoming_vaccines %}<p><a href="{% url 'core:vaccination-detail' vaccine.pk %}">{{ vaccine.name }} {{ vaccine.dose }}</a><br>{{ vaccine.child }} · {{ vaccine.date }}</p>{% empty %}<p>{% trans "No scheduled vaccinations." %}</p>{% endfor %}
             <h3 class="h5">{% trans "Next vaccination date" %}</h3>
             {% for vaccine in next_vaccines %}<p><a href="{% url 'core:vaccination-detail' vaccine.pk %}">{{ vaccine.child }} · {{ vaccine.name }}</a> · {{ vaccine.next_date }}</p>{% empty %}<p>—</p>{% endfor %}
@@ -35,6 +34,10 @@
         <h2 class="h4">{% trans "Recent medical visits" %}</h2>
         {% for visit in recent_visits %}<p><a href="{% url 'core:visit-detail' visit.pk %}">{{ visit.child }} · {{ visit.reason }}</a> · {{ visit.date }}</p>{% empty %}<p>{% trans "No health records found." %}</p>{% endfor %}
     {% endif %}
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        {% if perms.core.view_prescription %}<a class="btn btn-outline-primary" href="{% url 'core:prescription-list' %}">{% trans "Prescriptions" %}</a>{% endif %}
+        {% if perms.core.view_medication %}<a class="btn btn-outline-primary" href="{% url 'core:medication-list' %}">{% trans "Administered doses" %}</a>{% endif %}
+    </div>
     {% if perms.core.view_weight or perms.core.view_height or perms.core.view_head_circumference %}
         <section id="growth" class="mt-4">
             <h2>{% trans "Growth and percentiles" %}</h2>

@@ -3,7 +3,6 @@
 {% block title %}{% trans "Growth and percentiles" %} · {{ child }}{% endblock %}
 {% block breadcrumbs %}<li class="breadcrumb-item"><a href="{% url 'dashboard:dashboard-child' child.slug %}">{{ child }}</a></li><li class="breadcrumb-item active" aria-current="page">{% trans "Growth and percentiles" %}</li>{% endblock %}
 {% block content %}
-    {% include "core/health/nav.html" %}
     {% include "core/daily_styles.html" %}
     <div class="daily-overview" data-growth-overview>
         <h1>{% trans "Growth and percentiles" %}</h1>
