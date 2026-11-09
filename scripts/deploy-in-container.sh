@@ -9,15 +9,29 @@ RELEASE_FILE="${RELEASE_FILE:-/root/babybuddy-release.env}"
 HEALTHCHECK_BASE_URL="${HEALTHCHECK_BASE_URL:-https://acsbaby.duckdns.org}"
 RUN_COLLECTSTATIC="${RUN_COLLECTSTATIC:-0}"
 
-if [ ! -f "$RELEASE_FILE" ]; then
+if [ "$#" -eq 2 ]; then
+    COMMIT="$1"
+    EXPECTED_SHA256="$2"
+    printf 'COMMIT=%s\nEXPECTED_SHA256=%s\nRUN_COLLECTSTATIC=%s\n' \
+        "$COMMIT" "$EXPECTED_SHA256" "$RUN_COLLECTSTATIC" > "$RELEASE_FILE.tmp"
+    chmod 600 "$RELEASE_FILE.tmp"
+    mv -f -- "$RELEASE_FILE.tmp" "$RELEASE_FILE"
+elif [ "$#" -eq 0 ] && [ -f "$RELEASE_FILE" ]; then
+    # shellcheck disable=SC1090
+    source "$RELEASE_FILE"
+elif [ "$#" -ne 0 ]; then
+    echo "Uso: $0 [commit sha256]" >&2
+    exit 2
+else
     echo "Falta el archivo de lanzamiento: $RELEASE_FILE" >&2
     exit 1
 fi
 
-# shellcheck disable=SC1090
-source "$RELEASE_FILE"
 : "${COMMIT:?COMMIT no está definido en $RELEASE_FILE}"
 : "${EXPECTED_SHA256:?EXPECTED_SHA256 no está definido en $RELEASE_FILE}"
+
+[[ "$COMMIT" =~ ^[0-9a-fA-F]{7,40}$ ]] || { echo "Commit no válido" >&2; exit 2; }
+[[ "$EXPECTED_SHA256" =~ ^[0-9a-fA-F]{64}$ ]] || { echo "SHA256 no válido" >&2; exit 2; }
 
 ARCHIVE_ROOT="babybuddy-adrian-${COMMIT}"
 DOWNLOAD_URL="https://github.com/adrianCft/babybuddy-adrian/archive/${COMMIT}.tar.gz"
