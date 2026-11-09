@@ -37,10 +37,22 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if perms.core.change_dish %}
-                                <a class="btn btn-sm btn-primary"
-                                   href="{% url 'core:dish-update' dish.pk %}">{% trans "Edit dish" %}</a>
-                            {% endif %}
+                            <div class="btn-group btn-group-sm" role="group" aria-label="{% trans 'Actions' %}">
+                                {% if perms.core.change_dish %}
+                                    <a class="btn btn-primary"
+                                       href="{% url 'core:dish-update' dish.pk %}"
+                                       aria-label="{% trans 'Edit dish' %}: {{ dish.name }}">
+                                        <i class="icon-update" aria-hidden="true"></i>
+                                    </a>
+                                {% endif %}
+                                {% if perms.core.delete_dish %}
+                                    <a class="btn btn-danger"
+                                       href="{% url 'core:dish-delete' dish.pk %}"
+                                       aria-label="{% trans 'Delete' %} {{ dish.name }}">
+                                        <i class="icon-delete" aria-hidden="true"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
                         </td>
                     </tr>
                 {% empty %}

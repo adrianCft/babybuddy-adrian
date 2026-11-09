@@ -7,6 +7,7 @@
     <li class="breadcrumb-item active" aria-current="page">{% trans "Medication" %}</li>
 {% endblock %}
 {% block content %}
+    {% include 'core/health/nav.html' %}
     <h1>
         {% trans "Medication" %}
         {% if perms.core.add_medication %}
@@ -75,6 +76,9 @@
                                 <i class="icon-note me-2" aria-hidden="true"></i>{{ medication.notes }}
                             </td>
                         </tr>
+                    {% endif %}
+                    {% if medication.photos.all %}
+                        <tr class="row-details"><td colspan="7">{% include 'core/health/photos.html' with photos=medication.photos.all %}</td></tr>
                     {% endif %}
                 {% empty %}
                     <tr>

@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.test import TestCase, override_settings
-from django.urls import NoReverseMatch, reverse
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import override
 
@@ -150,9 +150,44 @@ class FoodCatalogTestCase(TestCase):
             self.assertContains(response, "Añadir alimento")
             self.assertContains(response, "Categoría")
 
-    def test_catalog_has_no_delete_route(self):
-        with self.assertRaises(NoReverseMatch):
-            reverse("core:food-delete", args=[self.food.pk])
+    def test_delete_requires_permission_and_removes_unused_food(self):
+        url = reverse("core:food-delete", args=[self.inactive_food.pk])
+        self.assertEqual(self.client.get(url).status_code, 403)
+        self.assertEqual(self.client.post(url).status_code, 403)
+        self.grant("view_food", "delete_food")
+        response = self.client.get(reverse("core:food-list"), {"name": self.inactive_food.name, "filtered": "1"})
+        self.assertContains(response, url)
+        self.assertEqual(self.client.get(url).status_code, 200)
+        self.assertEqual(self.client.post(url).status_code, 302)
+        self.assertFalse(models.Food.objects.filter(pk=self.inactive_food.pk).exists())
+
+    def test_delete_keeps_food_used_by_meals_dishes_or_profiles(self):
+        self.grant("delete_food")
+        url = reverse("core:food-delete", args=[self.food.pk])
+        child = models.Child.objects.create(
+            first_name="Ana", birth_date=timezone.localdate()
+        )
+        meal = models.Meal.objects.create(
+            child=child,
+            time=timezone.localtime() - timezone.timedelta(hours=1),
+            meal_type="breakfast",
+        )
+        meal.foods.add(self.food)
+        response = self.client.get(url)
+        self.assertContains(response, "Desactívalo")
+        self.assertNotContains(response, 'type="submit"')
+        self.assertEqual(self.client.post(url).status_code, 409)
+        self.assertTrue(models.Food.objects.filter(pk=self.food.pk).exists())
+        self.assertTrue(meal.foods.filter(pk=self.food.pk).exists())
+
+        meal.delete()
+        dish = models.Dish.objects.create(name="Plato con plátano")
+        dish.foods.add(self.food)
+        self.assertEqual(self.client.post(url).status_code, 409)
+        dish.delete()
+        models.ChildFoodProfile.objects.create(child=child, food=self.food)
+        self.assertEqual(self.client.post(url).status_code, 409)
+        self.assertTrue(models.Food.objects.filter(pk=self.food.pk).exists())
 
     def test_deactivation_keeps_existing_meal_history(self):
         child = models.Child.objects.create(

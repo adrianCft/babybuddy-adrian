@@ -7,6 +7,7 @@
     <li class="breadcrumb-item active" aria-current="page">{% trans "Head Circumference" %}</li>
 {% endblock %}
 {% block content %}
+    {% include "core/health/nav.html" %}
     <h1>
         {% trans "Head Circumference" %}
         {% if perms.core.add_head_circumference %}

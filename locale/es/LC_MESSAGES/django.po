@@ -3884,3 +3884,199 @@ msgstr "OMS 2006, desde el nacimiento hasta los 5 años"
 #, python-format
 msgid "Percentile unavailable. Confirm reference and units, and check the date and value. Selected range: %(reference)s."
 msgstr "Percentil no disponible. Confirma la referencia y las unidades, y revisa la fecha y el valor. Rango seleccionado: %(reference)s."
+
+msgid "This food is used in meals, saved dishes, or food profiles. Deactivate it instead to preserve those records."
+msgstr "Este alimento se usa en comidas, platos guardados o perfiles de alimentación. Desactívalo para conservar esos registros."
+
+msgid "Deleting a saved dish does not change previous meals."
+msgstr "Eliminar un plato guardado no modifica las comidas anteriores."
+
+msgid "Health"
+msgstr "Salud"
+
+msgid "Medical visits"
+msgstr "Visitas médicas"
+
+msgid "Medical visit"
+msgstr "Visita médica"
+
+msgid "Check-up"
+msgstr "Revisión"
+
+msgid "Illness"
+msgstr "Enfermedad"
+
+msgid "Emergency visit"
+msgstr "Urgencias"
+
+msgid "Specialist"
+msgstr "Especialista"
+
+msgid "Visit type"
+msgstr "Tipo de visita"
+
+msgid "Scheduled"
+msgstr "Programada"
+
+msgid "Completed"
+msgstr "Realizada"
+
+msgid "Cancelled"
+msgstr "Cancelada"
+
+msgid "Reason for visit"
+msgstr "Motivo de la visita"
+
+msgid "Medical center"
+msgstr "Centro médico"
+
+msgid "Professional"
+msgstr "Profesional"
+
+msgid "Symptoms"
+msgstr "Síntomas"
+
+msgid "What we were told / diagnosis"
+msgstr "Qué nos han dicho / diagnóstico"
+
+msgid "Tests and results"
+msgstr "Pruebas y resultados"
+
+msgid "Instructions and follow-up"
+msgstr "Indicaciones y seguimiento"
+
+msgid "Follow-up date"
+msgstr "Fecha de seguimiento"
+
+msgid "Follow-up"
+msgstr "Seguimiento"
+
+msgid "A completed visit cannot be in the future."
+msgstr "Una visita realizada no puede tener una fecha futura."
+
+msgid "Follow-up cannot precede the visit."
+msgstr "El seguimiento no puede ser anterior a la visita."
+
+msgid "Prescription"
+msgstr "Receta"
+
+msgid "Prescriptions"
+msgstr "Medicamentos recetados"
+
+msgid "Prescribed instructions"
+msgstr "Pauta indicada"
+
+msgid ""
+"Copy the dose, unit, frequency and route indicated by the professional."
+msgstr ""
+"Copia la dosis, unidad, frecuencia y vía indicadas por el profesional."
+
+msgid "Start date"
+msgstr "Fecha de inicio"
+
+msgid "End date"
+msgstr "Fecha de fin"
+
+msgid "End date cannot precede start date."
+msgstr "La fecha de fin no puede ser anterior a la de inicio."
+
+msgid "Vaccination"
+msgstr "Vacunación"
+
+msgid "Vaccinations"
+msgstr "Vacunas"
+
+msgid "Vaccine"
+msgstr "Vacuna"
+
+msgid "Vaccine dose"
+msgstr "Dosis de la vacuna"
+
+msgid "Administered"
+msgstr "Administrada"
+
+msgid "Administered doses"
+msgstr "Dosis administradas"
+
+msgid "Batch number"
+msgstr "Número de lote"
+
+msgid "Next vaccination date"
+msgstr "Próxima fecha de vacunación"
+
+msgid "Notes / reactions"
+msgstr "Observaciones / reacciones"
+
+msgid "An administered vaccine cannot be in the future."
+msgstr "Una vacuna administrada no puede tener una fecha futura."
+
+msgid "The next vaccination cannot precede this one."
+msgstr "La próxima vacunación no puede ser anterior a esta."
+
+msgid "Photo"
+msgstr "Foto"
+
+msgid "Photos"
+msgstr "Fotos"
+
+msgid "Photos to remove"
+msgstr "Fotos que quieres eliminar"
+
+msgid "Upload up to 8 photos at a time."
+msgstr "Puedes subir hasta 8 fotos cada vez."
+
+msgid "Each photo must be smaller than 10 MB."
+msgstr "Cada foto debe ocupar menos de 10 MB."
+
+msgid "Select one or more photos (up to 8, 10 MB each)."
+msgstr "Selecciona una o varias fotos (hasta 8, de 10 MB cada una)."
+
+msgid "Details"
+msgstr "Ver detalles"
+
+msgid "No health records found."
+msgstr "No hay registros de salud."
+
+msgid ""
+"Add prescriptions from a medical visit. Recording a prescription does not "
+"record an administered dose."
+msgstr ""
+"Añade los medicamentos recetados desde una visita médica. Guardar una receta"
+" no registra una dosis administrada."
+
+msgid "Add prescription"
+msgstr "Añadir medicamento recetado"
+
+msgid "No prescriptions recorded."
+msgstr "No hay medicamentos recetados registrados."
+
+msgid ""
+"This visit has prescriptions. Remove them first if you want to delete the "
+"visit."
+msgstr ""
+"Esta visita tiene medicamentos recetados. Elimínalos primero si quieres "
+"borrar la visita."
+
+msgid "Attached photos will also be removed."
+msgstr "También se eliminarán las fotos adjuntas."
+
+msgid "Add medical visit"
+msgstr "Añadir visita médica"
+
+msgid "Add vaccination"
+msgstr "Añadir vacuna"
+
+msgid "Scheduled visits"
+msgstr "Visitas programadas"
+
+msgid "No scheduled visits."
+msgstr "No hay visitas programadas."
+
+msgid "Scheduled vaccinations"
+msgstr "Vacunas programadas"
+
+msgid "No scheduled vaccinations."
+msgstr "No hay vacunas programadas."
+
+msgid "Recent medical visits"
+msgstr "Visitas médicas recientes"

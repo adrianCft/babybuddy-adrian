@@ -6,6 +6,7 @@ from import_export import fields, resources, widgets
 from import_export.admin import ImportExportMixin, ExportActionMixin
 
 from core import models
+from core import health_admin  # noqa: F401
 
 
 class ImportExportResourceBase(resources.ModelResource):

@@ -31,13 +31,22 @@
                 {% for food in object_list %}
                     <tr>
                         <td>
-                            {% if perms.core.change_food %}
-                                <a href="{% url 'core:food-update' food.id %}"
-                                   class="btn btn-sm btn-primary"
-                                   aria-label="{% blocktrans with name=food.name %}Edit {{ name }}{% endblocktrans %}">
-                                    <i class="icon-update" aria-hidden="true"></i>
-                                </a>
-                            {% endif %}
+                            <div class="btn-group btn-group-sm" role="group" aria-label="{% trans 'Actions' %}">
+                                {% if perms.core.change_food %}
+                                    <a href="{% url 'core:food-update' food.id %}"
+                                       class="btn btn-primary"
+                                       aria-label="{% blocktrans with name=food.name %}Edit {{ name }}{% endblocktrans %}">
+                                        <i class="icon-update" aria-hidden="true"></i>
+                                    </a>
+                                {% endif %}
+                                {% if perms.core.delete_food %}
+                                    <a href="{% url 'core:food-delete' food.id %}"
+                                       class="btn btn-danger"
+                                       aria-label="{% trans 'Delete' %} {{ food.name }}">
+                                        <i class="icon-delete" aria-hidden="true"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
                         </td>
                         <th scope="row">{{ food.name }}</th>
                         <td>{{ food.get_category_display }}</td>

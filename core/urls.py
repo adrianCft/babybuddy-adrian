@@ -1,11 +1,28 @@
 # -*- coding: utf-8 -*-
 from django.urls import path
 
-from . import daily_views, growth_views, period_views, views
+from . import daily_views, growth_views, period_views, views, health_views
 
 app_name = "core"
 
 urlpatterns = [
+    path("health/", health_views.HealthOverview.as_view(), name="health-overview"),
+    path("health/photos/<int:pk>/", health_views.HealthPhotoView.as_view(), name="health-photo"),
+    path("health/visits/", health_views.VisitList.as_view(), name="visit-list"),
+    path("health/visits/add/", health_views.VisitAdd.as_view(), name="visit-add"),
+    path("health/visits/<int:pk>/", health_views.VisitDetail.as_view(), name="visit-detail"),
+    path("health/visits/<int:pk>/edit/", health_views.VisitUpdate.as_view(), name="visit-update"),
+    path("health/visits/<int:pk>/delete/", health_views.VisitDelete.as_view(), name="visit-delete"),
+    path("health/visits/<int:visit_pk>/prescriptions/add/", health_views.PrescriptionAdd.as_view(), name="prescription-add"),
+    path("health/prescriptions/", health_views.PrescriptionList.as_view(), name="prescription-list"),
+    path("health/prescriptions/<int:pk>/", health_views.PrescriptionDetail.as_view(), name="prescription-detail"),
+    path("health/prescriptions/<int:pk>/edit/", health_views.PrescriptionUpdate.as_view(), name="prescription-update"),
+    path("health/prescriptions/<int:pk>/delete/", health_views.PrescriptionDelete.as_view(), name="prescription-delete"),
+    path("health/vaccinations/", health_views.VaccinationList.as_view(), name="vaccination-list"),
+    path("health/vaccinations/add/", health_views.VaccinationAdd.as_view(), name="vaccination-add"),
+    path("health/vaccinations/<int:pk>/", health_views.VaccinationDetail.as_view(), name="vaccination-detail"),
+    path("health/vaccinations/<int:pk>/edit/", health_views.VaccinationUpdate.as_view(), name="vaccination-update"),
+    path("health/vaccinations/<int:pk>/delete/", health_views.VaccinationDelete.as_view(), name="vaccination-delete"),
     path("daily/", daily_views.DailySummary.as_view(), name="daily-summary"),
     path("summary/", period_views.PeriodSummary.as_view(), name="period-summary"),
     path(
@@ -62,6 +79,7 @@ urlpatterns = [
     path("foods/add/", views.FoodAdd.as_view(), name="food-add"),
     path("foods/quick-add/", views.FoodQuickAdd.as_view(), name="food-quick-add"),
     path("foods/<int:pk>/", views.FoodUpdate.as_view(), name="food-update"),
+    path("foods/<int:pk>/delete/", views.FoodDelete.as_view(), name="food-delete"),
     path(
         "food-profiles/",
         views.ChildFoodProfileList.as_view(),
@@ -82,6 +100,7 @@ urlpatterns = [
     path("dishes/add/", views.DishAdd.as_view(), name="dish-add"),
     path("dishes/quick-add/", views.DishQuickAdd.as_view(), name="dish-quick-add"),
     path("dishes/<int:pk>/", views.DishUpdate.as_view(), name="dish-update"),
+    path("dishes/<int:pk>/delete/", views.DishDelete.as_view(), name="dish-delete"),
     path("meals/add/", views.MealAdd.as_view(), name="meal-add"),
     path("meals/<int:pk>/", views.MealUpdate.as_view(), name="meal-update"),
     path(

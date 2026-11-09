@@ -1192,3 +1192,6 @@ class WeightPercentile(models.Model):
 
     def __str__(self):
         return f"Sex: {self.sex}, Age: {self.age_in_days} days, p3: {self.p3_weight} kg, p15: {self.p15_weight} kg, p50: {self.p50_weight} kg, p85: {self.p85_weight} kg, p97: {self.p97_weight} kg"
+
+
+from .health_models import HealthVisit, Prescription, Vaccination, HealthPhoto  # noqa: E402,F401

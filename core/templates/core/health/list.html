@@ -1,0 +1,23 @@
+{% extends "babybuddy/page.html" %}
+{% load i18n %}
+{% block title %}{{ title }}{% endblock %}
+{% block breadcrumbs %}<li class="breadcrumb-item"><a href="{% url 'core:health-overview' %}">{% trans "Health" %}</a></li><li class="breadcrumb-item active">{{ title }}</li>{% endblock %}
+{% block content %}
+    <h1>{{ title }}</h1>
+    {% include "core/health/nav.html" %}
+    {% if can_add and add_url %}<a class="btn btn-success mb-3" href="{{ add_url }}"><i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}</a>{% endif %}
+    {% if route == 'prescription' %}<p>{% trans "Add prescriptions from a medical visit. Recording a prescription does not record an administered dose." %}</p>{% endif %}
+    {% include "babybuddy/filter.html" %}
+    <div class="row g-3 mb-4">
+        {% for record in records %}
+            <div class="col-12 col-lg-6"><article class="card h-100"><div class="card-body">
+                <h2 class="h5"><a href="{{ record.url }}">{{ record.object }}</a></h2>
+                <p>{{ record.child }} · {{ record.date }}</p>
+                {% if record.object.status %}<span class="badge bg-secondary">{{ record.object.get_status_display }}</span>{% endif %}
+                {% if record.object.kind %}<span class="badge bg-info text-dark">{{ record.object.get_kind_display }}</span>{% endif %}
+                <a href="{{ record.url }}" class="btn btn-outline-primary d-block mt-3">{% trans "Details" %}</a>
+            </div></article></div>
+        {% empty %}<p>{% trans "No health records found." %}</p>{% endfor %}
+    </div>
+    {% include "babybuddy/paginator.html" %}
+{% endblock %}

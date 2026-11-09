@@ -7,6 +7,7 @@
     <li class="breadcrumb-item active" aria-current="page">{% trans "Weight" %}</li>
 {% endblock %}
 {% block content %}
+    {% include "core/health/nav.html" %}
     <h1>
         {% trans "Weight" %}
         {% if perms.core.add_weight %}

@@ -1,0 +1,24 @@
+{% extends 'babybuddy/page.html' %}
+{% load babybuddy i18n %}
+{% block title %}{% trans "Delete" %} {% trans "Food" %}{% endblock %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'core:food-list' %}">{% trans "Food catalog" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Delete" %}</li>
+{% endblock %}
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        <h1>{% confirm_delete_text object %}</h1>
+        {% if food_in_use %}
+            <div class="alert alert-warning" role="alert">
+                {% trans "This food is used in meals, saved dishes, or food profiles. Deactivate it instead to preserve those records." %}
+            </div>
+            {% if perms.core.change_food %}
+                <a href="{% url 'core:food-update' object.pk %}" class="btn btn-primary">{% trans "Update food" %}</a>
+            {% endif %}
+        {% else %}
+            <button type="submit" class="btn btn-danger">{% trans "Delete" %}</button>
+        {% endif %}
+        <a href="{% url 'core:food-list' %}" class="btn btn-default">{% trans "Cancel" %}</a>
+    </form>
+{% endblock %}

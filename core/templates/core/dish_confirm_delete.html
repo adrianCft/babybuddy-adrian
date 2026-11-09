@@ -1,0 +1,16 @@
+{% extends 'babybuddy/page.html' %}
+{% load babybuddy i18n %}
+{% block title %}{% trans "Delete" %} {% trans "Saved dish" %}{% endblock %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'core:dish-list' %}">{% trans "Saved dishes" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Delete" %}</li>
+{% endblock %}
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        <h1>{% confirm_delete_text object %}</h1>
+        <p class="text-muted">{% trans "Deleting a saved dish does not change previous meals." %}</p>
+        <button type="submit" class="btn btn-danger">{% trans "Delete" %}</button>
+        <a href="{% url 'core:dish-list' %}" class="btn btn-default">{% trans "Cancel" %}</a>
+    </form>
+{% endblock %}

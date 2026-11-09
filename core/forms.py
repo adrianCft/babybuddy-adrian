@@ -11,6 +11,7 @@ from taggit.forms import TagField
 from babybuddy.widgets import DateInput, DateTimeInput, TimeInput
 from core import models
 from core.models import Timer
+from core.photo_forms import PhotoFormMixin
 from core.widgets import (
     ChildRadioSelect,
     FoodMultiCheckboxSelect,
@@ -318,11 +319,15 @@ class DishForm(CoreModelForm):
         fields = ["name", "foods", "active"]
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
         available = Q(active=True)
         if self.instance.pk:
             available |= Q(dish=self.instance)
         self.fields["foods"].queryset = models.Food.objects.filter(available).distinct()
+        self.fields["foods"].widget.can_add_food = bool(
+            user and user.has_perm("core.add_food")
+        )
 
     def clean_name(self):
         name = self.cleaned_data["name"].strip()
@@ -486,7 +491,8 @@ class HeightForm(CoreModelForm, TaggableModelForm):
         }
 
 
-class MedicationForm(CoreModelForm, TaggableModelForm):
+class MedicationForm(PhotoFormMixin, CoreModelForm, TaggableModelForm):
+    photo_owner = "medication"
     next_dose_interval = forms.DecimalField(
         label=_("Time Until Next Dosage"),
         required=False,

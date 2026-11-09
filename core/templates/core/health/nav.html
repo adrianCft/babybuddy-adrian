@@ -1,0 +1,9 @@
+{% load i18n %}
+<nav class="d-flex flex-wrap gap-2 mb-4" aria-label="{% trans 'Health' %}">
+    <a class="btn btn-outline-primary" href="{% url 'core:health-overview' %}">{% trans "Health" %}</a>
+    {% if perms.core.view_healthvisit %}<a class="btn btn-outline-primary" href="{% url 'core:visit-list' %}">{% trans "Medical visits" %}</a>{% endif %}
+    {% if perms.core.view_vaccination %}<a class="btn btn-outline-primary" href="{% url 'core:vaccination-list' %}">{% trans "Vaccinations" %}</a>{% endif %}
+    {% if perms.core.view_prescription %}<a class="btn btn-outline-primary" href="{% url 'core:prescription-list' %}">{% trans "Prescriptions" %}</a>{% endif %}
+    {% if perms.core.view_medication %}<a class="btn btn-outline-primary" href="{% url 'core:medication-list' %}">{% trans "Administered doses" %}</a>{% endif %}
+    {% if perms.core.view_weight or perms.core.view_height or perms.core.view_head_circumference %}<a class="btn btn-outline-primary" href="{% url 'core:health-overview' %}#growth">{% trans "Growth and percentiles" %}</a>{% endif %}
+</nav>

@@ -93,6 +93,23 @@ class SavedDishesTestCase(TestCase):
         self.assertFalse(dish.active)
         self.assertEqual(list(dish.foods.all()), [self.oats])
 
+    def test_delete_requires_permission_and_preserves_meal_snapshot(self):
+        url = reverse("core:dish-delete", args=[self.dish.pk])
+        self.assertEqual(self.client.get(url).status_code, 403)
+        self.assertEqual(self.client.post(url).status_code, 403)
+        self.grant("view_dish", "delete_dish")
+        response = self.client.get(reverse("core:dish-list"))
+        self.assertContains(response, url)
+        form = forms.MealForm(data=self.meal_data())
+        self.assertTrue(form.is_valid(), form.errors)
+        meal = form.save()
+        self.assertEqual(self.client.get(url).status_code, 200)
+        self.assertEqual(self.client.post(url).status_code, 302)
+        self.assertFalse(models.Dish.objects.filter(pk=self.dish.pk).exists())
+        meal.refresh_from_db()
+        self.assertEqual(meal.dish_names, ["Plato de prueba"])
+        self.assertCountEqual(meal.foods.all(), [self.apple, self.oats])
+
     def test_quick_creation_and_invalid_selections(self):
         self.grant("add_dish")
         response = self.client.post(

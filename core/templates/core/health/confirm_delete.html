@@ -1,0 +1,15 @@
+{% extends "babybuddy/page.html" %}
+{% load babybuddy i18n %}
+{% block title %}{% trans "Delete" %} — {{ object }}{% endblock %}
+{% block content %}
+    {% include "core/health/nav.html" %}
+    <h1>{% confirm_delete_text object %}</h1>
+    <form method="post">
+        {% csrf_token %}
+        {% if delete_blocked %}<p class="alert alert-warning">{% trans "This visit has prescriptions. Remove them first if you want to delete the visit." %}</p>{% else %}
+            <p>{% trans "Attached photos will also be removed." %}</p>
+            <button class="btn btn-danger" type="submit">{% trans "Delete" %}</button>
+        {% endif %}
+        <a class="btn btn-default" href="{{ detail_url }}">{% trans "Cancel" %}</a>
+    </form>
+{% endblock %}

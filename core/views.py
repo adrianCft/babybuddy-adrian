@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models.deletion import ProtectedError
 from django.db.models import Count, Exists, F, Max, Min, OuterRef, Prefetch, Q
 from django.db.models.functions import Lower, TruncDate
 from django.forms import Form
@@ -241,6 +242,34 @@ class FoodUpdate(CoreUpdateView):
     success_url = reverse_lazy("core:food-list")
 
 
+class FoodDelete(CoreDeleteView):
+    model = models.Food
+    permission_required = ("core.delete_food",)
+    success_url = reverse_lazy("core:food-list")
+
+    def food_in_use(self):
+        return (
+            models.MealFood.objects.filter(food=self.object).exists()
+            or models.DishFood.objects.filter(food=self.object).exists()
+            or models.ChildFoodProfile.objects.filter(food=self.object).exists()
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["food_in_use"] = self.food_in_use()
+        return context
+
+    def form_valid(self, form):
+        if self.food_in_use():
+            return self.render_to_response(self.get_context_data(), status=409)
+        try:
+            return super().form_valid(form)
+        except ProtectedError:
+            context = self.get_context_data()
+            context["food_in_use"] = True
+            return self.render_to_response(context, status=409)
+
+
 class FoodQuickAdd(PermissionRequiredMixin, View):
     permission_required = ("core.add_food",)
 
@@ -278,11 +307,27 @@ class DishAdd(CoreAddView):
     form_class = forms.DishForm
     success_url = reverse_lazy("core:dish-list")
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
 
 class DishUpdate(CoreUpdateView):
     model = models.Dish
     permission_required = ("core.change_dish",)
     form_class = forms.DishForm
+    success_url = reverse_lazy("core:dish-list")
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+
+class DishDelete(CoreDeleteView):
+    model = models.Dish
+    permission_required = ("core.delete_dish",)
     success_url = reverse_lazy("core:dish-list")
 
 
@@ -534,6 +579,7 @@ class MedicationList(
     template_name = "core/medication_list.html"
     permission_required = ("core.view_medication",)
     filterset_class = filters.MedicationFilter
+    queryset = models.Medication.objects.select_related("child").prefetch_related("photos")
 
 
 class MedicationAdd(CoreAddView):
