@@ -13,7 +13,9 @@ class HealthVisitForm(PhotoFormMixin, CoreModelForm):
 
     class Meta:
         model = models.HealthVisit
-        fields = ["child", "date", "kind", "status", "reason", "center", "professional",
+        # The professional is intentionally kept in the database for backwards
+        # compatibility, but is no longer part of the user-facing form.
+        fields = ["child", "date", "kind", "status", "reason", "center",
                   "symptoms", "assessment", "tests", "instructions", "follow_up"]
         widgets = {
             "child": ChildRadioSelect(), "date": DateTimeInput(), "follow_up": DateInput(),
@@ -56,7 +58,9 @@ PrescriptionInlineFormSet = inlineformset_factory(
     models.Prescription,
     form=PrescriptionInlineForm,
     extra=1,
-    can_delete=True,
+    # Prescriptions have their own detail/delete screens; keeping deletion out
+    # of this compact visit form avoids exposing formset internals here.
+    can_delete=False,
 )
 
 

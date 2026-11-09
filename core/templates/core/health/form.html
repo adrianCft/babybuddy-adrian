@@ -8,6 +8,7 @@
     {{ form.non_field_errors }}
     {% include "core/health/photos.html" with photos=object.photos.all %}
     {% if route == 'visit' %}
+        <div class="container-fluid pb-5">
         <form role="form" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {% if form.fieldsets %}
@@ -15,7 +16,9 @@
                     {% with "forms/layouts/"|add:fieldset.layout|add:".html" as template %}{% include template %}{% endwith %}
                 {% endfor %}
             {% else %}
-                {% for field in form %}<div class="row">{% include 'babybuddy/form_field.html' %}</div>{% endfor %}
+                {% for field in form %}
+                    {% if field.is_hidden %}{{ field }}{% else %}{% include 'babybuddy/form_field.html' %}{% endif %}
+                {% endfor %}
             {% endif %}
             <section class="border rounded p-3 mb-4">
                 <h2 class="h4">{% trans "Prescribed medication" %}</h2>
@@ -24,12 +27,16 @@
                 {% for prescription_form in prescription_formset %}
                     <div class="border-top pt-3 mt-3">
                         {{ prescription_form.non_field_errors }}
-                        {% for field in prescription_form %}<div class="row">{% include 'babybuddy/form_field.html' with field=field %}</div>{% endfor %}
+                        {% for hidden in prescription_form.hidden_fields %}{{ hidden }}{% endfor %}
+                        {% for field in prescription_form.visible_fields %}
+                            {% if field.name != 'DELETE' %}{% include 'babybuddy/form_field.html' with field=field %}{% endif %}
+                        {% endfor %}
                     </div>
                 {% endfor %}
             </section>
             <button type="submit" class="submit-primary btn btn-primary btn-lg">{% trans "Submit" %}</button>
         </form>
+        </div>
     {% else %}
         {% include "babybuddy/form.html" %}
     {% endif %}

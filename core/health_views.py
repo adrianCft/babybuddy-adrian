@@ -107,7 +107,7 @@ class HealthRecordContext:
             context["update_url"] = reverse("core:" + self.route + "-update", args=[obj.pk])
             context["delete_url"] = reverse("core:" + self.route + "-delete", args=[obj.pk])
             context["details"] = [(field.verbose_name, getattr(obj, "get_" + field.name + "_display", lambda: getattr(obj, field.name))())
-                                  for field in obj._meta.fields if field.name not in ("id", "visit")]
+                                  for field in obj._meta.fields if field.name not in ("id", "visit", "professional")]
             if self.route == "visit":
                 context["delete_blocked"] = obj.prescriptions.exists()
                 if user.has_perm("core.view_prescription"):
