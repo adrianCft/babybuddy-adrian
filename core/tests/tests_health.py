@@ -99,6 +99,23 @@ class HealthTests(TestCase):
         self.assertEqual(self.client.post(reverse("core:visit-delete", args=[visit.pk])).status_code, 302)
         self.assertFalse(models.HealthVisit.objects.filter(pk=visit.pk).exists())
 
+    def test_visit_form_saves_prescribed_medication(self):
+        self.grant("add_healthvisit", "view_healthvisit", "add_prescription")
+        response = self.client.post(reverse("core:visit-add"), {
+            "child": self.child.pk,
+            "date": timezone.now() - timedelta(hours=1),
+            "kind": "illness", "status": "completed", "reason": "Resfriado",
+            "prescriptions-TOTAL_FORMS": "1", "prescriptions-INITIAL_FORMS": "0",
+            "prescriptions-MIN_NUM_FORMS": "0", "prescriptions-MAX_NUM_FORMS": "1000",
+            "prescriptions-0-name": "Jarabe", "prescriptions-0-instructions": "5 ml cada 8 horas",
+            "prescriptions-0-start_date": timezone.localdate(),
+        })
+        self.assertEqual(response.status_code, 302)
+        visit = models.HealthVisit.objects.get(reason="Resfriado")
+        prescription = visit.prescriptions.get()
+        self.assertEqual(prescription.name, "Jarabe")
+        self.assertEqual(prescription.instructions, "5 ml cada 8 horas")
+
     def test_invalid_uploads_and_other_records_photos_are_rejected(self):
         self.grant("add_vaccination", "change_vaccination")
         url = reverse("core:vaccination-add")

@@ -8,6 +8,31 @@
     {% if form.instance.visit_id %}<p>{{ form.instance.visit.child }} · {{ form.instance.visit }}</p>{% endif %}
     {{ form.non_field_errors }}
     {% include "core/health/photos.html" with photos=object.photos.all %}
-    {% include "babybuddy/form.html" %}
+    {% if route == 'visit' %}
+        <form role="form" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% if form.fieldsets %}
+                {% for fieldset in form.hydrated_fielsets %}
+                    {% with "forms/layouts/"|add:fieldset.layout|add:".html" as template %}{% include template %}{% endwith %}
+                {% endfor %}
+            {% else %}
+                {% for field in form %}<div class="row">{% include 'babybuddy/form_field.html' %}</div>{% endfor %}
+            {% endif %}
+            <section class="border rounded p-3 mb-4">
+                <h2 class="h4">{% trans "Prescribed medication" %}</h2>
+                <p class="text-muted">{% trans "Add any medication prescribed during this visit. You can attach its photo from the prescription details after saving." %}</p>
+                {{ prescription_formset.management_form }}
+                {% for prescription_form in prescription_formset %}
+                    <div class="border-top pt-3 mt-3">
+                        {{ prescription_form.non_field_errors }}
+                        {% for field in prescription_form %}<div class="row">{% include 'babybuddy/form_field.html' with field=field %}</div>{% endfor %}
+                    </div>
+                {% endfor %}
+            </section>
+            <button type="submit" class="submit-primary btn btn-primary btn-lg">{% trans "Submit" %}</button>
+        </form>
+    {% else %}
+        {% include "babybuddy/form.html" %}
+    {% endif %}
     {% if medication_names %}<datalist id="medication-names">{% for name in medication_names %}<option value="{{ name }}"></option>{% endfor %}</datalist>{% endif %}
 {% endblock %}

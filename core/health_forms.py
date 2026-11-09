@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import inlineformset_factory
 from django.utils.translation import gettext_lazy as _
 from babybuddy.widgets import DateInput, DateTimeInput
 from core import models
@@ -34,6 +35,29 @@ class PrescriptionForm(PhotoFormMixin, forms.ModelForm):
             "instructions": forms.Textarea(attrs={"rows": 3}),
             "notes": forms.Textarea(attrs={"rows": 3}),
         }
+
+
+class PrescriptionInlineForm(forms.ModelForm):
+    """Compact prescription rows shown while recording a medical visit."""
+
+    class Meta:
+        model = models.Prescription
+        fields = ["name", "instructions", "start_date", "end_date", "notes"]
+        widgets = {
+            "name": forms.TextInput(attrs={"autocomplete": "off"}),
+            "start_date": DateInput(), "end_date": DateInput(),
+            "instructions": forms.Textarea(attrs={"rows": 2}),
+            "notes": forms.Textarea(attrs={"rows": 2}),
+        }
+
+
+PrescriptionInlineFormSet = inlineformset_factory(
+    models.HealthVisit,
+    models.Prescription,
+    form=PrescriptionInlineForm,
+    extra=1,
+    can_delete=True,
+)
 
 
 class VaccinationForm(PhotoFormMixin, CoreModelForm):

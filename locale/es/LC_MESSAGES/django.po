@@ -4080,3 +4080,9 @@ msgstr "No hay vacunas programadas."
 
 msgid "Recent medical visits"
 msgstr "Visitas médicas recientes"
+
+msgid "Prescribed medication"
+msgstr "Medicaciones recetadas"
+
+msgid "Add any medication prescribed during this visit. You can attach its photo from the prescription details after saving."
+msgstr "Añade cualquier medicamento recetado durante esta visita. Puedes adjuntar su foto desde el detalle de la receta después de guardarla."

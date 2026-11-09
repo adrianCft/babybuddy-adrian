@@ -7,7 +7,8 @@ administradas y el acceso a las medidas y curvas de crecimiento existentes.
 
 - Una visita puede estar programada, realizada o cancelada. Permite guardar el
   motivo, centro, profesional, síntomas, valoración, pruebas, indicaciones y fecha
-  de seguimiento. Desde su detalle se añaden medicamentos recetados.
+  de seguimiento. En el mismo formulario se pueden añadir uno o varios medicamentos
+  recetados; también se pueden añadir desde el detalle de la visita.
 - Cada receta conserva el nombre, la pauta indicada por el profesional, fechas y
   notas. Las sugerencias de nombres proceden de registros que el usuario tiene
   permiso para consultar. Crear una receta no registra dosis administradas.

@@ -10,7 +10,12 @@ import django_filters
 from babybuddy.mixins import PermissionRequiredMixin
 from babybuddy.views import BabyBuddyFilterView, BabyBuddyPaginatedView
 from core import models
-from core.health_forms import HealthVisitForm, PrescriptionForm, VaccinationForm
+from core.health_forms import (
+    HealthVisitForm,
+    PrescriptionForm,
+    PrescriptionInlineFormSet,
+    VaccinationForm,
+)
 from core.views import CoreAddView, CoreUpdateView, CoreDeleteView
 
 
@@ -148,6 +153,28 @@ class VisitAdd(HealthRecordContext, CoreAddView):
     form_class = HealthVisitForm
     template_name = "core/health/form.html"
 
+    def get_prescription_formset(self, form=None):
+        data = self.request.POST if "prescriptions-TOTAL_FORMS" in self.request.POST else None
+        return PrescriptionInlineFormSet(
+            data,
+            instance=form.instance if form is not None else models.HealthVisit(),
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["prescription_formset"] = self.get_prescription_formset(kwargs.get("form"))
+        return context
+
+    def form_valid(self, form):
+        formset = self.get_prescription_formset(form)
+        if formset.is_bound and not formset.is_valid():
+            return self.form_invalid(form)
+        response = super().form_valid(form)
+        if formset.is_bound:
+            formset.instance = self.object
+            formset.save()
+        return response
+
 
 class VisitUpdate(HealthRecordContext, CoreUpdateView):
     model = models.HealthVisit
@@ -155,6 +182,28 @@ class VisitUpdate(HealthRecordContext, CoreUpdateView):
     permission_required = "core.change_healthvisit"
     form_class = HealthVisitForm
     template_name = "core/health/form.html"
+
+    def get_prescription_formset(self, form=None):
+        data = self.request.POST if "prescriptions-TOTAL_FORMS" in self.request.POST else None
+        return PrescriptionInlineFormSet(
+            data,
+            instance=form.instance if form is not None else self.object,
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["prescription_formset"] = self.get_prescription_formset(kwargs.get("form"))
+        return context
+
+    def form_valid(self, form):
+        formset = self.get_prescription_formset(form)
+        if formset.is_bound and not formset.is_valid():
+            return self.form_invalid(form)
+        response = super().form_valid(form)
+        if formset.is_bound:
+            formset.instance = self.object
+            formset.save()
+        return response
 
 
 class RecordDelete(HealthRecordContext, CoreDeleteView):
