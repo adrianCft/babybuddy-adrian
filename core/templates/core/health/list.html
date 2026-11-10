@@ -7,7 +7,7 @@
 {% endblock %}
 {% block content %}
     {% load mobile_records %}
-    <h1>
+    <h1 class="bb-list-heading">
         {{ title }}
         {% if can_add and add_url %}<a class="btn btn-sm btn-success" href="{{ add_url }}"><i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}</a>{% endif %}
     </h1>

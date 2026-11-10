@@ -1,5 +1,7 @@
 {% load widget_tweaks %}
-{% if field.is_hidden and field|widget_type != 'tagseditor' %}
+{% if header_child_field and field.name == 'child' and field.form == header_child_field.form %}
+    {% if field.errors %}<div class="alert alert-danger" role="alert">{{ field.label }}: {{ field.errors }}</div>{% endif %}
+{% elif field.is_hidden and field|widget_type != 'tagseditor' %}
     {{ field }}
     {{ field.errors }}
 {% else %}

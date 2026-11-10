@@ -43,7 +43,8 @@ class InterfacePolishTests(TestCase):
             },
         )
         chips = {c["name"]: c for c in response.context["active_filters"]}
-        self.assertEqual(chips["child"]["value"], str(self.child))
+        self.assertNotIn("child", chips)
+        self.assertNotContains(response, 'data-filter-chip="child"')
         self.assertNotEqual(chips["status"]["value"], "completed")
         self.assertContains(response, 'data-filter-chip="status"')
         response = self.client.get(chips["status"]["remove_url"])
@@ -52,7 +53,7 @@ class InterfacePolishTests(TestCase):
         self.assertEqual(response.context["record_context"]["child"], self.child)
         response = self.client.get(response.context["clear_filters_url"])
         self.assertEqual(response.context["active_filters"], [])
-        self.assertIsNone(response.context["record_context"]["child"])
+        self.assertEqual(response.context["record_context"]["child"], self.child)
         self.assertIsNone(response.context["record_context"]["date"])
         self.assertEqual(models.HealthVisit.objects.get().reason, "Revisión")
 

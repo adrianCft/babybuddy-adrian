@@ -9,11 +9,11 @@
 {% endblock %}
 {% block content %}
     {% load mobile_records %}
-    <h1>
+    <h1 class="bb-list-heading">
         {% trans "Pumping" %}
         {% if perms.core.add_pumping %}
-            <a href="{% context_url 'core:pumping-add' %}" class="btn btn-sm btn-success">
-                <i class="icon-pumping" aria-hidden="true"></i> {% trans "Add Pumping Entry" %}
+            <a href="{% context_url 'core:pumping-add' %}" class="btn btn-sm btn-success" aria-label="{% trans 'Add Pumping Entry' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}
             </a>
         {% endif %}
     </h1>

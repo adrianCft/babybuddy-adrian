@@ -9,11 +9,11 @@
 {% endblock %}
 {% block content %}
     {% load mobile_records %}
-    <h1>
+    <h1 class="bb-list-heading">
         {% trans "Tummy Time" %}
         {% if perms.core.add_tummytime %}
-            <a href="{% context_url 'core:tummytime-add' %}" class="btn btn-sm btn-success">
-                <i class="icon-tummytime" aria-hidden="true"></i> {% trans "Add Tummy Time" %}</a>
+            <a href="{% context_url 'core:tummytime-add' %}" class="btn btn-sm btn-success" aria-label="{% trans 'Add Tummy Time' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}</a>
         {% endif %}
     </h1>
     {% include 'babybuddy/filter.html' %}

@@ -1,12 +1,13 @@
+{% load i18n %}
 {% if not empty or not hide_empty %}
     <div class="card card-dashboard card-{{ type }}">
         <div class="card-header">
             <i class="icon-{{ type }} pull-left" aria-hidden="true"></i>
-            {% block header %}{% endblock %}
+            {% if home_label %}<a href="{{ home_list_url }}">{{ home_label }}</a>{% else %}{% block header %}{% endblock %}{% endif %}
         </div>
         <div class="card-body">
             <span class="card-title"><strong>
-                {% block title %}{% endblock %}
+                {% if home_card and empty %}<span class="bb-home-empty">{% trans "No records" %}</span>{% else %}{% block title %}{% endblock %}{% endif %}
             </strong></span>
             <div class="card-text">
                 {% block content %}{% endblock %}

@@ -2,7 +2,7 @@
 {# Load any form-javascript files #}
 {{ form.media.js }}
 <div class="bb-form-layout">
-    <form class="bb-form" role="form" method="post" enctype="multipart/form-data">
+    <form id="bb-record-form" class="bb-form" role="form" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {% include 'babybuddy/form_fields.html' %}
         {% include 'babybuddy/form_actions.html' %}

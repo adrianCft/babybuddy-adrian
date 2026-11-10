@@ -1,33 +1,41 @@
 {% load i18n widget_tweaks %}
 <section class="bb-filters" aria-label="{% trans 'Filters' %}">
     <div class="bb-filter-toolbar">
-        <a class="btn btn-outline-secondary" data-bs-toggle="collapse" href="#filter_form" role="button"
-           aria-expanded="{% if request.GET.filtered or filter.form.errors %}true{% else %}false{% endif %}" aria-controls="filter_form">
-            {% trans "Filters" %}{% if active_filters %} <span class="badge text-bg-secondary">{{ active_filters|length }}</span>{% endif %}
-        </a>
-        {% if active_filters or filter.form.errors %}<a class="btn btn-link" href="{{ clear_filters_url }}">{% trans "Clear filters" %}</a>{% endif %}
+        <button class="btn bb-filter-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#filter-panel" aria-controls="filter-panel" aria-haspopup="dialog">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+            {% trans "Filters" %}{% if active_filters %}<span class="bb-filter-count">{{ active_filters|length }}</span>{% endif %}
+        </button>
+        {% if active_filters or filter.form.errors %}<a class="bb-filter-clear" href="{{ clear_filters_url }}">{% trans "Clear filters" %}</a>{% endif %}
     </div>
-    {% if active_filters %}
-        <ul class="bb-filter-chips" aria-label="{% trans 'Active filters' %}">
-            {% for chip in active_filters %}<li><a href="{{ chip.remove_url }}" data-filter-chip="{{ chip.name }}" aria-label="{% trans 'Remove filter' %}: {{ chip.label }}: {{ chip.value }}"><span><span class="text-body-secondary">{{ chip.label }}:</span> {{ chip.value }}</span><span aria-hidden="true">×</span></a></li>{% endfor %}
-        </ul>
-    {% endif %}
-    <form id="filter_form" action="" method="get" class="collapse{% if request.GET.filtered or filter.form.errors %} show{% endif %}">
-        {{ filter.form.non_field_errors }}
-        <div class="bb-filter-fields">
-            {% for field in filter.form %}
-                {% if not record_context or field.name != 'child' and field.name != 'date' %}
-                    <div class="bb-filter-field"><label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                        {% if 'choice' in field|field_type or 'boolean' in field|field_type %}{{ field|add_class:"form-select" }}{% else %}{{ field|add_class:"form-control" }}{% endif %}
-                        {{ field.errors }}
-                    </div>
-                {% else %}
-                    <input type="hidden" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}">
-                    {{ field.errors }}
-                {% endif %}
-            {% endfor %}
+    {% if active_filters %}<p class="bb-filter-summary">{% for chip in active_filters %}<span>{{ chip.label }}: {{ chip.value }}</span>{% if not forloop.last %}<span aria-hidden="true"> · </span>{% endif %}{% endfor %}</p>{% endif %}
+    <div class="offcanvas offcanvas-end bb-filter-panel" tabindex="-1" id="filter-panel" aria-labelledby="filter-panel-title" data-filter-panel{% if filter.form.errors %} data-filter-errors{% endif %}>
+        <div class="offcanvas-header">
+            <h2 class="offcanvas-title h5" id="filter-panel-title">{% trans "Filters" %}</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{% trans 'Close' %}"></button>
         </div>
-        <input type="hidden" name="filtered" value="1">
-        <button type="submit" class="btn btn-primary mt-3">{% trans "Apply filters" %}</button>
-    </form>
+        <form id="filter_form" action="" method="get" class="bb-filter-form">
+            <div class="offcanvas-body">
+                {{ filter.form.non_field_errors }}
+                {% if active_filters %}<ul class="bb-filter-chips" aria-label="{% trans 'Active filters' %}">
+                    {% for chip in active_filters %}<li><a href="{{ chip.remove_url }}" data-filter-chip="{{ chip.name }}" aria-label="{% trans 'Remove filter' %}: {{ chip.label }}: {{ chip.value }}"><span>{{ chip.label }}: {{ chip.value }}</span><span aria-hidden="true">×</span></a></li>{% endfor %}
+                </ul>{% endif %}
+                <div class="bb-filter-fields">
+                    {% for field in filter.form %}
+                        {% if not record_context or field.name != 'child' %}
+                            <div class="bb-filter-field"><label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                {% if 'choice' in field|field_type or 'boolean' in field|field_type %}{{ field|add_class:"form-select" }}{% else %}{{ field|add_class:"form-control" }}{% endif %}
+                                {{ field.errors }}
+                            </div>
+                        {% else %}<input type="hidden" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}">{{ field.errors }}{% endif %}
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="filtered" value="1">
+            </div>
+            <div class="bb-filter-actions">
+                <a class="btn btn-outline-secondary" href="{{ clear_filters_url }}" aria-label="{% trans 'Clear filters' %}">{% trans "Clear" %}</a>
+                <button type="submit" class="btn btn-primary" aria-label="{% trans 'Apply filters' %}">{% trans "Apply" %}</button>
+            </div>
+        </form>
+    </div>
+    <noscript><style>.bb-filter-panel{position:static!important;visibility:visible!important;transform:none!important;width:100%!important;height:auto!important;max-height:none!important}.bb-filter-toggle,.bb-filter-panel .btn-close{display:none!important}</style></noscript>
 </section>

@@ -4497,3 +4497,27 @@ msgstr "Página %(current)s de %(total)s"
 
 #~ msgid "<b>Temperature</b>"
 #~ msgstr "<b>Temperatura</b>"
+
+msgid "Diapers"
+msgstr "Pañales"
+
+msgid "No records"
+msgstr "Sin registros"
+
+msgid "Latest records"
+msgstr "Últimos registros"
+
+msgid "No favorite cards to show."
+msgstr "No hay tarjetas favoritas para mostrar."
+
+msgid "Choose a child to open their home."
+msgstr "Elige un niño para abrir su inicio."
+
+msgid "Clear"
+msgstr "Limpiar"
+
+msgid "Apply"
+msgstr "Aplicar"
+
+msgid "Any"
+msgstr "Cualquiera"

@@ -28,10 +28,10 @@
         </div>
     {% endif %}
     {% if can_add %}
-        <div class="mt-2">
-                <a class="btn btn-sm btn-dashboard-add-link p-0 text-decoration-none"
-               href="{% context_url 'core:meal-add' %}">
-                <i class="icon-add" aria-hidden="true"></i> {% trans "Add meal" %}
+        <div class="mt-2 bb-card-add">
+                <a class="btn btn-sm btn-dashboard-add-link text-decoration-none"
+               href="{% context_url 'core:meal-add' %}" aria-label="{% trans 'Add meal' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}
             </a>
         </div>
     {% endif %}

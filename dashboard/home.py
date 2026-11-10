@@ -5,7 +5,7 @@ from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 
 from core.models import Timer
-from core.navigation import effective_url
+from core.navigation import contextual_url, effective_url
 from dashboard.templatetags import cards
 
 DEFAULT_CARDS = [
@@ -16,6 +16,14 @@ DEFAULT_CARDS = [
     "medication-last",
 ]
 MAX_FAVORITES = 6
+HOME_HEADINGS = {
+    "feeding-last": (_("Feedings"), "core:feeding-list"),
+    "diaper-change-last": (_("Diapers"), "core:diaperchange-list"),
+    "meal-summary": (_("Meals"), "core:meal-list"),
+    "sleep-last": (_("Sleep"), "core:sleep-list"),
+    "medication-last": (_("Medication"), "core:medication-list"),
+    "pumping-last": (_("Pumping"), "core:pumping-list"),
+}
 SPECS = [
     ("feeding-last", _("Last Feeding"), ("feeding",), "feeding_last"),
     (
@@ -128,7 +136,12 @@ def home_layout(request, child, form=None):
             data = loader({"request": request}, child)
         if data.get("empty") and data.get("hide_empty"):
             return None
-        data.update(request=request, child=child, next=effective_url(request))
+        data.update(
+            request=request, child=child, next=effective_url(request), home_card=True
+        )
+        if card["key"] in HOME_HEADINGS:
+            label, target = HOME_HEADINGS[card["key"]]
+            data.update(home_label=label, home_list_url=contextual_url(request, target))
         return {
             **card,
             "html": render_to_string(

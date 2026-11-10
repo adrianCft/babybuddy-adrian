@@ -1,19 +1,18 @@
 {% load i18n %}
-{% if record_context.children and not view.form_page %}
-    <form method="get" class="bb-context-bar" aria-label="{% trans 'Child and date' %}">
-        <div class="bb-context-child">
-            <label for="context-child">{% trans "Child" %}</label>
-            <select id="context-child" name="child" class="form-select">
+{% if header_child_field %}
+    <div class="bb-child-switcher">
+        <label for="{{ header_child_field.id_for_label }}" class="visually-hidden">{{ header_child_field.label }}</label>
+        {{ header_child_field }}
+    </div>
+{% elif record_context.children and not view.form_page %}
+    <form method="get" class="bb-child-switcher" aria-label="{% trans 'Child' %}" data-child-switcher>
+            <label for="context-child" class="visually-hidden">{% trans "Child" %}</label>
+            <select id="context-child" name="child" class="form-select" data-child-switcher-select title="{% trans 'Child' %}">
                 <option value=""{% if not record_context.child %} selected{% endif %}>{% trans "All children" %}</option>
                 {% for child in record_context.children %}<option value="{{ child.pk }}"{% if child == record_context.child %} selected{% endif %}>{{ child }}</option>{% endfor %}
             </select>
-        </div>
-        <div class="bb-context-date">
-            <label for="context-date">{% if record_context.date_filter or record_context.date_required %}{% trans "Day" %}{% else %}{% trans "Date for new records" %}{% endif %}</label>
-            <input id="context-date" type="date" name="date" class="form-control" value="{{ record_context.display_date|date:'Y-m-d' }}" min="1900-01-01" max="{{ record_context.today|date:'Y-m-d' }}"{% if record_context.date_required %} required{% endif %}>
-        </div>
+        {% if record_context.display_date %}<input type="hidden" name="date" value="{{ record_context.display_date|date:'Y-m-d' }}">{% elif record_context.date_filter %}<input type="hidden" name="date" value="">{% endif %}
         {% for name, value in record_context.hidden %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
-        <button class="btn btn-outline-primary" type="submit">{% trans "Show" %}</button>
-        {% if record_context.date_filter and not record_context.display_date %}<p class="small text-body-secondary mb-0 bb-context-hint">{% trans "All dates. Choose a day to filter the records." %}</p>{% endif %}
+        <noscript><button class="btn btn-outline-secondary" type="submit">{% trans "Show" %}</button></noscript>
     </form>
 {% endif %}

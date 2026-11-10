@@ -9,7 +9,7 @@
     {% if route == 'visit' %}
         {{ form.media.js }}
         <div class="bb-form-layout">
-            <form class="bb-form" role="form" method="post" enctype="multipart/form-data">
+            <form id="bb-record-form" class="bb-form" role="form" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 {% include 'babybuddy/form_fields.html' %}
                 {% if can_add_prescription or can_edit_prescription %}

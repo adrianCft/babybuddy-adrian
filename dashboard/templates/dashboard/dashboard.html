@@ -1,44 +1,29 @@
 {% extends 'babybuddy/page.html' %}
-{% load cards datetime i18n imagekit static navigation %}
-{% block title %}
-    {% trans "Dashboard" %}
-{% endblock %}
-{% block breadcrumbs %}
-    <li class="breadcrumb-item fw-bold">{% trans "Dashboard" %}</li>
-{% endblock %}
+{% load datetime i18n imagekit static navigation %}
+{% block title %}{% trans "Dashboard" %}{% endblock %}
+{% block breadcrumb_nav %}{% endblock %}
 {% block content %}
-    <h1>{% trans "Dashboard" %}</h1>
-    <div class="row">
-        <div class="col-12">
-            <div class="row">
-                {% for object in objects %}
-                    <div class="col-lg-4 col-md-6 col-sm-6 col-xs-2 mb-4">
-                        <div class="card">
-                            <a class="text-center" href="{% context_url 'dashboard:dashboard-child' object.slug %}">
-                                {% if object.picture %}
-                                    {% thumbnail '300x300' object.picture as thumb %}
-                                        <img src="{{ thumb.url }}" class="child-photo img-fluid" />
-                                    {% else %}
-                                        <img src="{% static 'babybuddy/img/core/child-placeholder.png' %}"
-                                             class="child-photo img-fluid" />
-                                    {% endif %}
-                                </a>
-                                <div class="card-body text-center">
-                                    <h4 class="card-title">{{ object }}</h4>
-                                    {% if object.active_sleep %}<p class="small"><i class="icon-sleep" aria-hidden="true"></i> {% trans "Sleeping" %} · {{ object.active_sleep.start|datetime_short }}</p>{% endif %}
-                                    <div class="card-text">
-                                        <p>
-                                            {% trans "Born" %} <span class="text-secondary">{{ object.birth_date }}</span>
-                                            <br />
-                                            {% trans "Age" %} <span class="text-secondary">{{ object.birth_date|timesince }}</span>
-                                        </p>
-                                        {% include 'dashboard/child_button_group.html' %}
-                                    </div>
-                                </div>
-                            </div>
+    <div class="bb-home">
+        <header class="bb-home-heading">
+            <div><p class="bb-home-date">{% trans "Today" %} · {% now "j F" %}</p><h1>{% trans "Dashboard" %}</h1><p class="bb-home-child">{% trans "Choose a child to open their home." %}</p></div>
+        </header>
+        <div class="bb-home-child-cards">
+            {% for object in objects %}
+                <article class="bb-home-child-card">
+                    <a class="bb-home-child-link" href="{% context_url 'dashboard:dashboard-child' object.slug %}">
+                        {% if object.picture %}{% thumbnail '300x300' object.picture as thumb %}<img src="{{ thumb.url }}" alt="" loading="lazy">
+                        {% else %}<img src="{% static 'babybuddy/img/core/child-placeholder.png' %}" alt="" loading="lazy">{% endif %}
+                        <div>
+                            <h2>{{ object }}</h2>
+                            <p>{% trans "Age" %}: {{ object.birth_date|timesince }}</p>
+                            <p>{% trans "Born" %}: {{ object.birth_date }}</p>
+                            {% if object.active_sleep %}<p class="text-primary-emphasis"><i class="icon-sleep" aria-hidden="true"></i> {% trans "Sleeping" %} · {{ object.active_sleep.start|datetime_short }}</p>{% endif %}
                         </div>
-                    {% endfor %}
-                </div>
-            </div>
+                        <span aria-hidden="true">›</span>
+                    </a>
+                    {% include 'dashboard/child_button_group.html' %}
+                </article>
+            {% empty %}<p class="bb-record-empty">{% trans "No children found." %}</p>{% endfor %}
         </div>
-    {% endblock %}
+    </div>
+{% endblock %}

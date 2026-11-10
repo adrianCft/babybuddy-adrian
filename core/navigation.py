@@ -4,6 +4,7 @@ from datetime import date, datetime
 from urllib.parse import unquote, urlsplit, urlunsplit
 
 import django_filters
+from django import forms
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models as django_models
 from django.http import HttpResponseRedirect, QueryDict
@@ -190,7 +191,10 @@ def date_filter_class(base, model):
         (base,),
         {
             "date": django_filters.DateFilter(
-                field_name=path, lookup_expr=lookup, label=_("Day")
+                field_name=path,
+                lookup_expr=lookup,
+                label=_("Day"),
+                widget=forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
             ),
         },
     )
@@ -302,6 +306,22 @@ class ReturnContextMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        form = context.get("form")
+        child_field = form.fields.get("child") if form is not None else None
+        if isinstance(child_field, forms.ModelChoiceField):
+            # Keep the original field, choices, initial value and validation.
+            # HTML's form attribute includes the header control in the POST
+            # without navigating away or discarding an unfinished form.
+            child_field.empty_label = _("Child")
+            child_field.widget = forms.Select(
+                attrs={
+                    "form": "bb-record-form",
+                    "class": "form-select",
+                    "title": child_field.label,
+                },
+                choices=child_field.choices,
+            )
+            context["header_child_field"] = form["child"]
         return_url = safe_return_url(self.request)
         from core.presentation import submit_label
 

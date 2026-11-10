@@ -20,10 +20,10 @@
         {% trans "Amount" %}: {{ pumping.amount }}
     {% endif %}
     {% if can_add %}
-        <div class="mt-2">
-            <a class="btn btn-sm btn-dashboard-add-link p-0 text-decoration-none"
-               href="{% context_url 'core:pumping-add' %}">
-                <i class="icon-add" aria-hidden="true"></i> {% trans "Add Pumping Entry" %}
+        <div class="mt-2 bb-card-add">
+            <a class="btn btn-sm btn-dashboard-add-link text-decoration-none"
+               href="{% context_url 'core:pumping-add' %}" aria-label="{% trans 'Add Pumping Entry' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}
             </a>
         </div>
     {% endif %}

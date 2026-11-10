@@ -9,11 +9,11 @@
 {% endblock %}
 {% block content %}
     {% load mobile_records %}
-    <h1>
+    <h1 class="bb-list-heading">
         {% trans "Height" %}
         {% if perms.core.add_height %}
-            <a href="{% context_url 'core:height-add' %}" class="btn btn-sm btn-success">
-                <i class="icon-height" aria-hidden="true"></i> {% trans "Add Height" %}
+            <a href="{% context_url 'core:height-add' %}" class="btn btn-sm btn-success" aria-label="{% trans 'Add Height' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}
             </a>
         {% endif %}
     </h1>

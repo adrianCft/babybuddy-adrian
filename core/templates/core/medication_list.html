@@ -9,11 +9,11 @@
 {% endblock %}
 {% block content %}
     {% load mobile_records %}
-    <h1>
+    <h1 class="bb-list-heading">
         {% trans "Recorded doses" %}
         {% if perms.core.add_medication %}
-            <a href="{% context_url 'core:medication-add' %}" class="btn btn-sm btn-success">
-                <i class="icon-medication" aria-hidden="true"></i> {% trans "Record dose" %}
+            <a href="{% context_url 'core:medication-add' %}" class="btn btn-sm btn-success" aria-label="{% trans 'Record dose' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}
             </a>
         {% endif %}
     </h1>

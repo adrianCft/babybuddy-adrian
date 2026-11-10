@@ -18,10 +18,10 @@
 {% block content %}
     {% if change %}{{ change.attributes|join:', ' }}{% endif %}
     {% if can_add %}
-        <div class="mt-2">
-            <a class="btn btn-sm btn-dashboard-add-link p-0 text-decoration-none"
-               href="{% context_url 'core:diaperchange-add' %}">
-                <i class="icon-add" aria-hidden="true"></i> {% trans "Add Diaper Change" %}
+        <div class="mt-2 bb-card-add">
+            <a class="btn btn-sm btn-dashboard-add-link text-decoration-none"
+               href="{% context_url 'core:diaperchange-add' %}" aria-label="{% trans 'Add Diaper Change' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}
             </a>
         </div>
     {% endif %}

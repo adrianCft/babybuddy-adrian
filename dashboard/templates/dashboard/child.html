@@ -1,32 +1,28 @@
 {% extends 'babybuddy/page.html' %}
-{% load breadcrumb cards i18n navigation %}
+{% load i18n navigation %}
 {% block title %}
     {% trans "Dashboard" %} - {{ object }}
 {% endblock %}
-{% block breadcrumbs %}
-    <li class="breadcrumb-item">
-        <a href="{% url 'core:child-list' %}">{% trans "Children" %}</a>
-    </li>
-    <li class="breadcrumb-item fw-bold">{% child_quick_switch object 'dashboard:dashboard-child' %}</li>
-    <li class="breadcrumb-item active" aria-current="page">{% trans "Dashboard" %}</li>
-{% endblock %}
+{% block breadcrumb_nav %}{% endblock %}
 {% block content %}
-    <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2 mb-3">
-        <h1 class="mb-0">{% trans "Dashboard" %} · {{ object }}</h1>
-        <span class="small text-body-secondary">{% trans "Latest activity" %}</span>
+    <div class="bb-home">
+        <header class="bb-home-heading">
+            <div><p class="bb-home-date">{% trans "Today" %} · {% now "j F" %}</p><h1>{% trans "Dashboard" %}</h1><p class="bb-home-child">{{ object }}</p></div>
+            <nav class="bb-home-links" aria-label="{% trans 'Summaries' %}">
+                <a href="{% context_url 'core:daily-summary' %}"><i class="icon-timeline" aria-hidden="true"></i><span>{% trans "Summaries" %}</span><span aria-hidden="true">›</span></a>
+                <a href="{% context_url 'core:growth-summary' object.slug %}"><i class="icon-graph" aria-hidden="true"></i><span>{% trans "Growth and percentiles" %}</span><span aria-hidden="true">›</span></a>
+            </nav>
+        </header>
+        {% include 'dashboard/home_sleep.html' %}
+        <h2 class="bb-home-section-title">{% trans "Latest records" %}</h2>
+        <div id="dashboard-child" class="bb-home-grid">
+            {% for card in home.favorites %}<div data-dashboard-card="{{ card.key }}">{{ card.html }}</div>{% empty %}<p class="bb-record-empty">{% trans "No favorite cards to show." %}</p>{% endfor %}
+        </div>
+        <details class="bb-home-more mt-4"><summary>{% trans "More data" %}</summary>
+            <div class="bb-home-grid mt-3">{% for card in home.others %}<div data-dashboard-card="{{ card.key }}">{{ card.html }}</div>{% empty %}<p class="text-body-secondary">{% trans "No more data to show." %}</p>{% endfor %}</div>
+        </details>
+        {% include 'dashboard/home_customize.html' %}
     </div>
-    {% include 'dashboard/home_sleep.html' %}
-    <a class="btn btn-outline-primary mb-3"
-       href="{% context_url 'core:daily-summary' %}">{% trans "Summaries" %}</a>
-    <a class="btn btn-primary mb-3"
-       href="{% context_url 'core:growth-summary' object.slug %}"><i class="icon-graph" aria-hidden="true"></i> {% trans "Growth and percentiles" %}</a>
-    {% include 'dashboard/home_customize.html' %}
-    <div id="dashboard-child" class="bb-home-grid">
-        {% for card in home.favorites %}<div data-dashboard-card="{{ card.key }}">{{ card.html }}</div>{% empty %}<p class="text-body-secondary">{% trans "No favorite cards to show. Choose cards above or open the other data." %}</p>{% endfor %}
-    </div>
-    <details class="bb-home-more mt-4"><summary>{% trans "More data" %}</summary>
-        <div class="bb-home-grid mt-3">{% for card in home.others %}<div data-dashboard-card="{{ card.key }}">{{ card.html }}</div>{% empty %}<p class="text-body-secondary">{% trans "No more data to show." %}</p>{% endfor %}</div>
-    </details>
 {% endblock %}
 {% block javascript %}
     {% if user.settings.dashboard_refresh_rate %}

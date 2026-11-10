@@ -15,8 +15,7 @@
                     <span class="text-primary">Baby</span> Buddy
                 </span>
             </a>
-<div class="bb-mobile-toolbar d-xl-none ms-auto me-2">
-    {% if request.resolver_match.namespace != 'dashboard' %}{% quick_timer_nav %}{% endif %}
+<div class="bb-mobile-toolbar d-xl-none ms-1 me-1">
     <button class="btn btn-link text-success"
        type="button"
        id="nav-quick-add-link"
@@ -363,17 +362,21 @@
     {% timer_nav %}
 {% endif %}
 </ul>
+</div>
+<div class="bb-navbar-account">
+{% include 'babybuddy/record_context.html' %}
 {% if request.user %}
-    <ul class="navbar-nav ms-auto">
+    <ul class="navbar-nav">
         <li class="nav-item dropdown">
             <a id="nav-user-menu-link"
                class="nav-link dropdown-toggle"
                href="#"
                data-bs-toggle="dropdown"
                aria-haspopup="true"
-               aria-expanded="false">
+               aria-expanded="false"
+               aria-label="{% firstof user.get_full_name user.get_username %}">
                 <i class="icon-user" aria-hidden="true"></i>
-                {% firstof user.get_full_name user.get_username %}
+                <span class="bb-user-name">{% firstof user.get_full_name user.get_username %}</span>
             </a>
             <div class="dropdown-menu dropdown-menu-end"
                  aria-labelledby="nav-user-menu-link">

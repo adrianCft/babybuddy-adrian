@@ -9,12 +9,12 @@
 {% endblock %}
 {% block content %}
     {% load mobile_records %}
-    <h1>
+    <h1 class="bb-list-heading">
         {% trans "Diaper Changes" %}
         {% if perms.core.add_diaperchange %}
             <a href="{% context_url 'core:diaperchange-add' %}"
-               class="btn btn-sm btn-success">
-                <i class="icon-diaperchange" aria-hidden="true"></i> {% trans "Add Diaper Change" %}
+               class="btn btn-sm btn-success" aria-label="{% trans 'Add Diaper Change' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}
             </a>
         {% endif %}
     </h1>

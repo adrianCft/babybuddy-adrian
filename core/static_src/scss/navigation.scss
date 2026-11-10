@@ -1,27 +1,53 @@
-.bb-context-bar {
-    display: grid;
-    grid-template-columns: minmax(0, 15rem) minmax(0, 12rem) auto;
-    justify-content: start;
-    align-items: end;
-    gap: .6rem;
-    margin: .5rem 0 1.25rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--bs-border-color);
+.bb-navbar-account {
+    display: flex;
+    order: 1;
+    align-items: center;
+    gap: .25rem;
+    margin-left: auto;
+    min-width: 0;
 
-    label {
-        display: block;
-        margin-bottom: .3rem;
-        font-size: .85rem;
-    }
+    .navbar-nav { min-width: 2.75rem; }
+    .nav-item { min-width: 0; }
+    .nav-link { display: flex; align-items: center; gap: .25rem; min-height: 2.75rem; padding-inline: .5rem; white-space: nowrap; }
+    .nav-link > i, .dropdown-toggle::after { flex-shrink: 0; }
+    .dropdown-menu { position: absolute; right: 0; left: auto; }
+    .dropdown-item { min-height: 2.75rem; }
+}
 
-    .form-control, .form-select, > button {
-        min-width: 0;
+.bb-child-switcher {
+    width: clamp(5.5rem, 18vw, 9rem);
+    min-width: 5.5rem;
+    margin: 0;
+
+    .form-select {
         min-height: 2.75rem;
-    }
+        padding-left: .5rem;
+        border-color: transparent;
+        background-color: transparent;
+        font-size: .9rem;
+        text-overflow: ellipsis;
 
-    .bb-context-hint {
-        grid-column: 1 / -1;
+        &:hover, &:focus-visible { border-color: var(--bs-border-color); }
     }
+}
+
+.bb-app #navbar-app { order: 4; }
+.bb-app .bb-mobile-toolbar { order: 2; }
+.bb-app .navbar-toggler { order: 3; }
+
+@include media-breakpoint-up(xl) {
+    .bb-app #navbar-app { order: 1; }
+    .bb-navbar-account { order: 2; }
+    .bb-user-name { display: inline-block; min-width: 0; max-width: 10rem; overflow: hidden; text-overflow: ellipsis; }
+}
+
+@include media-breakpoint-down(xl) {
+    .bb-user-name { display: none; }
+    .bb-child-switcher .form-select { font-size: 1rem; }
+    .bb-navbar-account .nav-link { justify-content: center; min-width: 2.75rem; text-align: center; }
+    .bb-navbar-account .dropdown-toggle::after { display: none; }
+    .bb-app .navbar-toggler { width: 2.75rem; padding-inline: .25rem; }
+    .bb-app .bb-mobile-toolbar button { width: 2.75rem; height: 2.75rem; padding: .25rem; }
 }
 
 .bb-form-actions {
@@ -30,27 +56,4 @@
     align-items: baseline;
     gap: .75rem;
     margin-top: 1rem;
-}
-
-@include media-breakpoint-down(md) {
-    .bb-context-bar {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
-
-        .form-control, .form-select {
-            width: 100%;
-            max-width: 100%;
-            padding-inline: .5rem;
-            font-size: .9rem;
-        }
-    }
-}
-
-@media (max-width: 374px) {
-    .bb-context-bar {
-        grid-template-columns: minmax(0, 1fr) auto;
-
-        .bb-context-child {
-            grid-column: 1 / -1;
-        }
-    }
 }

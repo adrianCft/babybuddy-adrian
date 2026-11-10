@@ -68,6 +68,14 @@ def filter_context(request, filterset):
     form.is_valid()
     chips = []
     for name, field in form.fields.items():
+        if name == "child":
+            continue
+        if isinstance(field.widget, forms.Select):
+            unset = "unknown" if isinstance(field, forms.NullBooleanField) else ""
+            field.widget.choices = [
+                (key, _("Any") if key == unset else label)
+                for key, label in field.widget.choices
+            ]
         value = form.cleaned_data.get(name)
         if value is None or value == "" or value == [] or value == ():
             continue
@@ -89,15 +97,20 @@ def filter_context(request, filterset):
         )
     clear = QueryDict(mutable=True)
     clear["clear_filters"] = "1"
-    for name in ("child", "date"):
-        if name in form.fields:
-            clear[name] = ""
+    child = form.cleaned_data.get("child")
+    if "child" in form.fields:
+        clear["child"] = str(child.pk) if child is not None else ""
+    if "date" in form.fields:
+        clear["date"] = ""
+    scoped_records = filterset.queryset
+    if child is not None and "child" in filterset.filters:
+        scoped_records = filterset.filters["child"].filter(scoped_records, child)
     return {
         "active_filters": chips,
         "clear_filters_url": request.path + "?" + clear.urlencode(),
         "empty_message": (
             _("No results with these filters.")
-            if (chips or form.errors) and filterset.queryset.exists()
+            if (chips or form.errors) and scoped_records.exists()
             else _("No records yet.")
         ),
     }

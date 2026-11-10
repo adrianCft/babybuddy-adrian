@@ -9,11 +9,11 @@
 {% endblock %}
 {% block content %}
     {% load mobile_records %}
-    <h1>
+    <h1 class="bb-list-heading">
         {% trans "Weight" %}
         {% if perms.core.add_weight %}
-            <a href="{% context_url 'core:weight-add' %}" class="btn btn-sm btn-success">
-                <i class="icon-weight" aria-hidden="true"></i> {% trans "Add Weight" %}
+            <a href="{% context_url 'core:weight-add' %}" class="btn btn-sm btn-success" aria-label="{% trans 'Add Weight' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}
             </a>
         {% endif %}
     </h1>

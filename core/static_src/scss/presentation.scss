@@ -1,29 +1,96 @@
 .bb-filters {
-    margin-bottom: 1.5rem;
-
-    #filter_form {
-        padding: 1rem;
-        border: 1px solid var(--bs-border-color);
-        border-radius: .5rem;
-        background: var(--bs-tertiary-bg);
-    }
-
-    .btn, .form-control, .form-select { min-height: 2.75rem; }
+    margin-bottom: 1.25rem;
 }
 
 .bb-filter-toolbar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: .5rem;
-    margin-bottom: .65rem;
+    gap: 1rem;
+}
+
+.bb-filter-toggle {
+    --bs-btn-hover-color: var(--bs-body-color);
+    --bs-btn-hover-bg: var(--bs-secondary-bg);
+
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    min-height: 2.75rem;
+    padding: .5rem .8rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .65rem;
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-body-color);
+
+    &:hover, &:focus-visible { border-color: var(--bs-primary); }
+}
+
+.bb-filter-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    padding-inline: .3rem;
+    border-radius: 50%;
+    background: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary-text-emphasis);
+    font-size: .75rem;
+    font-weight: 600;
+}
+
+.bb-filter-clear { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--bs-secondary-color); font-size: .85rem; text-decoration: none; }
+.bb-filter-summary { margin: .5rem 0 0; color: var(--bs-secondary-color); font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.bb-filter-panel {
+    --bs-offcanvas-width: 27rem;
+
+    color: var(--bs-body-color);
+
+    .offcanvas-header { padding: 1.25rem; border-bottom: 1px solid var(--bs-border-color); }
+    .btn-close { width: 1rem; height: 1rem; padding: .85rem; }
+    .offcanvas-body { padding: 1.25rem; }
+    .form-control, .form-select { min-height: 2.75rem; font-size: 1rem; }
+}
+
+.bb-filter-form { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.bb-filter-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: .65rem;
+    padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--bs-border-color);
+
+    .btn { display: flex; align-items: center; justify-content: center; min-height: 2.75rem; }
+    .btn-outline-secondary {
+        --bs-btn-color: var(--bs-body-color);
+        --bs-btn-border-color: var(--bs-border-color);
+        --bs-btn-hover-color: var(--bs-body-color);
+        --bs-btn-hover-bg: var(--bs-tertiary-bg);
+        --bs-btn-hover-border-color: var(--bs-border-color);
+    }
+}
+
+@include media-breakpoint-down(md) {
+    .offcanvas.bb-filter-panel {
+        inset: auto 0 0;
+        width: 100%;
+        height: min(85dvh, 42rem);
+        border: 1px solid var(--bs-border-color);
+        border-bottom: 0;
+        border-radius: 1rem 1rem 0 0;
+        transform: translateY(100%);
+
+        &.show, &.showing { transform: none; }
+    }
 }
 
 .bb-filter-chips {
     display: flex;
     flex-wrap: wrap;
     gap: .5rem;
-    margin: 0 0 .75rem;
+    margin: 0 0 1.25rem;
     padding: 0;
     list-style: none;
 
@@ -34,8 +101,8 @@
         align-items: center;
         justify-content: space-between;
         gap: .7rem;
-        min-height: 2.75rem;
-        padding: .45rem .75rem;
+        min-height: 2.5rem;
+        padding: .4rem .65rem;
         border: 1px solid var(--bs-border-color);
         border-radius: .5rem;
         background: var(--bs-tertiary-bg);
@@ -50,11 +117,11 @@
 
 .bb-filter-fields {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
 
     > div { min-width: 0; }
-    label { font-size: .9rem; }
+    label { margin-bottom: .4rem; color: var(--bs-secondary-color); font-size: .85rem; }
 }
 
 .bb-record-empty {
@@ -62,6 +129,18 @@
     border: 1px dashed var(--bs-border-color);
     border-radius: .5rem;
     color: var(--bs-secondary-color);
+}
+
+.bb-list-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .65rem;
+    margin: .75rem 0 1.25rem;
+    font-size: clamp(1.45rem, 3vw, 2rem);
+
+    > .btn { display: inline-flex; flex-shrink: 0; align-items: center; gap: .35rem; min-height: 2.75rem; padding: .55rem .8rem; border-radius: .65rem; font-size: .9rem; }
 }
 
 @include media-breakpoint-down(md) {

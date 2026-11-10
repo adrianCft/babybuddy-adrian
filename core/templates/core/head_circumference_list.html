@@ -9,12 +9,12 @@
 {% endblock %}
 {% block content %}
     {% load mobile_records %}
-    <h1>
+    <h1 class="bb-list-heading">
         {% trans "Head Circumference" %}
         {% if perms.core.add_head_circumference %}
             <a href="{% context_url 'core:head-circumference-add' %}"
-               class="btn btn-sm btn-success">
-                <i class="icon-head-circumference" aria-hidden="true"></i> {% trans "Add Head Circumference" %}
+               class="btn btn-sm btn-success" aria-label="{% trans 'Add Head Circumference' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}
             </a>
         {% endif %}
     </h1>

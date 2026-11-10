@@ -9,15 +9,15 @@
 {% endblock %}
 {% block content %}
     {% load mobile_records %}
-    <h1>
+    <h1 class="bb-list-heading">
         {% trans "Feedings" %}
         {% if perms.core.add_feeding %}
-            <a href="{% context_url 'core:feeding-add' %}" class="btn btn-sm btn-success">
-                <i class="icon-feeding" aria-hidden="true"></i> {% trans "Add Feeding" %}
+            <a href="{% context_url 'core:feeding-add' %}" class="btn btn-sm btn-success" aria-label="{% trans 'Add Feeding' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}
             </a>
             <a href="{% context_url 'core:bottle-feeding-add' %}"
-               class="btn btn-sm btn-success">
-                <i class="icon-feeding" aria-hidden="true"></i> {% trans "Add Bottle Feeding" %}
+               class="btn btn-sm btn-success" aria-label="{% trans 'Add Bottle Feeding' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Bottle" %}
             </a>
         {% endif %}
     </h1>

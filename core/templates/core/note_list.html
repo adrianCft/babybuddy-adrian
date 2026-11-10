@@ -9,11 +9,11 @@
 {% endblock %}
 {% block content %}
     {% load mobile_records %}
-    <h1>
+    <h1 class="bb-list-heading">
         {% trans "Notes" %}
         {% if perms.core.add_note %}
-            <a href="{% context_url 'core:note-add' %}" class="btn btn-sm btn-success">
-                <i class="icon-note" aria-hidden="true"></i> {% trans "Add Note" %}
+            <a href="{% context_url 'core:note-add' %}" class="btn btn-sm btn-success" aria-label="{% trans 'Add Note' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}
             </a>
         {% endif %}
     </h1>

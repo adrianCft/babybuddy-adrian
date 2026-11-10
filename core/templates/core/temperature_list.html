@@ -9,12 +9,12 @@
 {% endblock %}
 {% block content %}
     {% load mobile_records %}
-    <h1>
+    <h1 class="bb-list-heading">
         {% trans "Temperature" %}
         {% if perms.core.add_temperature %}
             <a href="{% context_url 'core:temperature-add' %}"
-               class="btn btn-sm btn-success">
-                <i class="icon-temperature" aria-hidden="true"></i> {% trans "Add Temperature Reading" %}
+               class="btn btn-sm btn-success" aria-label="{% trans 'Add Temperature Reading' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}
             </a>
         {% endif %}
     </h1>

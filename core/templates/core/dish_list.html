@@ -10,9 +10,9 @@
 {% endblock %}
 {% block content %}
     {% load mobile_records %}
-    <h1>{% trans "Saved dishes" %}</h1>
+    <h1 class="bb-list-heading">{% trans "Saved dishes" %}</h1>
     {% if perms.core.add_dish %}
-        <a class="btn btn-success mb-3" href="{% context_url 'core:dish-add' %}">{% trans "Add dish" %}</a>
+        <a class="btn btn-success mb-3" href="{% context_url 'core:dish-add' %}" aria-label="{% trans 'Add dish' %}">{% trans "Add" %}</a>
     {% endif %}
     <p>{% trans "Save a dish with its ingredients to reuse it when recording meals." %}</p>
     {% include "babybuddy/filter.html" %}

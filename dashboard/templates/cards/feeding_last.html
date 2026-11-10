@@ -23,10 +23,10 @@
         {% if feeding.amount %}({{ feeding.amount }}){% endif %}
     {% endif %}
     {% if can_add %}
-        <div class="mt-2">
-            <a class="btn btn-sm btn-dashboard-add-link p-0 text-decoration-none"
-               href="{% context_url 'core:feeding-add' %}">
-                <i class="icon-add" aria-hidden="true"></i> {% trans "Add Feeding" %}
+        <div class="mt-2 bb-card-add">
+            <a class="btn btn-sm btn-dashboard-add-link text-decoration-none"
+               href="{% context_url 'core:feeding-add' %}" aria-label="{% trans 'Add Feeding' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}
             </a>
         </div>
     {% endif %}
