@@ -1,20 +1,22 @@
 {% extends 'babybuddy/page.html' %}
+{% load navigation %}
 {% load babybuddy i18n widget_tweaks %}
 {% block title %}
     {% trans "Delete a Tag" %}
 {% endblock %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item">
-        <a href="{% url 'core:tag-list' %}">{% trans "Tags" %}</a>
+        <a href="{% context_url 'core:tag-list' %}">{% trans "Tags" %}</a>
     </li>
     <li class="breadcrumb-item">
-        <a href="{% url 'core:tag-detail' tag.slug %}">{{ object }}</a>
+        <a href="{% context_url 'core:tag-detail' tag.slug %}">{{ object }}</a>
     </li>
     <li class="breadcrumb-item active" aria-current="page">{% trans "Delete" %}</li>
 {% endblock %}
 {% block content %}
     <form role="form" method="post">
         {% csrf_token %}
+        {% if return_url %}<input type="hidden" name="next" value="{{ return_url }}">{% endif %}
         <h1>{% confirm_delete_text object %}</h1>
         {% if object.core_tagged_items__count > 0 %}
             <div class="alert alert-warning" role="alert">
@@ -33,6 +35,6 @@
             </div>
         {% endif %}
         <button type="submit" class="btn btn-danger">{% trans "Delete Tag" %}</button>
-        <a href="{% url 'core:tag-list' %}" class="btn btn-default">{% trans "Cancel" %}</a>
+        <a href="{{ cancel_url }}" class="btn btn-default">{% trans "Cancel" %}</a>
     </form>
 {% endblock %}

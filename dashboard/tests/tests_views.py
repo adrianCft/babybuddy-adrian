@@ -38,10 +38,15 @@ class ViewsTestCase(TestCase):
         call_command("fake", verbosity=0, children=1, days=1)
         child = Child.objects.first()
         page = self.c.get("/dashboard/")
-        self.assertEqual(page.url, "/children/{}/dashboard/".format(child.slug))
+        child_url = reverse("dashboard:dashboard-child", args=[child.slug])
+        self.assertRedirects(
+            page, child_url + "?child=" + str(child.pk), fetch_redirect_response=False
+        )
 
         page = self.c.get("/dashboard/")
-        self.assertEqual(page.url, "/children/{}/dashboard/".format(child.slug))
+        self.assertRedirects(
+            page, child_url + "?child=" + str(child.pk), fetch_redirect_response=False
+        )
         # Test the actual child dashboard (including cards).
         # TODO: Test cards more granularly.
         page = self.c.get("/children/{}/dashboard/".format(child.slug))
@@ -58,6 +63,7 @@ class ViewsTestCase(TestCase):
         self.assertContains(page, "Plátano")
         self.assertContains(page, "Meals: 1")
         for route in (
+            "core:feeding-add",
             "core:diaperchange-add",
             "core:medication-add",
             "core:pumping-add",
@@ -86,5 +92,5 @@ class ViewsTestCase(TestCase):
         Child.objects.create(
             first_name="Second", last_name="Child", birth_date="2000-01-01"
         )
-        page = self.c.get("/dashboard/")
+        page = self.c.get("/dashboard/", {"child": ""})
         self.assertEqual(page.status_code, 200)

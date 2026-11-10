@@ -48,7 +48,13 @@ BabyBuddy.Dashboard = (function ($) {
     },
 
     handleVisibilityChange: function () {
-      if (!document[hidden]) {
+      const editing =
+        document.querySelector(
+          "[data-home-customizer][open], .bb-home-more[open]",
+        ) ||
+        document.activeElement.matches("input, select, textarea") ||
+        document.querySelector(".offcanvas.show, #navbar-app.show");
+      if (!document[hidden] && !editing) {
         Dashboard.update();
       }
     },

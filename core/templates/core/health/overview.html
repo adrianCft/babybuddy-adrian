@@ -1,58 +1,34 @@
 {% extends "babybuddy/page.html" %}
+{% load navigation %}
 {% load i18n %}
 {% block title %}{% trans "Health" %}{% endblock %}
 {% block breadcrumbs %}<li class="breadcrumb-item active">{% trans "Health" %}</li>{% endblock %}
 {% block content %}
     <h1>{% trans "Health" %}</h1>
-    <form method="get" class="d-flex flex-wrap gap-2 mb-4">
-        <label for="health-child" class="col-form-label">{% trans "Child" %}</label>
-        <select id="health-child" name="child" class="form-select w-auto">
-            <option value="">{% trans "All children" %}</option>
-            {% for child in children %}<option value="{{ child.pk }}" {% if child == selected_child %}selected{% endif %}>{{ child }}</option>{% endfor %}
-        </select>
-        <button class="btn btn-primary" type="submit">{% trans "Filter" %}</button>
-    </form>
     <div class="d-flex flex-wrap gap-2 mb-4">
-        {% if perms.core.add_healthvisit %}<a class="btn btn-success" href="{% url 'core:visit-add' %}{% if selected_child %}?child={{ selected_child.slug|urlencode }}{% endif %}">{% trans "Add medical visit" %}</a>{% endif %}
-        {% if perms.core.add_vaccination %}<a class="btn btn-success" href="{% url 'core:vaccination-add' %}{% if selected_child %}?child={{ selected_child.slug|urlencode }}{% endif %}">{% trans "Add vaccination" %}</a>{% endif %}
+        {% if perms.core.add_healthvisit %}<a class="btn btn-success" href="{% context_url 'core:visit-add' %}">{% trans "Add medical visit" %}</a>{% endif %}
+        {% if perms.core.add_vaccination %}<a class="btn btn-success" href="{% context_url 'core:vaccination-add' %}">{% trans "Add vaccination" %}</a>{% endif %}
     </div>
     <div class="row g-3 mb-4">
         {% if perms.core.view_healthvisit %}<section class="col-12 col-lg-6"><div class="card h-100"><div class="card-body">
-            <h2 class="h4">{% trans "Scheduled visits" %} {% if perms.core.view_healthvisit %}<a class="btn btn-sm btn-outline-primary float-end" href="{% url 'core:visit-list' %}">{% trans "View all" %}</a>{% endif %}</h2>
-            {% for visit in upcoming_visits %}<p><a href="{% url 'core:visit-detail' visit.pk %}">{{ visit.reason }}</a><br>{{ visit.child }} · {{ visit.date }} · {{ visit.get_status_display }}</p>{% empty %}<p>{% trans "No scheduled visits." %}</p>{% endfor %}
+            <h2 class="h4">{% trans "Scheduled visits" %} {% if perms.core.view_healthvisit %}<a class="btn btn-sm btn-outline-primary float-end" href="{% context_url 'core:visit-list' %}">{% trans "View all" %}</a>{% endif %}</h2>
+            {% for visit in upcoming_visits %}<p><a href="{% context_url 'core:visit-detail' visit.pk %}">{{ visit.reason }}</a><br>{{ visit.child }} · {{ visit.date }} · {{ visit.get_status_display }}</p>{% empty %}<p>{% trans "No scheduled visits." %}</p>{% endfor %}
             <h3 class="h5">{% trans "Follow-up" %}</h3>
-            {% for visit in follow_ups %}<p><a href="{% url 'core:visit-detail' visit.pk %}">{{ visit.child }} · {{ visit.reason }}</a> · {{ visit.follow_up }}</p>{% empty %}<p>—</p>{% endfor %}
+            {% for visit in follow_ups %}<p><a href="{% context_url 'core:visit-detail' visit.pk %}">{{ visit.child }} · {{ visit.reason }}</a> · {{ visit.follow_up }}</p>{% empty %}<p>—</p>{% endfor %}
         </div></div></section>{% endif %}
         {% if perms.core.view_vaccination %}<section class="col-12 col-lg-6"><div class="card h-100"><div class="card-body">
-            <h2 class="h4">{% trans "Scheduled vaccinations" %} {% if perms.core.view_vaccination %}<a class="btn btn-sm btn-outline-primary float-end" href="{% url 'core:vaccination-list' %}">{% trans "View all" %}</a>{% endif %}</h2>
-            {% for vaccine in upcoming_vaccines %}<p><a href="{% url 'core:vaccination-detail' vaccine.pk %}">{{ vaccine.name }} {{ vaccine.dose }}</a><br>{{ vaccine.child }} · {{ vaccine.date }}</p>{% empty %}<p>{% trans "No scheduled vaccinations." %}</p>{% endfor %}
+            <h2 class="h4">{% trans "Scheduled vaccinations" %} {% if perms.core.view_vaccination %}<a class="btn btn-sm btn-outline-primary float-end" href="{% context_url 'core:vaccination-list' %}">{% trans "View all" %}</a>{% endif %}</h2>
+            {% for vaccine in upcoming_vaccines %}<p><a href="{% context_url 'core:vaccination-detail' vaccine.pk %}">{{ vaccine.name }} {{ vaccine.dose }}</a><br>{{ vaccine.child }} · {{ vaccine.date }}</p>{% empty %}<p>{% trans "No scheduled vaccinations." %}</p>{% endfor %}
             <h3 class="h5">{% trans "Next vaccination date" %}</h3>
-            {% for vaccine in next_vaccines %}<p><a href="{% url 'core:vaccination-detail' vaccine.pk %}">{{ vaccine.child }} · {{ vaccine.name }}</a> · {{ vaccine.next_date }}</p>{% empty %}<p>—</p>{% endfor %}
+            {% for vaccine in next_vaccines %}<p><a href="{% context_url 'core:vaccination-detail' vaccine.pk %}">{{ vaccine.child }} · {{ vaccine.name }}</a> · {{ vaccine.next_date }}</p>{% empty %}<p>—</p>{% endfor %}
         </div></div></section>{% endif %}
     </div>
     {% if perms.core.view_healthvisit %}
         <h2 class="h4">{% trans "Recent medical visits" %}</h2>
-        {% for visit in recent_visits %}<p><a href="{% url 'core:visit-detail' visit.pk %}">{{ visit.child }} · {{ visit.reason }}</a> · {{ visit.date }}</p>{% empty %}<p>{% trans "No health records found." %}</p>{% endfor %}
+        {% for visit in recent_visits %}<p><a href="{% context_url 'core:visit-detail' visit.pk %}">{{ visit.child }} · {{ visit.reason }}</a> · {{ visit.date }}</p>{% empty %}<p>{% trans "No health records found." %}</p>{% endfor %}
     {% endif %}
     <div class="d-flex flex-wrap gap-2 mb-4">
-        {% if perms.core.view_prescription %}<a class="btn btn-outline-primary" href="{% url 'core:prescription-list' %}">{% trans "Prescriptions" %}</a>{% endif %}
-        {% if perms.core.view_medication %}<a class="btn btn-outline-primary" href="{% url 'core:medication-list' %}">{% trans "Administered doses" %}</a>{% endif %}
+        {% if perms.core.view_prescription %}<a class="btn btn-outline-primary" href="{% context_url 'core:prescription-list' %}">{% trans "Prescriptions" %}</a>{% endif %}
+        {% if perms.core.view_medication %}<a class="btn btn-outline-primary" href="{% context_url 'core:medication-list' %}">{% trans "Administered doses" %}</a>{% endif %}
     </div>
-    {% if perms.core.view_weight or perms.core.view_height or perms.core.view_head_circumference %}
-        <section id="growth" class="mt-4">
-            <h2>{% trans "Growth and percentiles" %}</h2>
-            <div class="d-flex flex-wrap gap-2 mb-3">
-                {% if perms.core.view_weight %}<a class="btn btn-outline-primary" href="{% url 'core:weight-list' %}">{% trans "Weight" %}</a>{% endif %}
-                {% if perms.core.view_height %}<a class="btn btn-outline-primary" href="{% url 'core:height-list' %}">{% trans "Height" %}</a>{% endif %}
-                {% if perms.core.view_head_circumference %}<a class="btn btn-outline-primary" href="{% url 'core:head-circumference-list' %}">{% trans "Head Circumference" %}</a>{% endif %}
-            </div>
-            <div class="row g-3">
-                {% for baby, measures in growth_children %}<div class="col-12 col-lg-6"><div class="card"><div class="card-body">
-                    <h3 class="h5">{{ baby }}</h3>
-                    {% for name, date in measures %}<p>{{ name }} · {{ date }}</p>{% endfor %}
-                    <a class="btn btn-primary" href="{% url 'core:growth-summary' baby.slug %}">{% trans "Growth and percentiles" %}</a>
-                </div></div></div>{% endfor %}
-            </div>
-        </section>
-    {% endif %}
 {% endblock %}

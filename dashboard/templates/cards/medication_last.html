@@ -1,7 +1,7 @@
 {% extends 'cards/base.html' %}
-{% load duration i18n %}
+{% load duration i18n navigation %}
 {% block header %}
-    <a href="{% url "core:medication-list" %}">{% trans "Last Medication" %}</a>
+    <a href="{% context_url 'core:medication-list' %}">{% trans "Last medication dose" %}</a>
 {% endblock %}
 {% block title %}
     {% if medication %}
@@ -43,8 +43,8 @@
     {% if can_add %}
         <div class="mt-2">
             <a class="btn btn-sm btn-dashboard-add-link p-0 text-decoration-none"
-               href="{% url 'core:medication-add' %}?child={{ child.slug }}">
-                <i class="icon-add" aria-hidden="true"></i> {% trans "Add Medication" %}
+               href="{% context_url 'core:medication-add' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Record dose" %}
             </a>
         </div>
     {% endif %}

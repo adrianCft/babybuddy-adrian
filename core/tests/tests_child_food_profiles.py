@@ -69,20 +69,24 @@ class ChildFoodProfileViewsTestCase(TestCase):
             403,
         )
 
-    def test_profile_navigation_is_in_measurements_menu(self):
+    def test_profile_navigation_is_in_health_menu(self):
         self.grant("view_childfoodprofile", "add_childfoodprofile")
 
         response = self.client.get(reverse("core:child-food-profile-list"))
         content = response.content.decode()
-        measurements = content.split(
-            'aria-labelledby="nav-measurements-menu-link"', 1
-        )[1].split('</div>\n</li>', 1)[0]
-        activities = content.split(
-            'aria-labelledby="nav-activity-menu-link"', 1
-        )[1].split('</div>\n</li>', 1)[0]
+        measurements = content.split('aria-labelledby="nav-measurements-menu-link"', 1)[
+            1
+        ].split("</div>\n</li>", 1)[0]
+        health = content.split('aria-labelledby="nav-health-menu-link"', 1)[1].split(
+            "</div>\n</li>", 1
+        )[0]
+        activities = content.split('aria-labelledby="nav-activity-menu-link"', 1)[
+            1
+        ].split("</div>\n</li>", 1)[0]
 
-        self.assertIn(reverse("core:child-food-profile-list"), measurements)
-        self.assertIn(reverse("core:child-food-profile-add"), measurements)
+        self.assertIn(reverse("core:child-food-profile-list"), health)
+        self.assertIn(reverse("core:child-food-profile-add"), health)
+        self.assertNotIn(reverse("core:child-food-profile-list"), measurements)
         self.assertNotIn(reverse("core:child-food-profile-list"), activities)
         self.assertEqual(
             self.client.get(
@@ -218,9 +222,7 @@ class FoodIntroductionCalculationsTestCase(TestCase):
 
         self.assertTrue(first.mealfood_set.get().is_first_introduction)
         self.assertFalse(second.mealfood_set.get().is_first_introduction)
-        self.assertTrue(
-            other_child_first.mealfood_set.get().is_first_introduction
-        )
+        self.assertTrue(other_child_first.mealfood_set.get().is_first_introduction)
 
         response = self.client.get(reverse("core:meal-list"))
         meals = {meal.pk: meal for meal in response.context["object_list"]}
@@ -230,4 +232,10 @@ class FoodIntroductionCalculationsTestCase(TestCase):
         self.assertTrue(
             meals[other_child_first.pk].mealfood_set.all()[0].is_first_introduction
         )
-        self.assertContains(response, "Nuevo", count=2)
+        # Each responsive presentation must mark exactly the two introductions.
+        content = response.content.decode()
+        mobile, desktop = content.split(
+            '<div class="table-responsive bb-desktop-records">', 1
+        )
+        self.assertEqual(mobile.count(">Nuevo</span>"), 2)
+        self.assertEqual(desktop.count(">Nuevo</span>"), 2)

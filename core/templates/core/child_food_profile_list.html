@@ -1,20 +1,23 @@
 {% extends 'babybuddy/page.html' %}
+{% load navigation %}
 {% load datetime i18n %}
 {% block title %}{% trans "Food profiles" %}{% endblock %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item active" aria-current="page">{% trans "Food profiles" %}</li>
 {% endblock %}
 {% block content %}
+    {% load mobile_records %}
     <h1>
         {% trans "Food profiles" %}
         {% if perms.core.add_childfoodprofile %}
-            <a href="{% url 'core:child-food-profile-add' %}" class="btn btn-sm btn-success">
+            <a href="{% context_url 'core:child-food-profile-add' %}" class="btn btn-sm btn-success">
                 <i class="icon-add" aria-hidden="true"></i> {% trans "Add food profile" %}
             </a>
         {% endif %}
     </h1>
     {% include 'babybuddy/filter.html' %}
-    <div class="table-responsive">
+    {% mobile_record_cards object_list %}
+    <div class="table-responsive bb-desktop-records">
         <table class="table table-instances table-borderless table-striped table-hover align-middle">
             <thead>
                 <tr>
@@ -34,7 +37,7 @@
                     <tr>
                         <td>
                             {% if perms.core.change_childfoodprofile %}
-                                <a href="{% url 'core:child-food-profile-update' profile.pk %}" class="btn btn-sm btn-primary">
+                                <a href="{% context_url 'core:child-food-profile-update' profile.pk %}" class="btn btn-sm btn-primary">
                                     <i class="icon-update" aria-hidden="true"></i>
                                 </a>
                             {% endif %}
@@ -54,7 +57,7 @@
                         </tr>
                     {% endif %}
                 {% empty %}
-                    <tr><th colspan="9">{% trans "No food profiles found." %}</th></tr>
+                    <tr><th colspan="9">{{ empty_message }}</th></tr>
                 {% endfor %}
             </tbody>
         </table>

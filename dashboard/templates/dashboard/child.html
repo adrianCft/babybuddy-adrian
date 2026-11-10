@@ -1,5 +1,5 @@
 {% extends 'babybuddy/page.html' %}
-{% load breadcrumb cards i18n %}
+{% load breadcrumb cards i18n navigation %}
 {% block title %}
     {% trans "Dashboard" %} - {{ object }}
 {% endblock %}
@@ -11,32 +11,22 @@
     <li class="breadcrumb-item active" aria-current="page">{% trans "Dashboard" %}</li>
 {% endblock %}
 {% block content %}
-    <a class="btn btn-outline-primary mb-3"
-       href="{% url 'core:daily-summary' %}?child={{ object.pk }}">{% trans "Daily overview" %}</a>
-    <a class="btn btn-outline-primary mb-3"
-       href="{% url 'core:period-summary' %}?child={{ object.pk }}">{% trans "Week and month" %}</a>
-    <a class="btn btn-primary mb-3"
-       href="{% url 'core:growth-summary' object.slug %}"><i class="icon-graph" aria-hidden="true"></i> {% trans "Growth and percentiles" %}</a>
-    <div id="dashboard-child"
-         class="row"
-         data-masonry='{"percentPosition": true }'>
-        <div class="col-sm-6 col-lg-4" data-dashboard-card="feeding-last">{% card_feeding_last object %}</div>
-        <div class="col-sm-6 col-lg-4" data-dashboard-card="diaper-change-last">{% card_diaperchange_last object %}</div>
-        <div class="col-sm-6 col-lg-4" data-dashboard-card="meal-summary">{% card_meal_summary object %}</div>
-        <div class="col-sm-6 col-lg-4" data-dashboard-card="sleep-last">{% card_sleep_last object %}</div>
-        <div class="col-sm-6 col-lg-4" data-dashboard-card="medication-last">{% card_medication_last object %}</div>
-        <div class="col-sm-6 col-lg-4">{% card_timer_list object %}</div>
-        <div class="col-sm-6 col-lg-4">{% card_pumping_last object %}</div>
-        <div class="col-sm-6 col-lg-4">{% card_pumping_recent object %}</div>
-        <div class="col-sm-6 col-lg-4">{% card_feeding_last_method object %}</div>
-        <div class="col-sm-6 col-lg-4">{% card_feeding_recent object %}</div>
-        <div class="col-sm-6 col-lg-4">{% card_statistics object %}</div>
-        <div class="col-sm-6 col-lg-4">{% card_sleep_recent object %}</div>
-        <div class="col-sm-6 col-lg-4">{% card_sleep_naps_day object %}</div>
-        <div class="col-sm-6 col-lg-4">{% card_tummytime_day object %}</div>
-        <div class="col-sm-6 col-lg-4">{% card_diaperchange_types object %}</div>
-        <div class="col-sm-6 col-lg-4">{% card_breastfeeding object %}</div>
+    <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2 mb-3">
+        <h1 class="mb-0">{% trans "Dashboard" %} · {{ object }}</h1>
+        <span class="small text-body-secondary">{% trans "Latest activity" %}</span>
     </div>
+    {% include 'dashboard/home_sleep.html' %}
+    <a class="btn btn-outline-primary mb-3"
+       href="{% context_url 'core:daily-summary' %}">{% trans "Summaries" %}</a>
+    <a class="btn btn-primary mb-3"
+       href="{% context_url 'core:growth-summary' object.slug %}"><i class="icon-graph" aria-hidden="true"></i> {% trans "Growth and percentiles" %}</a>
+    {% include 'dashboard/home_customize.html' %}
+    <div id="dashboard-child" class="bb-home-grid">
+        {% for card in home.favorites %}<div data-dashboard-card="{{ card.key }}">{{ card.html }}</div>{% empty %}<p class="text-body-secondary">{% trans "No favorite cards to show. Choose cards above or open the other data." %}</p>{% endfor %}
+    </div>
+    <details class="bb-home-more mt-4"><summary>{% trans "More data" %}</summary>
+        <div class="bb-home-grid mt-3">{% for card in home.others %}<div data-dashboard-card="{{ card.key }}">{{ card.html }}</div>{% empty %}<p class="text-body-secondary">{% trans "No more data to show." %}</p>{% endfor %}</div>
+    </details>
 {% endblock %}
 {% block javascript %}
     {% if user.settings.dashboard_refresh_rate %}

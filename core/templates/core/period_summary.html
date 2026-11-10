@@ -11,30 +11,9 @@
     <div class="daily-overview" data-period-overview>
         <h1>{% trans "Week and month" %}</h1>
         <p class="text-body-secondary">{% trans "Recorded routines, changes over time and a look ahead." %}</p>
-        <nav class="d-flex flex-wrap gap-2 mb-3"
-             aria-label="{% trans 'Summaries' %}">
-            <a class="btn btn-outline-primary"
-               href="{% url 'core:daily-summary' %}?date={{ day|date:'Y-m-d' }}&amp;child={{ selected_child.pk }}">{% trans "Day" %}</a>
-            <a class="btn {% if period == 'week' %}btn-primary{% else %}btn-outline-primary{% endif %}"
-               href="?period=week&amp;date={{ day|date:'Y-m-d' }}&amp;child={{ selected_child.pk }}">{% trans "Week" %}</a>
-            <a class="btn {% if period == 'month' %}btn-primary{% else %}btn-outline-primary{% endif %}"
-               href="?period=month&amp;date={{ day|date:'Y-m-d' }}&amp;child={{ selected_child.pk }}">{% trans "Month" %}</a>
-        </nav>
-        <form method="get" class="daily-filters mb-4">
-            {% for field in form %}<div><label class="form-label"
-       for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endfor %}
-            <button class="btn btn-primary" type="submit">{% trans "Show summary" %}</button>
-        </form>
+        {% include 'core/summary_navigation.html' %}
+        {% if form.errors %}<div class="alert alert-danger">{{ form.child.errors }}{{ form.date.errors }}{{ form.period.errors }}{{ form.non_field_errors }}</div>{% endif %}
         {% if summary %}
-            <nav class="d-flex flex-wrap align-items-center gap-2 mb-3"
-                 aria-label="{% trans 'Period navigation' %}">
-                {% if previous_url %}<a class="btn btn-outline-secondary"
-   href="{{ previous_url }}">← {% trans "Previous period" %}</a>{% endif %}
-                <h2 class="h5 mb-0">{{ summary.first|date:"j M Y" }} – {{ summary.last|date:"j M Y" }}</h2>
-                {% if next_url %}<a class="btn btn-outline-secondary"
-   href="{{ next_url }}">{% trans "Next period" %} →</a>{% endif %}
-                <a class="btn btn-link" href="{{ today_url }}">{% trans "Today" %}</a>
-            </nav>
             {% if summary.partial %}
                 <p class="alert alert-info">{% trans "Period in progress: today's records are partial and future days are excluded." %}</p>
             {% endif %}

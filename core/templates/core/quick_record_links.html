@@ -1,0 +1,13 @@
+{% load i18n %}
+<div class="bb-quick-record-grid">
+    {% for link in primary_links %}<a href="{{ link.url }}"><i class="icon-{{ link.icon }}" aria-hidden="true"></i><span>{{ link.label }}</span></a>{% endfor %}
+</div>
+{% if other_links %}
+    <details class="bb-quick-record-more">
+        <summary>{% trans "More records" %}</summary>
+        <div class="bb-quick-record-grid">
+            {% for link in other_links %}<a href="{{ link.url }}"><i class="icon-{{ link.icon }}" aria-hidden="true"></i><span>{{ link.label }}</span></a>{% endfor %}
+        </div>
+    </details>
+{% endif %}
+{% if not primary_links and not other_links %}<p>{% trans "You do not have permission to add records." %}</p>{% endif %}

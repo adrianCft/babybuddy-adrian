@@ -1,41 +1,38 @@
 {% extends "babybuddy/page.html" %}
+{% load navigation %}
 {% load i18n %}
-{% block title %}{{ title }}{% endblock %}
-{% block breadcrumbs %}<li class="breadcrumb-item"><a href="{% url 'core:health-overview' %}">{% trans "Health" %}</a></li><li class="breadcrumb-item"><a href="{{ list_url }}">{{ title }}</a></li><li class="breadcrumb-item active">{% if object %}{% trans "Update" %}{% else %}{% trans "Add" %}{% endif %}</li>{% endblock %}
+{% block title %}{% if object %}{% trans "Update" %} · {{ object }}{% elif route == 'visit' %}{% trans "Add medical visit" %}{% elif route == 'vaccination' %}{% trans "Add vaccination" %}{% else %}{% trans "Add prescription" %}{% endif %}{% endblock %}
+{% block breadcrumbs %}<li class="breadcrumb-item"><a href="{% context_url 'core:health-overview' %}">{% trans "Health" %}</a></li><li class="breadcrumb-item"><a href="{{ list_url }}">{{ title }}</a></li><li class="breadcrumb-item active">{% if object %}{% trans "Update" %}{% else %}{% trans "Add" %}{% endif %}</li>{% endblock %}
 {% block content %}
-    <h1>{{ title }} — {% if object %}{% trans "Update" %}{% else %}{% trans "Add" %}{% endif %}</h1>
+    <h1>{% if object %}{% trans "Update" %} <span class="text-info">{{ object }}</span>{% elif route == 'visit' %}{% trans "Add medical visit" %}{% elif route == 'vaccination' %}{% trans "Add vaccination" %}{% else %}{% trans "Add prescription" %}{% endif %}</h1>
     {% if form.instance.visit_id %}<p>{{ form.instance.visit.child }} · {{ form.instance.visit }}</p>{% endif %}
-    {{ form.non_field_errors }}
-    {% include "core/health/photos.html" with photos=object.photos.all %}
     {% if route == 'visit' %}
-        <div class="container-fluid pb-5">
-        <form role="form" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            {% if form.fieldsets %}
-                {% for fieldset in form.hydrated_fielsets %}
-                    {% with "forms/layouts/"|add:fieldset.layout|add:".html" as template %}{% include template %}{% endwith %}
-                {% endfor %}
-            {% else %}
-                {% for field in form %}
-                    {% if field.is_hidden %}{{ field }}{% else %}{% include 'babybuddy/form_field.html' %}{% endif %}
-                {% endfor %}
-            {% endif %}
-            <section class="border rounded p-3 mb-4">
-                <h2 class="h4">{% trans "Prescribed medication" %}</h2>
-                <p class="text-muted">{% trans "Add any medication prescribed during this visit. You can attach its photo from the prescription details after saving." %}</p>
-                {{ prescription_formset.management_form }}
-                {% for prescription_form in prescription_formset %}
-                    <div class="border-top pt-3 mt-3">
-                        {{ prescription_form.non_field_errors }}
-                        {% for hidden in prescription_form.hidden_fields %}{{ hidden }}{% endfor %}
-                        {% for field in prescription_form.visible_fields %}
-                            {% if field.name != 'DELETE' %}{% include 'babybuddy/form_field.html' with field=field %}{% endif %}
+        {{ form.media.js }}
+        <div class="bb-form-layout">
+            <form class="bb-form" role="form" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% include 'babybuddy/form_fields.html' %}
+                {% if can_add_prescription or can_edit_prescription %}
+                <section class="bb-prescriptions" data-prescription-formset data-prefix="{{ prescription_formset.prefix }}">
+                    <h2 class="h5">{% trans "Prescribed medication" %}</h2>
+                    <p class="small text-body-secondary">{% trans "Add medication only if it was prescribed during this visit." %}</p>
+                    {{ prescription_formset.management_form }}
+                    {% if prescription_formset.non_form_errors %}<div class="alert alert-danger">{{ prescription_formset.non_form_errors }}</div>{% endif %}
+                    <div data-prescription-list>
+                        {% for prescription_form in prescription_formset %}
+                            {% include 'core/health/prescription_fields.html' %}
                         {% endfor %}
                     </div>
-                {% endfor %}
-            </section>
-            <button type="submit" class="submit-primary btn btn-primary btn-lg">{% trans "Submit" %}</button>
-        </form>
+                    <p class="text-body-secondary" data-prescription-empty-message {% if prescription_formset.forms %}hidden{% endif %}>{% trans "No medication added." %}</p>
+                    <template data-prescription-template>
+                        {% include 'core/health/prescription_fields.html' with prescription_form=prescription_formset.empty_form %}
+                    </template>
+                    {% if can_add_prescription %}<button type="button" class="btn btn-outline-primary" data-prescription-add hidden><i class="icon-add" aria-hidden="true"></i> {% trans "Add medication" %}</button>{% endif %}
+                    <noscript><p>{% trans "Save the visit to add medication from its details." %}</p></noscript>
+                </section>
+                {% endif %}
+                {% include 'babybuddy/form_actions.html' %}
+            </form>
         </div>
     {% else %}
         {% include "babybuddy/form.html" %}

@@ -1,4 +1,5 @@
 {% extends 'babybuddy/page.html' %}
+{% load navigation %}
 {% load bootstrap datetime misc i18n widget_tweaks %}
 {% block title %}
     {% trans "Diaper Changes" %}
@@ -7,17 +8,19 @@
     <li class="breadcrumb-item active" aria-current="page">{% trans "Diaper Changes" %}</li>
 {% endblock %}
 {% block content %}
+    {% load mobile_records %}
     <h1>
         {% trans "Diaper Changes" %}
         {% if perms.core.add_diaperchange %}
-            <a href="{% url 'core:diaperchange-add' %}"
+            <a href="{% context_url 'core:diaperchange-add' %}"
                class="btn btn-sm btn-success">
                 <i class="icon-diaperchange" aria-hidden="true"></i> {% trans "Add Diaper Change" %}
             </a>
         {% endif %}
     </h1>
     {% include 'babybuddy/filter.html' %}
-    <div class="table-responsive">
+    {% mobile_record_cards object_list %}
+    <div class="table-responsive bb-desktop-records">
         <table class="table table-instances table-borderless table-striped table-hover align-middle">
             <thead>
                 <tr>
@@ -42,13 +45,13 @@
                                      role="group"
                                      aria-label="{% trans "Actions" %}">
                                     {% if perms.core.change_diaperchange %}
-                                        <a href="{% url 'core:diaperchange-update' change.id %}"
+                                        <a href="{% context_url 'core:diaperchange-update' change.id %}"
                                            class="btn btn-primary">
                                             <i class="icon-update" aria-hidden="true"></i>
                                         </a>
                                     {% endif %}
                                     {% if perms.core.delete_diaperchange %}
-                                        <a href="{% url 'core:diaperchange-delete' change.id %}"
+                                        <a href="{% context_url 'core:diaperchange-delete' change.id %}"
                                            class="btn btn-danger">
                                             <i class="icon-delete" aria-hidden="true"></i>
                                         </a>
@@ -58,7 +61,7 @@
                             <th scope="row">{{ change.time|datetime_short }}</th>
                             {% if not unique_child %}
                                 <td>
-                                    <a href="{% url 'core:child' change.child.slug %}">{{ change.child }}</a>
+                                    <a href="{% context_url 'core:child' change.child.slug %}">{{ change.child }}</a>
                                 </td>
                             {% endif %}
                             <td class="text-center">
@@ -90,7 +93,7 @@
                     {% endwith %}
                 {% empty %}
                     <tr>
-                        <th colspan="8">{% trans "No diaper changes found." %}</th>
+                        <th colspan="8">{{ empty_message }}</th>
                     </tr>
                 {% endfor %}
             </tbody>

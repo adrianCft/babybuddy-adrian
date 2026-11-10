@@ -969,9 +969,7 @@ class MedicationFormsTestCase(FormsTestCaseBase):
 
         page = self.c.post("/medication/add/", params, follow=True)
         self.assertEqual(page.status_code, 200)
-        self.assertContains(
-            page, "Medication entry for {} added".format(str(self.child))
-        )
+        self.assertContains(page, "Dose recorded for {}.".format(str(self.child)))
 
     def test_add_without_interval(self):
         params = {
@@ -985,9 +983,7 @@ class MedicationFormsTestCase(FormsTestCaseBase):
 
         page = self.c.post("/medication/add/", params, follow=True)
         self.assertEqual(page.status_code, 200)
-        self.assertContains(
-            page, "Medication entry for {} added".format(str(self.child))
-        )
+        self.assertContains(page, "Dose recorded for {}.".format(str(self.child)))
 
     def test_add_with_tags(self):
         params = {
@@ -1002,9 +998,7 @@ class MedicationFormsTestCase(FormsTestCaseBase):
 
         page = self.c.post("/medication/add/", params, follow=True)
         self.assertEqual(page.status_code, 200)
-        self.assertContains(
-            page, "Medication entry for {} added".format(str(self.child))
-        )
+        self.assertContains(page, "Dose recorded for {}.".format(str(self.child)))
 
     def test_edit(self):
         params = {
@@ -1079,9 +1073,7 @@ class MedicationFormsTestCase(FormsTestCaseBase):
 
         page = self.c.post("/medication/add/", params, follow=True)
         self.assertEqual(page.status_code, 200)
-        self.assertContains(
-            page, "Medication entry for {} added".format(str(self.child))
-        )
+        self.assertContains(page, "Dose recorded for {}.".format(str(self.child)))
 
     def test_form_validation_future_time(self):
         future_time = timezone.localtime() + timezone.timedelta(hours=1)

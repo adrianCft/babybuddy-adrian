@@ -58,6 +58,7 @@ class PeriodSummary(PermissionRequiredMixin, TemplateView):
             selected_child=child,
             day=day,
             period=period,
+            is_today=day == today,
             previous_url=(
                 link(first - timedelta(days=1)) if first > date(1900, 1, 1) else None
             ),

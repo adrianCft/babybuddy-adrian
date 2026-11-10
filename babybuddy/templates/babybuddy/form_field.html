@@ -1,10 +1,15 @@
 {% load widget_tweaks %}
-<div class="row mb-3">
-    <label for="id_{{ field.name }}"
-           class="col-sm-2 col-form-label{% if field|field_type == 'booleanfield' %} boolean-label{% endif %}">
+{% if field.is_hidden and field|widget_type != 'tagseditor' %}
+    {{ field }}
+    {{ field.errors }}
+{% else %}
+<div class="bb-form-field">
+    <label {% if field.id_for_label %}for="{{ field.id_for_label }}"{% endif %}
+           class="bb-form-label{% if field|field_type == 'booleanfield' %} boolean-label{% endif %}">
         {{ field.label }}
     </label>
-    <div class="col-sm-10{% if field|widget_type == 'childradioselect' %} overflow-auto"{% endif %}">
+    <div class="bb-form-control">
         {% include 'babybuddy/form_field_no_label.html' %}
     </div>
 </div>
+{% endif %}

@@ -104,3 +104,101 @@ class InitialSpanishFoodCatalogMigrationTestCase(TransactionTestCase):
         self.assertEqual(oats.category, "other")
         self.assertFalse(oats.active)
         self.assertEqual(oats.notes, "Valor personalizado")
+
+
+class InterfaceUpgradePreservesDataTests(TransactionTestCase):
+    """Exercise the release upgrade against populated versions of the old schema."""
+
+    def test_existing_records_preferences_relations_and_photo_paths_are_preserved(self):
+        executor = MigrationExecutor(connection)
+        old_targets = [
+            ("core", "0043_health_records"),
+            ("babybuddy", "0035_alter_settings_language"),
+        ]
+        executor.migrate(old_targets)
+        old = executor.loader.project_state(old_targets).apps
+        try:
+            user = old.get_model("auth", "User").objects.create(
+                username="conservar-usuario", password="existing-password-hash"
+            )
+            old.get_model("babybuddy", "Settings").objects.create(
+                user_id=user.pk,
+                language="es",
+                timezone="Europe/Madrid",
+                dashboard_hide_empty=True,
+            )
+            child = old.get_model("core", "Child").objects.create(
+                first_name="Lucía", birth_date=datetime.date(2026, 1, 1), slug="lucia"
+            )
+            food = old.get_model("core", "Food").objects.create(
+                name="Alimento personalizado",
+                notes="Notas que deben conservarse",
+                active=False,
+            )
+            dish = old.get_model("core", "Dish").objects.create(name="Plato existente")
+            dish.foods.add(food)
+            meal = old.get_model("core", "Meal").objects.create(
+                child_id=child.pk,
+                dish_names=["Nombre histórico"],
+                time=datetime.datetime(2026, 3, 1, 12, tzinfo=datetime.timezone.utc),
+                notes="Detalle de la comida",
+            )
+            old.get_model("core", "MealFood").objects.create(
+                meal_id=meal.pk, food_id=food.pk
+            )
+            visit = old.get_model("core", "HealthVisit").objects.create(
+                child_id=child.pk,
+                reason="Revisión existente",
+                professional="Nombre guardado",
+                assessment="Valoración que debe conservarse",
+            )
+            old.get_model("core", "Prescription").objects.create(
+                visit_id=visit.pk,
+                name="Medicación existente",
+                instructions="Pauta original",
+            )
+            old.get_model("core", "Vaccination").objects.create(
+                child_id=child.pk, name="Vacuna existente", batch="Lote conservado"
+            )
+            old.get_model("core", "Medication").objects.create(
+                child_id=child.pk, name="Toma existente", dosage=2, dosage_unit="ml"
+            )
+            old.get_model("core", "Weight").objects.create(
+                child_id=child.pk, date=datetime.date(2026, 6, 1), weight=7860
+            )
+            old.get_model("core", "HealthPhoto").objects.create(
+                visit_id=visit.pk, image="health/photos/original.png"
+            )
+            selected = list(
+                old.get_app_config("core").get_models(include_auto_created=True)
+            )
+            selected += [
+                old.get_model("babybuddy", "Settings"),
+                old.get_model("auth", "User"),
+            ]
+            snapshots = {}
+            for model in selected:
+                fields = [field.name for field in model._meta.fields]
+                snapshots[model._meta.label_lower] = (
+                    fields,
+                    list(model.objects.order_by("pk").values(*fields)),
+                )
+            executor = MigrationExecutor(connection)
+            executor.migrate(executor.loader.graph.leaf_nodes())
+            new = executor.loader.project_state().apps
+            for label, (fields, rows) in snapshots.items():
+                model = new.get_model(label)
+                self.assertEqual(
+                    list(model.objects.order_by("pk").values(*fields)), rows, label
+                )
+            self.assertIsNone(
+                new.get_model("core", "HealthVisit").objects.get(pk=visit.pk).specialty
+            )
+            self.assertIsNone(
+                new.get_model("babybuddy", "Settings")
+                .objects.get(user_id=user.pk)
+                .dashboard_cards
+            )
+        finally:
+            executor = MigrationExecutor(connection)
+            executor.migrate(executor.loader.graph.leaf_nodes())

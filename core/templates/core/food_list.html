@@ -1,4 +1,5 @@
 {% extends 'babybuddy/page.html' %}
+{% load navigation %}
 {% load i18n %}
 {% block title %}
     {% trans "Food catalog" %}
@@ -7,16 +8,18 @@
     <li class="breadcrumb-item active" aria-current="page">{% trans "Food catalog" %}</li>
 {% endblock %}
 {% block content %}
+    {% load mobile_records %}
     <h1>
         {% trans "Food catalog" %}
         {% if perms.core.add_food %}
-            <a href="{% url 'core:food-add' %}" class="btn btn-sm btn-success">
+            <a href="{% context_url 'core:food-add' %}" class="btn btn-sm btn-success">
                 <i class="icon-add" aria-hidden="true"></i> {% trans "Add food" %}
             </a>
         {% endif %}
     </h1>
     {% include 'babybuddy/filter.html' %}
-    <div class="table-responsive">
+    {% mobile_record_cards object_list %}
+    <div class="table-responsive bb-desktop-records">
         <table class="table table-instances table-borderless table-striped table-hover align-middle">
             <thead>
                 <tr>
@@ -33,14 +36,14 @@
                         <td>
                             <div class="btn-group btn-group-sm" role="group" aria-label="{% trans 'Actions' %}">
                                 {% if perms.core.change_food %}
-                                    <a href="{% url 'core:food-update' food.id %}"
+                                    <a href="{% context_url 'core:food-update' food.id %}"
                                        class="btn btn-primary"
                                        aria-label="{% blocktrans with name=food.name %}Edit {{ name }}{% endblocktrans %}">
                                         <i class="icon-update" aria-hidden="true"></i>
                                     </a>
                                 {% endif %}
                                 {% if perms.core.delete_food %}
-                                    <a href="{% url 'core:food-delete' food.id %}"
+                                    <a href="{% context_url 'core:food-delete' food.id %}"
                                        class="btn btn-danger"
                                        aria-label="{% trans 'Delete' %} {{ food.name }}">
                                         <i class="icon-delete" aria-hidden="true"></i>
@@ -74,7 +77,7 @@
                     {% endif %}
                 {% empty %}
                     <tr>
-                        <th colspan="5">{% trans "No foods found." %}</th>
+                        <th colspan="5">{{ empty_message }}</th>
                     </tr>
                 {% endfor %}
             </tbody>

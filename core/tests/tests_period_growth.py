@@ -254,6 +254,76 @@ class PeriodGrowthTests(TestCase):
             ][0]["projection"]
         )
 
+    def test_summary_period_navigation_preserves_selected_child_and_day(self):
+        self.grant("view_child", "view_sleep")
+        for route, selected in (
+            ("core:daily-summary", "day"),
+            ("core:period-summary", "month"),
+        ):
+            response = self.client.get(
+                reverse(route),
+                {"child": self.child.pk, "date": self.day, "period": selected},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.context["period"], selected)
+            self.assertContains(response, 'class="bb-summary-period"', count=1)
+            self.assertContains(
+                response, 'class="btn btn-primary" aria-current="page"', count=1
+            )
+            self.assertNotContains(response, '<select name="period"')
+            for period in ("week", "month"):
+                self.assertContains(
+                    response,
+                    f"period={period}&amp;date={self.day.isoformat()}&amp;child={self.child.pk}",
+                )
+            self.assertIn(str(self.child.pk), response.context["previous_url"])
+
+    def test_growth_tabs_and_exact_point_details_keep_records_and_warnings(self):
+        self.grant("view_child", "view_weight", "view_height", "view_headcircumference")
+        self.seed_growth()
+        url = reverse("core:growth-summary", args=[self.child.slug])
+        with patch("core.growth.timezone.localdate", return_value=self.day):
+            response = self.client.get(url, {"metric": "head_circumference"})
+        self.assertEqual(response.status_code, 200)
+        metrics = response.context["growth"]["metrics"]
+        self.assertEqual(
+            [m["kind"] for m in metrics if m["active"]], ["head_circumference"]
+        )
+        self.assertContains(response, 'class="bb-growth-latest"', count=1)
+        self.assertContains(response, "data-growth-point data-date=", count=12)
+        self.assertContains(response, 'data-percentile="P50.0"', count=12)
+        self.assertContains(response, 'role="tabpanel"', count=3)
+        self.assertContains(
+            response, 'class="bb-growth-hit" role="button" tabindex="0"', count=12
+        )
+        self.assertContains(response, "data-point-date")
+        self.assertContains(response, "data-point-value")
+        self.assertContains(response, "data-point-percentile")
+        self.assertContains(response, "Cómo leer estas gráficas")
+        self.assertContains(response, "no diagnostican")
+        self.assertEqual(models.Weight.objects.filter(child=self.child).count(), 4)
+        self.assertEqual(models.Height.objects.filter(child=self.child).count(), 4)
+        self.assertEqual(
+            models.HeadCircumference.objects.filter(child=self.child).count(), 4
+        )
+        # An unknown or no-longer-permitted tab falls back to the first allowed metric.
+        response = self.client.get(url, {"metric": "bad"})
+        self.assertEqual(
+            [m["kind"] for m in response.context["growth"]["metrics"] if m["active"]],
+            ["weight"],
+        )
+        self.user.user_permissions.remove(
+            Permission.objects.get(
+                content_type__app_label="core", codename="view_height"
+            )
+        )
+        response = self.client.get(url, {"metric": "height"})
+        self.assertNotContains(response, 'data-growth-tab="height"')
+        self.assertEqual(
+            [m["kind"] for m in response.context["growth"]["metrics"] if m["active"]],
+            ["weight"],
+        )
+
     def test_units_converted_only_for_calculation_and_invalid_measurements(self):
         self.grant("view_weight", "view_height")
         self.profile(weight_unit="g")
@@ -304,9 +374,7 @@ class PeriodGrowthTests(TestCase):
             date=self.child.birth_date + timedelta(days=100),
             head_circumference=reference("head_circumference", "girl")[100][1],
         )
-        page = self.client.get(
-            reverse("core:growth-summary", args=[self.child.slug])
-        )
+        page = self.client.get(reverse("core:growth-summary", args=[self.child.slug]))
         self.assertContains(page, 'data-growth-metric="head_circumference"')
         self.assertContains(page, reverse("core:head-circumference-add"))
 

@@ -1,0 +1,19 @@
+{% load i18n %}
+<div class="modal fade bb-photo-viewer" id="bb-photo-viewer" tabindex="-1" aria-labelledby="bb-photo-viewer-title" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-fullscreen-md-down">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5 text-break" id="bb-photo-viewer-title">{% trans "Photo" %}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
+            </div>
+            <div class="modal-body bb-photo-stage"><img alt="{% trans 'Photo' %}" data-photo-viewer-image></div>
+            <div class="modal-footer">
+                <div class="d-flex gap-2 me-auto">
+                    <button type="button" class="btn btn-outline-secondary" data-photo-previous>{% trans "Previous photo" %}</button>
+                    <button type="button" class="btn btn-outline-secondary" data-photo-next>{% trans "Next photo" %}</button>
+                </div>
+                <a class="btn btn-outline-primary" target="_blank" rel="noopener" data-photo-original>{% trans "Open original" %}</a>
+            </div>
+        </div>
+    </div>
+</div>

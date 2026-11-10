@@ -1,4 +1,5 @@
 {% extends 'babybuddy/page.html' %}
+{% load navigation %}
 {% load i18n widget_tweaks %}
 {% block title %}
     {% trans "Weight" %}
@@ -7,16 +8,18 @@
     <li class="breadcrumb-item active" aria-current="page">{% trans "Weight" %}</li>
 {% endblock %}
 {% block content %}
+    {% load mobile_records %}
     <h1>
         {% trans "Weight" %}
         {% if perms.core.add_weight %}
-            <a href="{% url 'core:weight-add' %}" class="btn btn-sm btn-success">
+            <a href="{% context_url 'core:weight-add' %}" class="btn btn-sm btn-success">
                 <i class="icon-weight" aria-hidden="true"></i> {% trans "Add Weight" %}
             </a>
         {% endif %}
     </h1>
     {% include 'babybuddy/filter.html' %}
-    <div class="table-responsive">
+    {% mobile_record_cards object_list %}
+    <div class="table-responsive bb-desktop-records">
         <table class="table table-instances table-borderless table-striped table-hover align-middle">
             <thead>
                 <tr>
@@ -37,13 +40,13 @@
                                  role="group"
                                  aria-label="{% trans "Actions" %}">
                                 {% if perms.core.change_weight %}
-                                    <a href="{% url 'core:weight-update' weight.id %}"
+                                    <a href="{% context_url 'core:weight-update' weight.id %}"
                                        class="btn btn-primary">
                                         <i class="icon-update" aria-hidden="true"></i>
                                     </a>
                                 {% endif %}
                                 {% if perms.core.delete_weight %}
-                                    <a href="{% url 'core:weight-delete' weight.id %}"
+                                    <a href="{% context_url 'core:weight-delete' weight.id %}"
                                        class="btn btn-danger">
                                         <i class="icon-delete" aria-hidden="true"></i>
                                     </a>
@@ -53,7 +56,7 @@
                         <th scope="row">{{ weight.date }}</th>
                         {% if not unique_child %}
                             <td>
-                                <a href="{% url 'core:child' weight.child.slug %}">{{ weight.child }}</a>
+                                <a href="{% context_url 'core:child' weight.child.slug %}">{{ weight.child }}</a>
                             </td>
                         {% endif %}
                         <td>{{ weight.weight }}</td>
@@ -68,7 +71,7 @@
                     {% endif %}
                 {% empty %}
                     <tr>
-                        <th colspan="5">{% trans "No weight entries found." %}</th>
+                        <th colspan="5">{{ empty_message }}</th>
                     </tr>
                 {% endfor %}
             </tbody>

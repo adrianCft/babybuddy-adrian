@@ -2,12 +2,14 @@ from django import forms
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
-from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 from django.views.generic import TemplateView
 
 from babybuddy.mixins import PermissionRequiredMixin
 from core.growth import build_growth
 from core.models import Child, GrowthProfile
+from core.navigation import navigation, contextual_url
 
 
 class GrowthProfileForm(forms.ModelForm):
@@ -82,6 +84,17 @@ class GrowthOverview(PermissionRequiredMixin, TemplateView):
             Child.objects.select_related("growth_profile"), slug=self.kwargs["slug"]
         )
         growth = build_growth(child, self.request.user)
+        kinds = [metric["kind"] for metric in growth["metrics"]]
+        active = self.request.GET.get("metric")
+        active = active if active in kinds else next(iter(kinds), "")
+        labels = {
+            "weight": _("Weight"),
+            "height": pgettext_lazy("growth tab", "Height"),
+            "head_circumference": _("Head Circumference"),
+        }
+        for metric in growth["metrics"]:
+            metric["active"] = metric["kind"] == active
+            metric["tab_label"] = labels[metric["kind"]]
         context.update(child=child, growth=growth)
         context.setdefault("form", GrowthProfileForm(instance=growth["profile"]))
         return context
@@ -99,5 +112,34 @@ class GrowthOverview(PermissionRequiredMixin, TemplateView):
             messages.success(
                 request, _("Growth reference saved. Measurements were not changed.")
             )
-            return redirect("core:growth-summary", slug=child.slug)
+            url = reverse("core:growth-summary", args=[child.slug])
+            metric = request.GET.get("metric")
+            if metric in ("weight", "height", "head_circumference"):
+                url += "?metric=" + metric
+            return redirect(contextual_url(request, url, remember_return=False))
         return self.render_to_response(self.get_context_data(form=form), status=400)
+
+
+class GrowthIndex(PermissionRequiredMixin, TemplateView):
+    """Open the growth page for the only child or let the user choose one."""
+
+    permission_required = ("core.view_child",)
+    template_name = "core/growth_index.html"
+
+    def get(self, request, *args, **kwargs):
+        children = Child.objects.order_by("first_name", "last_name", "pk")
+        selected = navigation(request)["child"]
+        if selected:
+            return redirect(
+                contextual_url(
+                    request, "core:growth-summary", selected.slug, remember_return=False
+                )
+            )
+        if children.count() == 1:
+            return redirect("core:growth-summary", slug=children.first().slug)
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["children"] = Child.objects.order_by("first_name", "last_name", "pk")
+        return context

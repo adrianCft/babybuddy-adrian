@@ -1,7 +1,7 @@
 {% extends 'cards/base.html' %}
-{% load duration i18n %}
+{% load duration i18n navigation %}
 {% block header %}
-    <a href="{% url "core:feeding-list" %}">{% trans "Last Feeding" %}</a>
+    <a href="{% context_url 'core:feeding-list' %}">{% trans "Last Feeding" %}</a>
 {% endblock %}
 {% block title %}
     {% if feeding %}
@@ -25,7 +25,7 @@
     {% if can_add %}
         <div class="mt-2">
             <a class="btn btn-sm btn-dashboard-add-link p-0 text-decoration-none"
-               href="{% url 'core:feeding-list' %}?child={{ child.pk }}">
+               href="{% context_url 'core:feeding-add' %}">
                 <i class="icon-add" aria-hidden="true"></i> {% trans "Add Feeding" %}
             </a>
         </div>

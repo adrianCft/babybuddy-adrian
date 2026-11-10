@@ -1,0 +1,31 @@
+{% load i18n %}
+<p class="small">{% trans "Thin lines: WHO reference. Solid line and dots: measurements. Dashed line: conditional scenario, not a prediction or recommended target." %}</p>
+<p class="small mb-2">{% trans "Tap a measurement to see its date, value and percentile." %} <span class="daily-mobile-hint">{% trans "Swipe sideways to explore the chart." %}</span></p>
+<div data-growth-chart>
+    <div class="growth-chart mb-2" role="region" tabindex="0" aria-label="{{ metric.label }}">
+        <svg viewBox="0 0 740 260" role="group" aria-labelledby="growth-chart-title-{{ metric.kind }} growth-chart-desc-{{ metric.kind }}">
+            <title id="growth-chart-title-{{ metric.kind }}">{{ metric.label }} · {{ child }}</title>
+            <desc id="growth-chart-desc-{{ metric.kind }}">{% trans "Measurements against reference percentiles P3, P15, P50, P85 and P97. Exact values are available in the history table below." %}</desc>
+            <text x="55" y="16" class="growth-axis">{{ metric.unit }}</text>
+            <text x="4" y="28" class="growth-axis">{{ metric.chart.maximum|floatformat:1 }}</text>
+            <text x="4" y="220" class="growth-axis">{{ metric.chart.minimum|floatformat:1 }}</text>
+            {% for curve in metric.chart.curves %}<polyline points="{{ curve.points }}" class="growth-reference" /><text x="686" y="{{ curve.y }}" class="growth-axis">{{ curve.label }}</text>{% endfor %}
+            <polyline points="{{ metric.chart.line }}" class="growth-measured" />
+            {% if metric.chart.forecast %}<polyline points="{{ metric.chart.forecast }}" class="growth-forecast" />{% endif %}
+            {% for point in metric.chart.points %}
+                <circle cx="{{ point.x }}" cy="{{ point.y }}" r="4" class="growth-point" />
+                <circle cx="{{ point.x }}" cy="{{ point.y }}" r="27" class="bb-growth-hit" role="button" tabindex="0"
+                        data-growth-point data-date="{{ point.date|date:'j M Y' }}" data-value="{{ point.input|floatformat:2 }} {{ metric.input_unit }}" data-chart-value="{{ point.value|floatformat:2 }} {{ metric.unit }}" data-percentile="{{ point.percentile }}"
+                        aria-label="{{ point.date|date:'j M Y' }}: {{ point.input|floatformat:2 }} {{ metric.input_unit }} · {{ point.percentile }}">
+                    <title>{{ point.date|date:"j M Y" }}: {{ point.input|floatformat:2 }} {{ metric.input_unit }} · {{ point.percentile }}</title>
+                </circle>
+            {% endfor %}
+            <text x="55" y="250" class="growth-axis">{{ metric.chart.first|date:"j M Y" }}</text><text x="675" y="250" text-anchor="end" class="growth-axis">{{ metric.chart.last|date:"j M Y" }}</text>
+        </svg>
+    </div>
+    <dl class="bb-growth-readout" role="status" aria-live="polite" aria-atomic="true" data-growth-readout hidden>
+        <div><dt>{% trans "Date" %}</dt><dd data-point-date></dd></div>
+        <div><dt>{% trans "Value" %}</dt><dd data-point-value></dd></div>
+        <div><dt>{% trans "Percentile" %}</dt><dd data-point-percentile></dd></div>
+    </dl>
+</div>

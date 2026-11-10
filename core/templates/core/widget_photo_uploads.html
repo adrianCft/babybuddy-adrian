@@ -1,0 +1,14 @@
+{% load i18n %}
+<div data-photo-upload data-photo-limit="{{ widget.photo_limit }}" data-photo-bytes="{{ widget.photo_bytes }}"
+     data-view-label="{% trans 'Enlarge photo' %}" data-remove-label="{% trans 'Remove from selection' %}"
+     data-one-label="{% trans '1 photo selected. It will be uploaded when you save.' %}"
+     data-many-label="{% trans '{count} photos selected. They will be uploaded when you save.' %}"
+     data-limit-error="{% trans 'Upload up to 8 photos at a time.' %}" data-size-error="{% trans 'Each photo must be smaller than 10 MB.' %}"
+     data-preview-error="{% trans 'Preview unavailable. The image will be checked when you save.' %}"
+     data-remove-error="{% trans 'Use Clear new photos to choose the files again in this browser.' %}">
+    {% if widget.reselect %}<p class="small text-warning">{% trans "Please select the new photos again before saving. Your saved photos are unchanged." %}</p>{% endif %}
+    <input type="{{ widget.type }}" name="{{ widget.name }}"{% include 'django/forms/widgets/attrs.html' %} data-photo-input>
+    <p class="small text-body-secondary mt-2 mb-2" role="status" aria-live="polite" data-photo-status></p>
+    <div class="bb-photo-grid" data-photo-previews data-photo-gallery></div>
+    <button type="button" class="btn btn-outline-secondary mt-2" data-photo-clear hidden>{% trans "Clear new photos" %}</button>
+</div>

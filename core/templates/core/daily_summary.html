@@ -1,5 +1,5 @@
 {% extends "babybuddy/page.html" %}
-{% load i18n l10n %}
+{% load i18n l10n navigation %}
 {% block title %}
     {% trans "Daily overview" %}
 {% endblock %}
@@ -18,43 +18,9 @@
                 <a class="btn btn-outline-secondary" href="">{% trans "Refresh" %}</a>
             {% endif %}
         </div>
-        <nav class="d-flex flex-wrap gap-2 mb-3"
-             aria-label="{% trans 'Summaries' %}">
-            <span class="btn btn-primary" aria-current="page">{% trans "Day" %}</span>
-            <a class="btn btn-outline-primary"
-               href="{% url 'core:period-summary' %}?period=week&amp;date={{ day|date:'Y-m-d' }}&amp;child={{ selected_child.pk }}">{% trans "Week" %}</a>
-            <a class="btn btn-outline-primary"
-               href="{% url 'core:period-summary' %}?period=month&amp;date={{ day|date:'Y-m-d' }}&amp;child={{ selected_child.pk }}">{% trans "Month" %}</a>
-        </nav>
-        <form method="get"
-              class="daily-filters mb-4"
-              aria-label="{% trans 'Daily overview filters' %}">
-            <div>
-                <label class="form-label" for="{{ form.child.id_for_label }}">{{ form.child.label }}</label>
-                {{ form.child }}
-                {{ form.child.errors }}
-            </div>
-            <div>
-                <label class="form-label" for="{{ form.date.id_for_label }}">{{ form.date.label }}</label>
-                {{ form.date }}
-                {{ form.date.errors }}
-            </div>
-            <button class="btn btn-primary" type="submit">{% trans "Show day" %}</button>
-        </form>
+        {% include 'core/summary_navigation.html' %}
+        {% if form.errors %}<div class="alert alert-danger">{{ form.child.errors }}{{ form.date.errors }}{{ form.non_field_errors }}</div>{% endif %}
         {% if day %}
-            <nav class="d-flex flex-wrap align-items-center gap-2 mb-3"
-                 aria-label="{% trans 'Day navigation' %}">
-                {% if previous_url %}<a class="btn btn-outline-secondary"
-   href="{{ previous_url }}"
-   data-daily-previous>← {% trans "Previous day" %}</a>{% endif %}
-                <h2 class="h5 mb-0 mx-1">{{ day|date:"l, j F Y" }}</h2>
-                {% if next_url %}<a class="btn btn-outline-secondary"
-   href="{{ next_url }}"
-   data-daily-next>{% trans "Next day" %} →</a>{% endif %}
-                {% if not is_today %}
-                    <a class="btn btn-link" href="{{ today_url }}">{% trans "Today" %}</a>
-                {% endif %}
-            </nav>
             {% if daily.day_hours != 24 %}
                 <p class="alert alert-info">{% blocktrans with hours=daily.day_hours %}This day has {{ hours }} hours due to the clock change. Durations use elapsed time.{% endblocktrans %}</p>
             {% endif %}
@@ -159,7 +125,7 @@
                                     {% endif %}
                                     {% if event.edit_url %}
                                         <a class="btn btn-sm btn-outline-secondary mt-2"
-                                           href="{{ event.edit_url }}">{% trans "Edit" %}</a>
+                                           href="{% context_url event.edit_url %}">{% trans "Edit" %}</a>
                                     {% endif %}
                                 </div>
                                 </article>

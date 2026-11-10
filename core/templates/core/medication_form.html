@@ -1,30 +1,42 @@
 {% extends 'babybuddy/page.html' %}
-{% load i18n %}
+{% load i18n navigation %}
 {% block title %}
     {% if object %}
         {{ object }}
     {% else %}
-        {% trans "Add a Medication Entry" %}
+        {% trans "Record dose" %}
     {% endif %}
 {% endblock %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item">
-        <a href="{% url 'core:medication-list' %}">{% trans "Medication" %}</a>
+        <a href="{% context_url 'core:medication-list' %}">{% trans "Recorded doses" %}</a>
     </li>
     {% if object %}
         <li class="breadcrumb-item active" aria-current="page">{% trans "Update" %}</li>
     {% else %}
-        <li class="breadcrumb-item active" aria-current="page">{% trans "Add a Medication Entry" %}</li>
+        <li class="breadcrumb-item active" aria-current="page">{% trans "Record dose" %}</li>
     {% endif %}
 {% endblock %}
 {% block content %}
-    {% include 'core/health/photos.html' with photos=object.photos.all %}
     {% if object %}
         <h1>
             {% trans "Update" %} <span class="text-info">{{ object }}</span>
         </h1>
     {% else %}
-        <h1>{% trans "Add a Medication Entry" %}</h1>
+        <h1>{% trans "Record dose" %}</h1>
+    {% endif %}
+    {% if source_prescription %}
+        <div class="card mb-4"><div class="card-body">
+            <h2 class="h5">{{ source_prescription.name }} · {{ source_prescription.visit.child }}</h2>
+            <p class="small text-body-secondary mb-1">{% trans "Prescribed instructions (reference)" %}</p>
+            <p class="text-break">{{ source_prescription.instructions|linebreaksbr }}</p>
+            <p class="small mb-0">{% trans "Confirm the amount, unit and time of the dose. Nothing has been recorded yet." %}</p>
+        </div></div>
     {% endif %}
     {% include 'babybuddy/form.html' %}
+    {% if medication_names %}
+        <datalist id="medication-names">
+            {% for name in medication_names %}<option value="{{ name }}"></option>{% endfor %}
+        </datalist>
+    {% endif %}
 {% endblock %}

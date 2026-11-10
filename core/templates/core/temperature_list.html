@@ -1,4 +1,5 @@
 {% extends 'babybuddy/page.html' %}
+{% load navigation %}
 {% load datetime i18n widget_tweaks %}
 {% block title %}
     {% trans "Temperature" %}
@@ -7,17 +8,19 @@
     <li class="breadcrumb-item active" aria-current="page">{% trans "Temperature" %}</li>
 {% endblock %}
 {% block content %}
+    {% load mobile_records %}
     <h1>
         {% trans "Temperature" %}
         {% if perms.core.add_temperature %}
-            <a href="{% url 'core:temperature-add' %}"
+            <a href="{% context_url 'core:temperature-add' %}"
                class="btn btn-sm btn-success">
                 <i class="icon-temperature" aria-hidden="true"></i> {% trans "Add Temperature Reading" %}
             </a>
         {% endif %}
     </h1>
     {% include 'babybuddy/filter.html' %}
-    <div class="table-responsive">
+    {% mobile_record_cards object_list %}
+    <div class="table-responsive bb-desktop-records">
         <table class="table table-instances table-borderless table-striped table-hover align-middle">
             <thead>
                 <tr>
@@ -38,13 +41,13 @@
                                  role="group"
                                  aria-label="{% trans "Actions" %}">
                                 {% if perms.core.change_temperature %}
-                                    <a href="{% url 'core:temperature-update' temperature.id %}"
+                                    <a href="{% context_url 'core:temperature-update' temperature.id %}"
                                        class="btn btn-primary">
                                         <i class="icon-update" aria-hidden="true"></i>
                                     </a>
                                 {% endif %}
                                 {% if perms.core.delete_temperature %}
-                                    <a href="{% url 'core:temperature-delete' temperature.id %}"
+                                    <a href="{% context_url 'core:temperature-delete' temperature.id %}"
                                        class="btn btn-danger">
                                         <i class="icon-delete" aria-hidden="true"></i>
                                     </a>
@@ -54,7 +57,7 @@
                         <th scope="row">{{ temperature.time|datetime_short }}</th>
                         {% if not unique_child %}
                             <td>
-                                <a href="{% url 'core:child' temperature.child.slug %}">{{ temperature.child }}</a>
+                                <a href="{% context_url 'core:child' temperature.child.slug %}">{{ temperature.child }}</a>
                             </td>
                         {% endif %}
                         <td>{{ temperature.temperature }}</td>
@@ -69,7 +72,7 @@
                     {% endif %}
                 {% empty %}
                     <tr>
-                        <th colspan="5">{% trans "No temperature entries found." %}</th>
+                        <th colspan="5">{{ empty_message }}</th>
                     </tr>
                 {% endfor %}
             </tbody>

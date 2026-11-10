@@ -1,0 +1,126 @@
+.bb-growth-latest {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .75rem;
+    margin-bottom: 1.25rem;
+
+    > div {
+        min-width: 0;
+        padding: .85rem;
+        border: 1px solid var(--bs-border-color);
+        border-radius: .5rem;
+    }
+
+    dt {
+        font-weight: 500;
+    }
+
+    dd {
+        margin: .35rem 0 0;
+    }
+
+    strong {
+        display: block;
+        font-size: 1.25rem;
+    }
+}
+
+.bb-growth-help {
+    margin-bottom: 1rem;
+
+    > summary {
+        min-height: 2.75rem;
+        padding-block: .65rem;
+        cursor: pointer;
+    }
+}
+
+.daily-cards.bb-growth-insights {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    .growth-card {
+        grid-column: auto;
+    }
+}
+
+.bb-growth-tabs {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    margin-bottom: 1rem;
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+        min-height: 2.75rem;
+        padding-inline: .5rem;
+        text-align: center;
+    }
+}
+
+[data-growth-metric] {
+    scroll-margin-top: 5rem;
+}
+
+.bb-growth-hit {
+    fill: transparent;
+    stroke: transparent;
+    stroke-width: 2;
+    cursor: pointer;
+
+    &:focus-visible, &.is-selected {
+        outline: none;
+        stroke: var(--bs-primary);
+    }
+}
+
+.bb-growth-readout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1.5rem;
+    margin: .5rem 0 1rem;
+    padding: .75rem;
+    border: 1px solid var(--bs-primary);
+    border-radius: .5rem;
+    scroll-margin-bottom: 6rem;
+
+    dt {
+        color: var(--bs-secondary-color);
+        font-size: .8rem;
+        font-weight: 400;
+    }
+
+    dd {
+        margin: .2rem 0 0;
+    }
+}
+
+@include media-breakpoint-down(sm) {
+    .daily-cards.bb-growth-insights {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .bb-growth-latest {
+        grid-template-columns: minmax(0, 1fr);
+        gap: .5rem;
+
+        > div {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .5rem;
+            padding: .65rem .75rem;
+        }
+
+        dd {
+            margin: 0;
+            text-align: end;
+        }
+
+        strong {
+            font-size: 1.1rem;
+        }
+    }
+}

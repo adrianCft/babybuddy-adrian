@@ -1,14 +1,12 @@
 {% load i18n %}
 {% if photos %}
-    <h2 class="h5 mt-3">{% trans "Photos" %}</h2>
-    <div class="row g-2 mb-4">
+    {% if not hide_heading %}<h2 class="h5 mt-3">{% trans "Photos" %}</h2>{% endif %}
+    <div class="bb-photo-grid mb-4" data-photo-gallery>
         {% for photo in photos %}
-            <div class="col-6 col-md-3">
-                <a href="{% url 'core:health-photo' photo.pk %}" target="_blank" rel="noopener">
-                    <img src="{% url 'core:health-photo' photo.pk %}" class="img-fluid rounded border" style="width:100%;height:10rem;object-fit:contain" loading="lazy" alt="{% trans 'Photo' %} #{{ photo.pk }}">
-                    <span class="d-block small">{% trans "Photo" %} #{{ photo.pk }}</span>
-                </a>
-            </div>
+            <a class="bb-photo-tile bb-photo-link" href="{% url 'core:health-photo' photo.pk %}" data-photo-viewer data-photo-caption="{% trans 'Saved photo' %}" aria-label="{% trans 'Enlarge photo' %} {{ forloop.counter }}">
+                <img src="{% url 'core:health-photo' photo.pk %}" loading="lazy" alt="{% trans 'Saved photo' %}">
+                <span class="bb-photo-caption">{% trans "Enlarge photo" %}</span>
+            </a>
         {% endfor %}
     </div>
 {% endif %}

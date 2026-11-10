@@ -1,0 +1,19 @@
+{% load datetime i18n %}
+{% if home_sleep.visible %}
+    <div class="bb-home-sleep" data-home-sleep>
+        <span><span class="text-body-secondary">{% trans "Now" %} · </span><i class="icon-sleep me-1" aria-hidden="true"></i>
+            {% if home_sleep.timer %}<strong>{% trans "Sleeping" %}</strong> · {{ home_sleep.timer.start|datetime_short }}{% else %}{% trans "No sleep in progress" %}{% endif %}
+        </span>
+        {% if home_sleep.timer and home_sleep.can_finish %}
+            <form action="{% url 'core:sleep-finish-quick' home_sleep.timer.pk %}" method="post">
+                {% csrf_token %}<input type="hidden" name="next" value="{{ home_sleep.next }}">
+                <button class="btn btn-sm btn-outline-primary btn-dashboard-sleep" type="submit">{% trans "Woke up" %}</button>
+            </form>
+        {% elif not home_sleep.timer and home_sleep.can_start %}
+            <form action="{% url 'core:timer-add-quick' %}" method="post">
+                {% csrf_token %}<input type="hidden" name="next" value="{{ home_sleep.next }}"><input type="hidden" name="child" value="{{ object.pk }}"><input type="hidden" name="kind" value="sleep">
+                <button class="btn btn-sm btn-outline-primary btn-dashboard-sleep" type="submit">{% trans "Fell asleep" %}</button>
+            </form>
+        {% endif %}
+    </div>
+{% endif %}

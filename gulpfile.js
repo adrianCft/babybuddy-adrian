@@ -11,6 +11,7 @@ import gulp from "gulp";
 import gulpSass from "gulp-sass";
 import minify from "gulp-minify";
 import sassGlob from "gulp-sass-glob";
+import { Transform } from "node:stream";
 
 const es = child_process.execSync;
 const sass = gulpSass(dartSass);
@@ -226,12 +227,32 @@ function styles() {
     "import",
     "mixed-decls",
   ];
-  return gulp
-    .src(config.stylesConfig.app)
-    .pipe(sassGlob({ ignorePaths: config.stylesConfig.ignore }))
-    .pipe(sass.sync({ silenceDeprecations }).on("error", sass.logError))
-    .pipe(concat("app.css"))
-    .pipe(gulp.dest(config.stylesConfig.dest));
+  return (
+    gulp
+      .src(config.stylesConfig.app)
+      .pipe(sassGlob({ ignorePaths: config.stylesConfig.ignore }))
+      // Older glob helpers leave backslashes in Windows paths with accents.
+      .pipe(
+        new Transform({
+          objectMode: true,
+          transform(file, encoding, callback) {
+            file.contents = Buffer.from(
+              file.contents
+                .toString()
+                .replace(
+                  /^@import "(.+)";$/gm,
+                  (match, importPath) =>
+                    `@import "${importPath.replaceAll("\\", "/")}";`,
+                ),
+            );
+            callback(null, file);
+          },
+        }),
+      )
+      .pipe(sass.sync({ silenceDeprecations }).on("error", sass.logError))
+      .pipe(concat("app.css"))
+      .pipe(gulp.dest(config.stylesConfig.dest))
+  );
 }
 
 /**

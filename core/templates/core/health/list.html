@@ -6,13 +6,15 @@
     <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
 {% endblock %}
 {% block content %}
+    {% load mobile_records %}
     <h1>
         {{ title }}
         {% if can_add and add_url %}<a class="btn btn-sm btn-success" href="{{ add_url }}"><i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}</a>{% endif %}
     </h1>
     {% if route == 'prescription' %}<p class="text-muted">{% trans "Add prescriptions from a medical visit. Recording a prescription does not record an administered dose." %}</p>{% endif %}
     {% include 'babybuddy/filter.html' %}
-    <div class="table-responsive">
+    {% mobile_record_cards object_list %}
+    <div class="table-responsive bb-desktop-records">
         <table class="table table-instances table-borderless table-striped table-hover align-middle">
             <thead><tr>
                 <th>{% trans "Actions" %}</th><th>{% trans "Date" %}</th><th>{% trans "Child" %}</th>
@@ -29,6 +31,7 @@
                     <tr>
                         <td><div class="btn-group btn-group-sm" role="group" aria-label="{% trans 'Actions' %}">
                             <a href="{{ record.url }}" class="btn btn-outline-primary">{% trans "Details" %}</a>
+                            {% if record.dose_url %}<a href="{{ record.dose_url }}" class="btn btn-success">{% trans "Record dose" %}</a>{% endif %}
                             {% if can_change %}<a href="{{ record.update_url }}" class="btn btn-primary" title="{% trans 'Update' %}"><i class="icon-update" aria-hidden="true"></i><span class="visually-hidden">{% trans "Update" %}</span></a>{% endif %}
                             {% if can_delete %}<a href="{{ record.delete_url }}" class="btn btn-danger" title="{% trans 'Delete' %}"><i class="icon-delete" aria-hidden="true"></i><span class="visually-hidden">{% trans "Delete" %}</span></a>{% endif %}
                         </div></td>
@@ -45,7 +48,7 @@
                     {% if route == 'visit' and record.object.assessment or route == 'vaccination' and record.object.notes or route == 'prescription' and record.object.notes %}
                         <tr class="row-details"><td colspan="{% if route == 'vaccination' %}7{% else %}6{% endif %}"><i class="icon-note me-2" aria-hidden="true"></i>{% if route == 'visit' %}{{ record.object.assessment }}{% elif route == 'vaccination' %}{{ record.object.notes }}{% else %}{{ record.object.notes }}{% endif %}</td></tr>
                     {% endif %}
-                {% empty %}<tr><th colspan="{% if route == 'vaccination' %}7{% else %}6{% endif %}">{% trans "No health records found." %}</th></tr>{% endfor %}
+                {% empty %}<tr><th colspan="{% if route == 'vaccination' %}7{% else %}6{% endif %}">{{ empty_message }}</th></tr>{% endfor %}
             </tbody>
         </table>
     </div>

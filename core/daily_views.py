@@ -59,6 +59,7 @@ class DailySummary(PermissionRequiredMixin, TemplateView):
             return "?" + urlencode({"date": value.isoformat(), "child": child_value})
 
         context.update(
+            period="day",
             day=day,
             selected_child=child,
             is_today=day == today,

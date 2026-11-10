@@ -1,4 +1,5 @@
 {% extends 'babybuddy/page.html' %}
+{% load navigation %}
 {% load datetime i18n imagekit widget_tweaks %}
 {% block title %}
     {% trans "Notes" %}
@@ -7,16 +8,18 @@
     <li class="breadcrumb-item active" aria-current="page">{% trans "Notes" %}</li>
 {% endblock %}
 {% block content %}
+    {% load mobile_records %}
     <h1>
         {% trans "Notes" %}
         {% if perms.core.add_note %}
-            <a href="{% url 'core:note-add' %}" class="btn btn-sm btn-success">
+            <a href="{% context_url 'core:note-add' %}" class="btn btn-sm btn-success">
                 <i class="icon-note" aria-hidden="true"></i> {% trans "Add Note" %}
             </a>
         {% endif %}
     </h1>
     {% include 'babybuddy/filter.html' %}
-    <div class="table-responsive">
+    {% mobile_record_cards object_list %}
+    <div class="table-responsive bb-desktop-records">
         <table class="table table-instances table-borderless table-striped table-hover align-middle">
             <thead>
                 <tr>
@@ -38,12 +41,12 @@
                                  role="group"
                                  aria-label="{% trans "Actions" %}">
                                 {% if perms.core.change_note %}
-                                    <a href="{% url 'core:note-update' note.id %}" class="btn btn-primary">
+                                    <a href="{% context_url 'core:note-update' note.id %}" class="btn btn-primary">
                                         <i class="icon-update" aria-hidden="true"></i>
                                     </a>
                                 {% endif %}
                                 {% if perms.core.delete_note %}
-                                    <a href="{% url 'core:note-delete' note.id %}" class="btn btn-danger">
+                                    <a href="{% context_url 'core:note-delete' note.id %}" class="btn btn-danger">
                                         <i class="icon-delete" aria-hidden="true"></i>
                                     </a>
                                 {% endif %}
@@ -52,7 +55,7 @@
                         <th scope="row">{{ note.time|datetime_short }}</th>
                         {% if not unique_child %}
                             <td>
-                                <a href="{% url 'core:child' note.child.slug %}">{{ note.child }}</a>
+                                <a href="{% context_url 'core:child' note.child.slug %}">{{ note.child }}</a>
                             </td>
                         {% endif %}
                         <td>
@@ -68,7 +71,7 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <th colspan="5">{% trans "No notes found." %}</th>
+                            <th colspan="5">{{ empty_message }}</th>
                         </tr>
                     {% endfor %}
                 </tbody>

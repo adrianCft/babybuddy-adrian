@@ -31,7 +31,12 @@ class ViewsTestCase(TestCase):
             is_superuser=True, email="admin@admin.admin", **cls.credentials
         )
 
-        cls.c.login(**cls.credentials)
+    def setUp(self):
+        # Password-reset tests change the authentication hash. Each test needs
+        # its own session, matching the transaction restored by TestCase.
+        self.c = HttpClient()
+        self.user = get_user_model().objects.get(pk=type(self).user.pk)
+        self.assertTrue(self.c.login(**self.credentials))
 
     def test_root_router(self):
         page = self.c.get("/")

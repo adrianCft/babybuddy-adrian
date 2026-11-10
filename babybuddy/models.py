@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import zoneinfo
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -12,6 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext_lazy
 
 from rest_framework.authtoken.models import Token
+from babybuddy.settings_choices import languages, timezones
 
 
 class Settings(models.Model):
@@ -71,6 +71,9 @@ class Settings(models.Model):
     dashboard_hide_empty = models.BooleanField(
         verbose_name=_("Hide Empty Dashboard Cards"), default=False, editable=True
     )
+    dashboard_cards = models.JSONField(
+        blank=True, null=True, default=None, verbose_name=_("Favorite home cards")
+    )
     dashboard_hide_age = models.DurationField(
         verbose_name=_("Hide data older than"),
         help_text=_(
@@ -104,16 +107,14 @@ class Settings(models.Model):
         ],
     )
     language = models.CharField(
-        choices=settings.LANGUAGES,
+        choices=languages,
         default=settings.LANGUAGE_CODE,
         max_length=255,
         verbose_name=_("Language"),
     )
     timezone = models.CharField(
-        choices=sorted(
-            tuple(zip(zoneinfo.available_timezones(), zoneinfo.available_timezones()))
-        ),
-        default=timezone.get_default_timezone_name(),
+        choices=timezones,
+        default=timezone.get_default_timezone_name,
         max_length=100,
         verbose_name=_("Timezone"),
     )

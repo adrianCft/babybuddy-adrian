@@ -1,0 +1,8 @@
+{% load i18n %}
+<li class="bb-home-option" data-home-option>
+    <label><input class="form-check-input" type="checkbox" name="cards" value="{{ card.key }}"{% if selected %} checked{% endif %}><span>{{ card.label }}</span></label>
+    <div class="bb-home-order" data-home-order{% if not selected %} hidden{% endif %}>
+        <button type="button" class="btn btn-outline-secondary" data-card-move="up" aria-label="{% trans 'Move up' %}: {{ card.label }}" hidden>↑</button>
+        <button type="button" class="btn btn-outline-secondary" data-card-move="down" aria-label="{% trans 'Move down' %}: {{ card.label }}" hidden>↓</button>
+    </div>
+</li>

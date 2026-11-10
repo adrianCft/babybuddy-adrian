@@ -1,4 +1,5 @@
 {% extends 'babybuddy/page.html' %}
+{% load navigation %}
 {% load datetime i18n %}
 {% block title %}
     {% trans "Meals" %}
@@ -7,17 +8,19 @@
     <li class="breadcrumb-item active" aria-current="page">{% trans "Meals" %}</li>
 {% endblock %}
 {% block content %}
+    {% load mobile_records %}
     <h1>
         {% trans "Meals" %}
         {% if perms.core.add_meal %}
-            <a href="{% url 'core:meal-add' %}" class="btn btn-sm btn-success">
+            <a href="{% context_url 'core:meal-add' %}" class="btn btn-sm btn-success">
                 <i class="icon-add" aria-hidden="true"></i> {% trans "Add meal" %}
             </a>
         {% endif %}
     </h1>
     {% include 'babybuddy/filter.html' %}
-    {% if perms.core.view_dish %}<a class="btn btn-outline-primary mb-3" href="{% url 'core:dish-list' %}">{% trans "Saved dishes" %}</a>{% endif %}
-    <div class="table-responsive">
+    {% if perms.core.view_dish %}<a class="btn btn-outline-primary mb-3" href="{% context_url 'core:dish-list' %}">{% trans "Saved dishes" %}</a>{% endif %}
+    {% mobile_record_cards object_list %}
+    <div class="table-responsive bb-desktop-records">
         <table class="table table-instances table-borderless table-striped table-hover align-middle">
             <thead>
                 <tr>
@@ -75,13 +78,13 @@
                                  role="group"
                                  aria-label="{% trans "Actions" %}">
                                 {% if perms.core.change_meal %}
-                                    <a href="{% url 'core:meal-update' meal.id %}"
+                                    <a href="{% context_url 'core:meal-update' meal.id %}"
                                        class="btn btn-primary">
                                         <i class="icon-update" aria-hidden="true"></i>
                                     </a>
                                 {% endif %}
                                 {% if perms.core.delete_meal %}
-                                    <a href="{% url 'core:meal-delete' meal.id %}"
+                                    <a href="{% context_url 'core:meal-delete' meal.id %}"
                                        class="btn btn-danger">
                                         <i class="icon-delete" aria-hidden="true"></i>
                                     </a>
@@ -91,7 +94,7 @@
                         <th scope="row">{{ meal.time|datetime_short }}</th>
                         {% if not unique_child %}
                             <td>
-                                <a href="{% url 'core:child' meal.child.slug %}">{{ meal.child }}</a>
+                                <a href="{% context_url 'core:child' meal.child.slug %}">{{ meal.child }}</a>
                             </td>
                         {% endif %}
                         <td>{{ meal.get_meal_type_display }}</td>
@@ -119,7 +122,7 @@
                     {% endfor %}
                 {% empty %}
                     <tr>
-                        <th colspan="{% if not unique_child %}8{% else %}7{% endif %}">{% trans "No meals found." %}</th>
+                        <th colspan="{% if not unique_child %}8{% else %}7{% endif %}">{{ empty_message }}</th>
                     </tr>
                 {% endfor %}
             </tbody>

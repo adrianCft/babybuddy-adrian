@@ -131,7 +131,7 @@ class MealCrudTestCase(TestCase):
         response = self.client.get(reverse("core:meal-add"))
         self.assertContains(response, "data-food-quick-add-open")
         self.assertContains(response, "data-food-recent-badge")
-        self.assertContains(response, "Crear alimento sin salir de la comida")
+        self.assertContains(response, "Crear alimento")
         self.assertContains(response, "Crear y seleccionar")
 
         response = self.client.post(
@@ -156,9 +156,7 @@ class MealCrudTestCase(TestCase):
     def test_edit_form_marks_existing_foods_in_multicheck(self):
         self.grant("change_meal")
 
-        response = self.client.get(
-            reverse("core:meal-update", args=[self.meal.pk])
-        )
+        response = self.client.get(reverse("core:meal-update", args=[self.meal.pk]))
 
         content = response.content.decode()
         self.assertRegex(
@@ -189,9 +187,7 @@ class MealCrudTestCase(TestCase):
         self.assertIn("foods", form.errors)
 
     def test_inactive_food_cannot_be_added_to_new_meal(self):
-        form = forms.MealForm(
-            data=self.meal_data(foods=[self.inactive_food.pk])
-        )
+        form = forms.MealForm(data=self.meal_data(foods=[self.inactive_food.pk]))
 
         self.assertFalse(form.is_valid())
         self.assertIn("foods", form.errors)

@@ -3,7 +3,7 @@
 {% get_current_locale as LOCALE %}
 {% get_current_timezone as TIMEZONE %}
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="{{ LANGUAGE_CODE }}" data-bs-theme="dark">
     <head>
         <meta charset="utf-8" />
         <title>
@@ -37,7 +37,7 @@
         <meta name="viewport"
               content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     </head>
-    <body>
+    <body class="{% block body_class %}{% endblock %}">
         {% block nav %}{% endblock %}
         {% block breadcrumb_nav %}
             <nav aria-label="breadcrumb" role="navigation">
@@ -50,6 +50,7 @@
             </nav>
         {% endblock %}
         {% block page %}{% endblock %}
+        {% include 'core/photo_viewer.html' %}
         <script src="{% static "babybuddy/js/vendor.js" %}"></script>
         <script src="{% static "babybuddy/js/app.js" %}"></script>
         {% if user.is_authenticated %}<script>BabyBuddy.PullToRefresh.init()</script>{% endif %}

@@ -4,6 +4,7 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.test import Client as HttpClient
 from django.utils import timezone
+from urllib.parse import urlsplit
 
 from faker import Faker
 
@@ -281,12 +282,16 @@ class ViewsTestCase(TestCase):
     def test_timeline_views(self):
         child = models.Child.objects.first()
         response = self.c.get("/timeline/")
-        self.assertRedirects(response, "/children/{}/".format(child.slug))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            urlsplit(response.url).path, "/children/{}/".format(child.slug)
+        )
+        self.assertEqual(self.c.get(response.url).status_code, 200)
 
         models.Child.objects.create(
             first_name="Second", last_name="Child", birth_date="2000-01-01"
         )
-        response = self.c.get("/timeline/")
+        response = self.c.get("/timeline/", {"child": ""})
         self.assertEqual(response.status_code, 200)
 
     def test_tummytime_views(self):

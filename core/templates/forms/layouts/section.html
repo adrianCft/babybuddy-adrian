@@ -1,0 +1,6 @@
+<details class="bb-form-section" {% if fieldset.open %}open{% endif %}>
+    <summary>{{ fieldset.title }}</summary>
+    <div class="bb-form-section__body">
+        {% for field in fieldset.fields %}{% include 'babybuddy/form_field.html' %}{% endfor %}
+    </div>
+</details>

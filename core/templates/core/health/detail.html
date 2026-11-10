@@ -1,24 +1,35 @@
 {% extends "babybuddy/page.html" %}
-{% load i18n %}
+{% load navigation %}
+{% load datetime i18n navigation %}
 {% block title %}{{ object }}{% endblock %}
-{% block breadcrumbs %}<li class="breadcrumb-item"><a href="{% url 'core:health-overview' %}">{% trans "Health" %}</a></li><li class="breadcrumb-item"><a href="{{ list_url }}">{{ title }}</a></li><li class="breadcrumb-item active">{{ object }}</li>{% endblock %}
+{% block breadcrumbs %}<li class="breadcrumb-item"><a href="{% context_url 'core:health-overview' %}">{% trans "Health" %}</a></li><li class="breadcrumb-item"><a href="{{ list_url }}">{{ title }}</a></li><li class="breadcrumb-item active">{{ object }}</li>{% endblock %}
 {% block content %}
     <h1>{{ object }}</h1>
     <div class="d-flex flex-wrap gap-2 mb-4">
+        {% if record_dose_url %}<a class="btn btn-success" href="{{ record_dose_url }}">{% trans "Record dose" %}</a>{% endif %}
         {% if can_change %}<a class="btn btn-primary" href="{{ update_url }}"><i class="icon-update" aria-hidden="true"></i> {% trans "Update" %}</a>{% endif %}
         {% if can_delete %}<a class="btn btn-danger" href="{{ delete_url }}"><i class="icon-delete" aria-hidden="true"></i> {% trans "Delete" %}</a>{% endif %}
     </div>
-    {% if object.visit_id and perms.core.view_healthvisit %}<p><a href="{% url 'core:visit-detail' object.visit_id %}">{{ object.visit.child }} · {{ object.visit }}</a></p>{% endif %}
+    {% if return_url %}<p><a href="{{ return_url }}">← {% trans "Back to previous view" %}</a></p>{% endif %}
+    {% if object.visit_id and perms.core.view_healthvisit %}<p><a href="{% context_url 'core:visit-detail' object.visit_id %}">{{ object.visit.child }} · {{ object.visit }}</a></p>{% endif %}
     <dl class="row">
         {% for label, value in details %}{% if value %}<dt class="col-sm-4">{{ label }}</dt><dd class="col-sm-8 text-break">{{ value|linebreaksbr }}</dd>{% endif %}{% endfor %}
     </dl>
     {% include "core/health/photos.html" with photos=object.photos.all %}
     {% if route == 'visit' %}
-        {% if perms.core.add_prescription %}<a class="btn btn-success mb-3" href="{% url 'core:prescription-add' object.pk %}">{% trans "Add prescription" %}</a>{% endif %}
+        {% if perms.core.add_prescription %}<a class="btn btn-success mb-3" href="{% context_url 'core:prescription-add' object.pk %}">{% trans "Add prescription" %}</a>{% endif %}
         {% if perms.core.view_prescription %}
             <h2 class="h4">{% trans "Prescriptions" %}</h2>
-            {% for prescription in prescriptions %}<p><a href="{% url 'core:prescription-detail' prescription.pk %}">{{ prescription.name }}</a> — {{ prescription.instructions|linebreaksbr }}</p>{% empty %}<p>{% trans "No prescriptions recorded." %}</p>{% endfor %}
+            {% for prescription in prescriptions %}
+                <div class="card mb-3"><div class="card-body">
+                    <h3 class="h6"><a href="{% context_url 'core:prescription-detail' prescription.pk %}">{{ prescription.name }}</a></h3>
+                    <p class="text-break mb-0">{{ prescription.instructions|linebreaksbr }}</p>
+                </div></div>
+            {% empty %}<p>{% trans "No prescriptions recorded." %}</p>{% endfor %}
         {% endif %}
-        {% if perms.core.view_weight or perms.core.view_height or perms.core.view_head_circumference %}<a href="{% url 'core:growth-summary' object.child.slug %}" class="btn btn-outline-primary">{% trans "Growth and percentiles" %}</a>{% endif %}
+    {% endif %}
+    {% if route == 'prescription' and perms.core.view_medication %}
+        <h2 class="h4">{% trans "Recent doses of this medication" %}</h2>
+        {% for dose in recent_doses %}<p>{{ dose.time|datetime_short }} · {{ dose.dosage|default_if_none:'—' }} {{ dose.get_dosage_unit_display }}{% if perms.core.change_medication %} · <a href="{% context_url 'core:medication-update' dose.pk %}">{% trans "Update" %}</a>{% endif %}</p>{% empty %}<p>{% trans "No doses recorded for this medication." %}</p>{% endfor %}
     {% endif %}
 {% endblock %}

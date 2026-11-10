@@ -9,7 +9,7 @@ from django.contrib.auth.views import LogoutView as LogoutViewBase
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import BadRequest
 from django.forms import Form
-from django.http import HttpResponseForbidden
+from django.http import Http404, HttpResponseForbidden
 from django.middleware.csrf import REASON_BAD_ORIGIN
 from django.shortcuts import redirect, render
 from django.template import loader
@@ -82,9 +82,23 @@ class BabyBuddyFilterView(FilterView):
     # TODO Figure out the correct way to use this.
     strict = False
 
+    def get_filterset_class(self):
+        from core.navigation import date_filter_class
+
+        base = super().get_filterset_class()
+        return date_filter_class(base, self.model)
+
+    def get_filterset_kwargs(self, filterset_class):
+        from core.navigation import list_context
+
+        return list_context(self, super().get_filterset_kwargs(filterset_class))
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         children = {o.child for o in context["object_list"] if hasattr(o, "child")}
+        from core.presentation import filter_context
+
+        context.update(filter_context(self.request, context["filter"]))
         if len(children) == 1:
             context["unique_child"] = True
         return context
@@ -93,6 +107,26 @@ class BabyBuddyFilterView(FilterView):
 class BabyBuddyPaginatedView(View):
     def get_paginate_by(self, queryset):
         return self.request.user.settings.pagination_count
+
+    def paginate_queryset(self, queryset, page_size):
+        try:
+            return super().paginate_queryset(queryset, page_size)
+        except Http404:
+            # Deleting the last record on a page should return to the last
+            # available page with the same filters, rather than a 404.
+            value = self.request.GET.get(self.page_kwarg, "")
+            if not value.isdecimal() or len(value) > 9:
+                raise
+            paginator = self.get_paginator(
+                queryset,
+                page_size,
+                orphans=self.get_paginate_orphans(),
+                allow_empty_first_page=self.get_allow_empty(),
+            )
+            if paginator.num_pages and int(value) > paginator.num_pages:
+                page = paginator.page(paginator.num_pages)
+                return paginator, page, page.object_list, page.has_other_pages()
+            raise
 
 
 @method_decorator(csrf_protect, name="dispatch")

@@ -1,33 +1,33 @@
 {% load i18n widget_tweaks %}
-<form id="filter_form"
-      role="form"
-      action=""
-      method="get"
-      class="collapse{% if request.GET.filtered %} show{% endif %}">
-    <div class="form-group form-row">
-        {% for field in filter.form %}
-            <label for="id_{{ field.name }}"
-                   class="col-xs-2 col-sm-auto col-form-label col-form-label-sm">{{ field.label }}</label>
-            <div class="col-xs-10 col-sm-auto">
-                {% if 'choice' or 'boolean' in field|field_type %}
-                    {{ field|add_class:"form-select form-select-sm" }}
-                {% else %}
-                    {{ field|add_class:"form-control form-control-sm" }}
-                {% endif %}
-            </div>
-        {% endfor %}
-        <div class="col-xs-12 col-sm-auto mt-3 mt-sm-0">
-            <button type="submit" class="btn btn-sm btn-primary me-2">{% trans "Filter" %}</button>
-            <a href="{{ request.path }}" class="btn btn-sm btn-error">{% trans "Reset" %}</a>
-        </div>
+<section class="bb-filters" aria-label="{% trans 'Filters' %}">
+    <div class="bb-filter-toolbar">
+        <a class="btn btn-outline-secondary" data-bs-toggle="collapse" href="#filter_form" role="button"
+           aria-expanded="{% if request.GET.filtered or filter.form.errors %}true{% else %}false{% endif %}" aria-controls="filter_form">
+            {% trans "Filters" %}{% if active_filters %} <span class="badge text-bg-secondary">{{ active_filters|length }}</span>{% endif %}
+        </a>
+        {% if active_filters or filter.form.errors %}<a class="btn btn-link" href="{{ clear_filters_url }}">{% trans "Clear filters" %}</a>{% endif %}
     </div>
-    <input type="hidden" name="filtered" value="1" />
-</form>
-<p>
-    <a class="btn btn btn-sm"
-       data-bs-toggle="collapse"
-       href="#filter_form"
-       role="button"
-       aria-expanded="false"
-       aria-controls="filter_form">{% trans "Filters" %}</a>
-</p>
+    {% if active_filters %}
+        <ul class="bb-filter-chips" aria-label="{% trans 'Active filters' %}">
+            {% for chip in active_filters %}<li><a href="{{ chip.remove_url }}" data-filter-chip="{{ chip.name }}" aria-label="{% trans 'Remove filter' %}: {{ chip.label }}: {{ chip.value }}"><span><span class="text-body-secondary">{{ chip.label }}:</span> {{ chip.value }}</span><span aria-hidden="true">×</span></a></li>{% endfor %}
+        </ul>
+    {% endif %}
+    <form id="filter_form" action="" method="get" class="collapse{% if request.GET.filtered or filter.form.errors %} show{% endif %}">
+        {{ filter.form.non_field_errors }}
+        <div class="bb-filter-fields">
+            {% for field in filter.form %}
+                {% if not record_context or field.name != 'child' and field.name != 'date' %}
+                    <div class="bb-filter-field"><label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {% if 'choice' in field|field_type or 'boolean' in field|field_type %}{{ field|add_class:"form-select" }}{% else %}{{ field|add_class:"form-control" }}{% endif %}
+                        {{ field.errors }}
+                    </div>
+                {% else %}
+                    <input type="hidden" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}">
+                    {{ field.errors }}
+                {% endif %}
+            {% endfor %}
+        </div>
+        <input type="hidden" name="filtered" value="1">
+        <button type="submit" class="btn btn-primary mt-3">{% trans "Apply filters" %}</button>
+    </form>
+</section>

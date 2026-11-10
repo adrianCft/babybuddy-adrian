@@ -2,12 +2,14 @@
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models.deletion import ProtectedError
 from django.db.models import Count, Exists, F, Max, Min, OuterRef, Prefetch, Q
 from django.db.models.functions import Lower, TruncDate
 from django.forms import Form
 from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -19,6 +21,13 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormVi
 from babybuddy.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from babybuddy.views import BabyBuddyFilterView, BabyBuddyPaginatedView
 from core import filters, forms, models, timeline
+from core.navigation import (
+    ReturnContextMixin,
+    context_initial,
+    contextual_url,
+    navigation,
+    safe_return_url,
+)
 
 
 def _prepare_timeline_context_data(context, date, child=None, user=None):
@@ -37,7 +46,14 @@ def _prepare_timeline_context_data(context, date, child=None, user=None):
     pass
 
 
-class CoreAddView(PermissionRequiredMixin, SuccessMessageMixin, CreateView):
+class CoreAddView(
+    ReturnContextMixin, PermissionRequiredMixin, SuccessMessageMixin, CreateView
+):
+    form_page = True
+
+    def get_initial(self):
+        return context_initial(self, super().get_initial())
+
     def get_success_message(self, cleaned_data):
         cleaned_data["model"] = self.model._meta.verbose_name.title()
         if "child" in cleaned_data:
@@ -58,14 +74,25 @@ class CoreAddView(PermissionRequiredMixin, SuccessMessageMixin, CreateView):
         :return: Updated keyword arguments.
         """
         kwargs = super(CoreAddView, self).get_form_kwargs()
+        if not issubclass(self.get_form_class(), forms.CoreModelForm):
+            return kwargs
+        child = navigation(self.request)["child"]
+        if child:
+            kwargs["child"] = child.slug
         for parameter in ["child", "timer"]:
             value = self.request.GET.get(parameter, None)
             if value:
+                if parameter == "child" and child:
+                    value = child.slug
                 kwargs.update({parameter: value})
         return kwargs
 
 
-class CoreUpdateView(PermissionRequiredMixin, SuccessMessageMixin, UpdateView):
+class CoreUpdateView(
+    ReturnContextMixin, PermissionRequiredMixin, SuccessMessageMixin, UpdateView
+):
+    form_page = True
+
     def get_success_message(self, cleaned_data):
         cleaned_data["model"] = self.model._meta.verbose_name.title()
         if "child" in cleaned_data:
@@ -75,7 +102,11 @@ class CoreUpdateView(PermissionRequiredMixin, SuccessMessageMixin, UpdateView):
         return self.success_message % cleaned_data
 
 
-class CoreDeleteView(PermissionRequiredMixin, SuccessMessageMixin, DeleteView):
+class CoreDeleteView(
+    ReturnContextMixin, PermissionRequiredMixin, SuccessMessageMixin, DeleteView
+):
+    form_page = True
+
     def get_success_message(self, cleaned_data):
         return _("%(model)s entry deleted.") % {
             "model": self.model._meta.verbose_name.title()
@@ -579,17 +610,82 @@ class MedicationList(
     template_name = "core/medication_list.html"
     permission_required = ("core.view_medication",)
     filterset_class = filters.MedicationFilter
-    queryset = models.Medication.objects.select_related("child").prefetch_related("photos")
+    queryset = models.Medication.objects.select_related("child").prefetch_related(
+        "photos"
+    )
 
 
-class MedicationAdd(CoreAddView):
+class MedicationSuggestions:
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        names = set()
+        if self.request.user.has_perm("core.view_medication"):
+            names.update(models.Medication.objects.values_list("name", flat=True))
+        if self.request.user.has_perm("core.view_prescription"):
+            names.update(models.Prescription.objects.values_list("name", flat=True))
+        context["medication_names"] = sorted(names, key=str.casefold)
+        context["medication_picker"] = True
+        return context
+
+
+class MedicationAdd(MedicationSuggestions, CoreAddView):
     model = models.Medication
     permission_required = ("core.add_medication",)
     form_class = forms.MedicationForm
     success_url = reverse_lazy("core:medication-list")
 
+    def get_success_message(self, cleaned_data):
+        return _("Dose recorded for %(child)s.") % {"child": cleaned_data["child"]}
 
-class MedicationUpdate(CoreUpdateView):
+    def get_source_prescription(self):
+        if not hasattr(self, "source_prescription"):
+            self.source_prescription = None
+            value = self.request.GET.get("prescription")
+            if value:
+                if not self.request.user.has_perm("core.view_prescription"):
+                    raise PermissionDenied
+                self.source_prescription = get_object_or_404(
+                    models.Prescription.objects.select_related("visit__child"),
+                    pk=(
+                        value
+                        if value.isascii() and value.isdecimal() and len(value) <= 18
+                        else None
+                    ),
+                )
+        return self.source_prescription
+
+    def get_initial(self):
+        initial = super().get_initial()
+        prescription = self.get_source_prescription()
+        if prescription:
+            initial.update(name=prescription.name, child=prescription.visit.child)
+        return initial
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        prescription = self.get_source_prescription()
+        if prescription:
+            kwargs["child"] = prescription.visit.child.slug
+        return kwargs
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        if self.get_source_prescription():
+            # Only name and child are copied. Dose, unit and time are confirmed here.
+            form.fields["name"].disabled = True
+            form.fields["child"].disabled = True
+            form.fields["dosage"].required = True
+            form.fields["dosage_unit"].required = True
+        return form
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["source_prescription"] = self.get_source_prescription()
+        context["submit_label"] = _("Record dose")
+        return context
+
+
+class MedicationUpdate(MedicationSuggestions, CoreUpdateView):
     model = models.Medication
     permission_required = ("core.change_medication",)
     form_class = forms.MedicationForm
@@ -694,9 +790,7 @@ class SleepFinishQuick(PermissionRequiredMixin, RedirectView):
     def post(self, request, *args, **kwargs):
         with transaction.atomic():
             timer = (
-                models.Timer.objects.select_for_update()
-                .filter(pk=kwargs["pk"])
-                .first()
+                models.Timer.objects.select_for_update().filter(pk=kwargs["pk"]).first()
             )
             if timer is None:
                 # An external client may have completed the timer after this
@@ -720,12 +814,12 @@ class SleepFinishQuick(PermissionRequiredMixin, RedirectView):
                     timer.stop()
                     messages.success(
                         request,
-                        _("Sleep entry for %(child)s added!")
-                        % {"child": sleep.child},
+                        _("Sleep entry for %(child)s added!") % {"child": sleep.child},
                     )
 
-        self.url = request.POST.get("next") or reverse("core:sleep-list")
-        return super().get(request, *args, **kwargs)
+        return HttpResponseRedirect(
+            safe_return_url(request) or reverse("core:sleep-list")
+        )
 
 
 class TagAdminList(
@@ -826,10 +920,10 @@ class Timeline(LoginRequiredMixin, TemplateView):
 
     # Show the overall timeline or a child timeline if one Child instance.
     def get(self, request, *args, **kwargs):
-        children = models.Child.objects.count()
-        if children == 1:
+        child = navigation(request)["child"]
+        if child:
             return HttpResponseRedirect(
-                reverse("core:child", args={models.Child.objects.first().slug})
+                contextual_url(request, "core:child", child.slug, remember_return=False)
             )
         return super(Timeline, self).get(request, *args, **kwargs)
 
@@ -852,7 +946,8 @@ class TimerDetail(PermissionRequiredMixin, DetailView):
     permission_required = ("core.view_timer",)
 
 
-class TimerAdd(PermissionRequiredMixin, CreateView):
+class TimerAdd(ReturnContextMixin, PermissionRequiredMixin, CreateView):
+    form_page = True
     model = models.Timer
     permission_required = ("core.add_timer",)
     form_class = forms.TimerForm
@@ -860,10 +955,15 @@ class TimerAdd(PermissionRequiredMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super(TimerAdd, self).get_form_kwargs()
         kwargs.update({"user": self.request.user})
+        child = navigation(self.request)["child"]
+        if child:
+            kwargs["child"] = child.slug
         return kwargs
 
     def get_success_url(self):
-        return reverse("core:timer-detail", kwargs={"pk": self.object.pk})
+        return safe_return_url(self.request) or reverse(
+            "core:timer-detail", kwargs={"pk": self.object.pk}
+        )
 
 
 class TimerUpdate(CoreUpdateView):
@@ -879,7 +979,9 @@ class TimerUpdate(CoreUpdateView):
 
     def get_success_url(self):
         instance = self.get_object()
-        return reverse("core:timer-detail", kwargs={"pk": instance.pk})
+        return safe_return_url(self.request) or reverse(
+            "core:timer-detail", kwargs={"pk": instance.pk}
+        )
 
 
 class TimerAddQuick(PermissionRequiredMixin, RedirectView):
@@ -887,25 +989,24 @@ class TimerAddQuick(PermissionRequiredMixin, RedirectView):
     permission_required = ("core.add_timer",)
 
     def post(self, request, *args, **kwargs):
-        name = (
-            models.Timer.SLEEP_NAME
-            if request.POST.get("kind") == "sleep"
-            else None
-        )
+        name = models.Timer.SLEEP_NAME if request.POST.get("kind") == "sleep" else None
         instance = models.Timer.objects.create(user=request.user, name=name)
         # Find child from child pk in POST
         child_id = request.POST.get("child", False)
-        child = models.Child.objects.get(pk=child_id) if child_id else None
+        child = (
+            models.Child.objects.get(pk=child_id)
+            if child_id
+            else navigation(request)["child"]
+        )
         if child:
             instance.child = child
         # Add child relationship if there is only Child instance.
-        elif models.Child.count() == 1:
+        elif models.Child.objects.count() == 1:
             instance.child = models.Child.objects.first()
         instance.save()
-        self.url = request.GET.get(
-            "next", reverse("core:timer-detail", args={instance.id})
+        return HttpResponseRedirect(
+            safe_return_url(request) or reverse("core:timer-detail", args=[instance.id])
         )
-        return super(TimerAddQuick, self).get(request, *args, **kwargs)
 
 
 class TimerRestart(PermissionRequiredMixin, RedirectView):

@@ -1,0 +1,39 @@
+.bb-summary-navigation {
+    max-width: 42rem;
+    margin-bottom: 1.25rem;
+}
+
+.bb-summary-period {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .5rem;
+    margin-bottom: .75rem;
+
+    > a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 2.75rem;
+    }
+}
+
+.bb-summary-dates {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+    align-items: center;
+    gap: .5rem;
+    text-align: center;
+
+    > a {
+        min-height: 2.75rem;
+        padding: .15rem;
+        font-size: 1.5rem;
+    }
+}
+
+.bb-summary-today {
+    display: block;
+    width: max-content;
+    min-height: 2.75rem;
+    margin-inline: auto;
+}

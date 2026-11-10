@@ -1,14 +1,8 @@
 {% load i18n %}
-<div class="row">
-    <div class="row mb-3">
-        <details ontoggle="BabyBuddy.RememberAdvancedToggle(event)"
-                 class="advanced-fields">
-            <summary class="advanced-fields__summary">
-                <h4>{% trans "Advanced Fields" %}</h4>
-            </summary>
-            {% for field in fieldset.fields %}
-                <div class="row">{% include "babybuddy/form_field.html" %}</div>
-            {% endfor %}
-        </details>
+<details ontoggle="BabyBuddy.RememberAdvancedToggle(event)"
+         class="advanced-fields bb-form-section" {% if fieldset.open %}open{% endif %}>
+    <summary class="advanced-fields__summary">{% trans "Advanced Fields" %}</summary>
+    <div class="bb-form-section__body">
+        {% for field in fieldset.fields %}{% include "babybuddy/form_field.html" %}{% endfor %}
     </div>
-</div>
+</details>

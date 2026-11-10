@@ -1,0 +1,21 @@
+{% load i18n %}
+<details class="bb-home-customize" data-home-customizer{% if home.form.errors %} open{% endif %}>
+    <summary>{% trans "Customize home" %}</summary>
+    <form method="post" class="mt-3" data-home-layout data-limit-message="{% trans 'Choose up to 6 favorite cards.' %}">
+        {% csrf_token %}
+        <p class="small text-body-secondary">{% trans "Choose up to 6 favorite cards. The other data stays available below." %}</p>
+        {{ home.form.non_field_errors }}{{ home.form.cards.errors }}
+        <h2 class="h6">{% trans "Favorite cards" %} (<span data-home-count>{{ home.selected_rows|length }}</span>/6)</h2>
+        <p class="small text-body-secondary" role="status" data-home-limit hidden></p>
+        <ul class="bb-home-options" data-home-selected>{% for card in home.selected_rows %}{% include 'dashboard/home_card_option.html' with selected=True %}{% endfor %}</ul>
+        <details class="mb-3"><summary>{% trans "More cards" %}</summary>
+            <ul class="bb-home-options mt-2" data-home-available>{% for card in home.available_rows %}{% include 'dashboard/home_card_option.html' with selected=False %}{% endfor %}</ul>
+        </details>
+        <label class="d-flex align-items-center gap-2 mb-3">{{ home.form.hide_empty }}{{ home.form.hide_empty.label }}</label>
+        <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-primary" type="submit">{% trans "Save home" %}</button>
+            <button class="btn btn-outline-secondary" type="submit" form="home-reset">{% trans "Restore recommended cards" %}</button>
+        </div>
+    </form>
+    <form method="post" id="home-reset" hidden>{% csrf_token %}<input type="hidden" name="reset_home" value="1"></form>
+</details>

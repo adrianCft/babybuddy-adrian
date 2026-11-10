@@ -1,0 +1,11 @@
+{% if form.fieldsets %}
+    {% for fieldset in form.hydrated_fielsets %}
+        {% with "forms/layouts/"|add:fieldset.layout|add:".html" as template %}
+            {% include template %}
+        {% endwith %}
+    {% endfor %}
+{% else %}
+    {% for field in form %}
+        {% include 'babybuddy/form_field.html' %}
+    {% endfor %}
+{% endif %}

@@ -1,7 +1,7 @@
 {% extends 'cards/base.html' %}
-{% load i18n %}
+{% load i18n navigation %}
 {% block header %}
-    <a href="{% url 'core:meal-list' %}?child={{ child.pk }}">{% trans "Meals" %}</a>
+    <a href="{% context_url 'core:meal-list' %}">{% trans "Meals" %}</a>
 {% endblock %}
 {% block title %}
     {% if meal %}
@@ -30,7 +30,7 @@
     {% if can_add %}
         <div class="mt-2">
                 <a class="btn btn-sm btn-dashboard-add-link p-0 text-decoration-none"
-               href="{% url 'core:meal-add' %}?child={{ child.slug }}">
+               href="{% context_url 'core:meal-add' %}">
                 <i class="icon-add" aria-hidden="true"></i> {% trans "Add meal" %}
             </a>
         </div>

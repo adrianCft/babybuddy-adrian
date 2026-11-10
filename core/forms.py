@@ -20,6 +20,7 @@ from core.widgets import (
     TagsEditor,
 )
 
+
 def set_initial_values(kwargs, form_type):
     """
     Sets initial value for add forms based on provided kwargs.
@@ -130,10 +131,16 @@ class CoreModelForm(forms.ModelForm):
             hyrdrated_fieldset = {
                 "layout": fieldset.get("layout", "default"),
                 "layout_attrs": fieldset.get("layout_attrs", {}),
+                "title": fieldset.get("title", ""),
                 "fields": [],
             }
             for field_name in fieldset["fields"]:
                 hyrdrated_fieldset["fields"].append(bound_field_dict[field_name])
+
+            hyrdrated_fieldset["open"] = any(
+                field.errors or field.value() not in (None, "", False, [], ())
+                for field in hyrdrated_fieldset["fields"]
+            )
 
             hydrated_fieldsets.append(hyrdrated_fieldset)
 
@@ -384,9 +391,7 @@ class MealForm(CoreModelForm, TaggableModelForm):
         available = Q(active=True)
         if self.instance.pk:
             available |= Q(meals=self.instance)
-        self.fields["foods"].queryset = (
-            models.Food.objects.filter(available).distinct()
-        )
+        self.fields["foods"].queryset = models.Food.objects.filter(available).distinct()
         widget = self.fields["foods"].widget
         widget.can_add_food = bool(user and user.has_perm("core.add_food"))
         recent_by_child = {}
@@ -448,9 +453,7 @@ class ChildFoodProfileForm(CoreModelForm):
             available |= Q(pk=self.instance.food_id)
             self.fields["child"].disabled = True
             self.fields["food"].disabled = True
-        self.fields["food"].queryset = models.Food.objects.filter(
-            available
-        ).distinct()
+        self.fields["food"].queryset = models.Food.objects.filter(available).distinct()
 
 
 class HeadCircumferenceForm(CoreModelForm, TaggableModelForm):
@@ -532,6 +535,9 @@ class MedicationForm(PhotoFormMixin, CoreModelForm, TaggableModelForm):
             "child": ChildRadioSelect,
             "dosage_unit": PillRadioSelect(),
             "time": DateTimeInput(),
+            "name": forms.TextInput(
+                attrs={"list": "medication-names", "autocomplete": "off"}
+            ),
             "notes": forms.Textarea(attrs={"rows": 5}),
         }
 

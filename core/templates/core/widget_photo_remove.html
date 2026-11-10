@@ -1,0 +1,14 @@
+{% load i18n %}
+<div class="bb-photo-grid" data-photo-gallery>
+    {% for group, options, index in widget.optgroups %}{% for option in options %}
+        <div class="bb-photo-tile{% if option.selected %} bb-photo-pending-removal{% endif %}">
+            <a class="bb-photo-link" href="{{ option.photo_url }}" data-photo-viewer data-photo-caption="{% trans 'Saved photo' %}" aria-label="{% trans 'Enlarge photo' %} {{ forloop.counter }}">
+                <img src="{{ option.photo_url }}" alt="{% trans 'Saved photo' %}" loading="lazy">
+            </a>
+            <label class="bb-photo-remove-label" for="{{ option.attrs.id }}">
+                {% include 'django/forms/widgets/input.html' with widget=option %}
+                <span>{% blocktrans with number=forloop.counter %}Remove photo {{ number }} when saving{% endblocktrans %}</span>
+            </label>
+        </div>
+    {% empty %}<p class="small text-body-secondary mb-0">{% trans "No saved photos." %}</p>{% endfor %}{% endfor %}
+</div>

@@ -1,0 +1,16 @@
+{% load i18n %}
+<div class="bb-summary-navigation">
+    <nav class="bb-summary-period" aria-label="{% trans 'Summary period' %}">
+        <a class="btn {% if period == 'day' %}btn-primary{% else %}btn-outline-primary{% endif %}"{% if period == 'day' %} aria-current="page"{% endif %} href="{% url 'core:daily-summary' %}?date={{ day|date:'Y-m-d' }}&amp;child={{ selected_child.pk }}">{% trans "Day" %}</a>
+        <a class="btn {% if period == 'week' %}btn-primary{% else %}btn-outline-primary{% endif %}"{% if period == 'week' %} aria-current="page"{% endif %} href="{% url 'core:period-summary' %}?period=week&amp;date={{ day|date:'Y-m-d' }}&amp;child={{ selected_child.pk }}">{% trans "Week" %}</a>
+        <a class="btn {% if period == 'month' %}btn-primary{% else %}btn-outline-primary{% endif %}"{% if period == 'month' %} aria-current="page"{% endif %} href="{% url 'core:period-summary' %}?period=month&amp;date={{ day|date:'Y-m-d' }}&amp;child={{ selected_child.pk }}">{% trans "Month" %}</a>
+    </nav>
+    {% if day %}
+        <nav class="bb-summary-dates" aria-label="{% trans 'Date navigation' %}">
+            {% if previous_url %}<a class="btn btn-outline-secondary" href="{{ previous_url }}" aria-label="{% if period == 'day' %}{% trans 'Previous day' %}{% else %}{% trans 'Previous period' %}{% endif %}"{% if period == 'day' %} data-daily-previous{% endif %}><span aria-hidden="true">‹</span></a>{% else %}<span></span>{% endif %}
+            <h2 class="h6 mb-0">{% if period == 'day' %}{{ day|date:"l, j F Y" }}{% else %}{{ summary.first|date:"j M Y" }} – {{ summary.last|date:"j M Y" }}{% endif %}</h2>
+            {% if next_url %}<a class="btn btn-outline-secondary" href="{{ next_url }}" aria-label="{% if period == 'day' %}{% trans 'Next day' %}{% else %}{% trans 'Next period' %}{% endif %}"{% if period == 'day' %} data-daily-next{% endif %}><span aria-hidden="true">›</span></a>{% else %}<span></span>{% endif %}
+        </nav>
+        {% if not is_today %}<a class="btn btn-link bb-summary-today" href="{{ today_url }}">{% trans "Today" %}</a>{% endif %}
+    {% endif %}
+</div>

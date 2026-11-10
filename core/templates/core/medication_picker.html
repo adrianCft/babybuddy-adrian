@@ -1,0 +1,12 @@
+{% load i18n widget_tweaks %}
+<div class="bb-medication-picker" data-medication-picker>
+    <label class="visually-hidden" for="{{ field.id_for_label }}_choice">{% trans "Choose a medication" %}</label>
+    <select id="{{ field.id_for_label }}_choice" class="form-select" data-medication-choice hidden{% if field.field.disabled %} disabled{% endif %}>
+        <option value="">{% trans "Write a new medication" %}</option>
+        {% for name in medication_names %}<option value="{{ name }}"{% if field.value == name %} selected{% endif %}>{{ name }}</option>{% endfor %}
+    </select>
+    <div data-medication-new>
+        <label class="visually-hidden" for="{{ field.id_for_label }}">{% trans "New medication name" %}</label>
+        {% if field.errors %}{{ field|add_class:"form-control is-invalid" }}{% else %}{{ field|add_class:"form-control" }}{% endif %}
+    </div>
+</div>

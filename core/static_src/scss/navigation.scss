@@ -1,0 +1,56 @@
+.bb-context-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 15rem) minmax(0, 12rem) auto;
+    justify-content: start;
+    align-items: end;
+    gap: .6rem;
+    margin: .5rem 0 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--bs-border-color);
+
+    label {
+        display: block;
+        margin-bottom: .3rem;
+        font-size: .85rem;
+    }
+
+    .form-control, .form-select, > button {
+        min-width: 0;
+        min-height: 2.75rem;
+    }
+
+    .bb-context-hint {
+        grid-column: 1 / -1;
+    }
+}
+
+.bb-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .75rem;
+    margin-top: 1rem;
+}
+
+@include media-breakpoint-down(md) {
+    .bb-context-bar {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+
+        .form-control, .form-select {
+            width: 100%;
+            max-width: 100%;
+            padding-inline: .5rem;
+            font-size: .9rem;
+        }
+    }
+}
+
+@media (max-width: 374px) {
+    .bb-context-bar {
+        grid-template-columns: minmax(0, 1fr) auto;
+
+        .bb-context-child {
+            grid-column: 1 / -1;
+        }
+    }
+}

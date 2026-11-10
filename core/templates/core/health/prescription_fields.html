@@ -1,0 +1,31 @@
+{% load i18n %}
+<fieldset class="bb-prescription" data-prescription-card data-form-prefix="{{ prescription_form.prefix }}">
+    <legend class="visually-hidden">{% trans "Medication" %}</legend>
+    <div class="bb-prescription__header">
+        <h3 class="h6 mb-0">{% trans "Medication" %} <span data-prescription-number>{{ forloop.counter }}</span></h3>
+        {% if not prescription_form.instance.pk %}
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-prescription-remove hidden>{% trans "Remove medication" %}</button>
+        {% endif %}
+    </div>
+    {{ prescription_form.non_field_errors }}
+    {% for hidden in prescription_form.hidden_fields %}{{ hidden }}{{ hidden.errors }}{% endfor %}
+    {% include 'babybuddy/form_field.html' with field=prescription_form.name %}
+    {% include 'babybuddy/form_field.html' with field=prescription_form.instructions %}
+    <details class="bb-form-section" {% if prescription_form.start_date.value or prescription_form.end_date.value or prescription_form.notes.value or prescription_form.start_date.errors or prescription_form.end_date.errors or prescription_form.notes.errors %}open{% endif %}>
+        <summary>{% trans "Dates and notes" %}</summary>
+        <div class="bb-form-section__body">
+            {% include 'babybuddy/form_field.html' with field=prescription_form.start_date %}
+            {% include 'babybuddy/form_field.html' with field=prescription_form.end_date %}
+            {% include 'babybuddy/form_field.html' with field=prescription_form.notes %}
+        </div>
+    </details>
+    {% if prescription_form.photos or prescription_form.remove_photos %}
+        <details class="bb-form-section" {% if prescription_form.photos.errors or prescription_form.remove_photos.errors %}open{% endif %}>
+            <summary>{% trans "Prescription photos" %}</summary>
+            <div class="bb-form-section__body">
+                {% if prescription_form.photos %}{% include 'babybuddy/form_field.html' with field=prescription_form.photos %}{% endif %}
+                {% if prescription_form.remove_photos %}{% include 'babybuddy/form_field.html' with field=prescription_form.remove_photos %}{% endif %}
+            </div>
+        </details>
+    {% endif %}
+</fieldset>

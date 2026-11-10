@@ -339,7 +339,7 @@ def card_pumping_recent(context, child, end_date=None):
 
 
 @register.inclusion_tag("cards/sleep_last.html", takes_context=True)
-def card_sleep_last(context, child):
+def card_sleep_last(context, child, internal_only=False):
     """
     Information about the most recent sleep entry.
     :param child: an instance of the Child model.
@@ -355,7 +355,10 @@ def card_sleep_last(context, child):
     # Read the current timer state from the database on every render. Timers
     # created by external clients (e.g. Home Assistant) are not guaranteed to
     # use Baby Buddy's internal sleep timer name.
-    timer = models.Timer.objects.filter(child=child).order_by("-start").first()
+    timers = models.Timer.objects.filter(child=child, active=True)
+    if internal_only:
+        timers = timers.filter(name=models.Timer.SLEEP_NAME)
+    timer = timers.order_by("-start").first()
     user = context["request"].user
 
     return {

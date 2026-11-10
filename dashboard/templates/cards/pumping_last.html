@@ -1,7 +1,7 @@
 {% extends 'cards/base.html' %}
-{% load duration i18n %}
+{% load duration i18n navigation %}
 {% block header %}
-    <a href="{% url "core:pumping-list" %}">{% trans "Last Pumping" %}</a>
+    <a href="{% context_url 'core:pumping-list' %}">{% trans "Last Pumping" %}</a>
 {% endblock %}
 {% block title %}
     {% if pumping %}
@@ -22,7 +22,7 @@
     {% if can_add %}
         <div class="mt-2">
             <a class="btn btn-sm btn-dashboard-add-link p-0 text-decoration-none"
-               href="{% url 'core:pumping-add' %}?child={{ child.slug }}">
+               href="{% context_url 'core:pumping-add' %}">
                 <i class="icon-add" aria-hidden="true"></i> {% trans "Add Pumping Entry" %}
             </a>
         </div>

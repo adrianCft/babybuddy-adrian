@@ -1,7 +1,7 @@
 {% extends 'cards/base.html' %}
-{% load duration i18n %}
+{% load duration i18n navigation %}
 {% block header %}
-    <a href="{% url "core:diaperchange-list" %}">{% trans "Last Diaper Change" %}</a>
+    <a href="{% context_url 'core:diaperchange-list' %}">{% trans "Last Diaper Change" %}</a>
 {% endblock %}
 {% block title %}
     {% if change %}
@@ -20,7 +20,7 @@
     {% if can_add %}
         <div class="mt-2">
             <a class="btn btn-sm btn-dashboard-add-link p-0 text-decoration-none"
-               href="{% url 'core:diaperchange-add' %}?child={{ child.slug }}">
+               href="{% context_url 'core:diaperchange-add' %}">
                 <i class="icon-add" aria-hidden="true"></i> {% trans "Add Diaper Change" %}
             </a>
         </div>

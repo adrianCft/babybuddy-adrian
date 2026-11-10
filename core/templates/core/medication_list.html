@@ -1,22 +1,25 @@
 {% extends 'babybuddy/page.html' %}
+{% load navigation %}
 {% load datetime i18n widget_tweaks %}
 {% block title %}
-    {% trans "Medication" %}
+    {% trans "Recorded doses" %}
 {% endblock %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item active" aria-current="page">{% trans "Medication" %}</li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Recorded doses" %}</li>
 {% endblock %}
 {% block content %}
+    {% load mobile_records %}
     <h1>
-        {% trans "Medication" %}
+        {% trans "Recorded doses" %}
         {% if perms.core.add_medication %}
-            <a href="{% url 'core:medication-add' %}" class="btn btn-sm btn-success">
-                <i class="icon-medication" aria-hidden="true"></i> {% trans "Add Medication" %}
+            <a href="{% context_url 'core:medication-add' %}" class="btn btn-sm btn-success">
+                <i class="icon-medication" aria-hidden="true"></i> {% trans "Record dose" %}
             </a>
         {% endif %}
     </h1>
     {% include 'babybuddy/filter.html' %}
-    <div class="table-responsive">
+    {% mobile_record_cards object_list %}
+    <div class="table-responsive bb-desktop-records">
         <table class="table table-instances table-borderless table-striped table-hover align-middle">
             <thead>
                 <tr>
@@ -39,13 +42,13 @@
                                  role="group"
                                  aria-label="{% trans "Actions" %}">
                                 {% if perms.core.change_medication %}
-                                    <a href="{% url 'core:medication-update' medication.id %}"
+                                    <a href="{% context_url 'core:medication-update' medication.id %}"
                                        class="btn btn-primary">
                                         <i class="icon-update" aria-hidden="true"></i>
                                     </a>
                                 {% endif %}
                                 {% if perms.core.delete_medication %}
-                                    <a href="{% url 'core:medication-delete' medication.id %}"
+                                    <a href="{% context_url 'core:medication-delete' medication.id %}"
                                        class="btn btn-danger">
                                         <i class="icon-delete" aria-hidden="true"></i>
                                     </a>
@@ -55,7 +58,7 @@
                         <th scope="row">{{ medication.time|datetime_short }}</th>
                         {% if not unique_child %}
                             <td>
-                                <a href="{% url 'core:child' medication.child.slug %}">{{ medication.child }}</a>
+                                <a href="{% context_url 'core:child' medication.child.slug %}">{{ medication.child }}</a>
                             </td>
                         {% endif %}
                         <td>{{ medication.name }}</td>
@@ -81,7 +84,7 @@
                     {% endif %}
                 {% empty %}
                     <tr>
-                        <th colspan="7">{% trans "No medication entries found." %}</th>
+                        <th colspan="7">{{ empty_message }}</th>
                     </tr>
                 {% endfor %}
             </tbody>

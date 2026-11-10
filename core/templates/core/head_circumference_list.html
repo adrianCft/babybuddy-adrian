@@ -1,4 +1,5 @@
 {% extends 'babybuddy/page.html' %}
+{% load navigation %}
 {% load i18n widget_tweaks %}
 {% block title %}
     {% trans "Head Circumference" %}
@@ -7,17 +8,19 @@
     <li class="breadcrumb-item active" aria-current="page">{% trans "Head Circumference" %}</li>
 {% endblock %}
 {% block content %}
+    {% load mobile_records %}
     <h1>
         {% trans "Head Circumference" %}
         {% if perms.core.add_head_circumference %}
-            <a href="{% url 'core:head-circumference-add' %}"
+            <a href="{% context_url 'core:head-circumference-add' %}"
                class="btn btn-sm btn-success">
                 <i class="icon-head-circumference" aria-hidden="true"></i> {% trans "Add Head Circumference" %}
             </a>
         {% endif %}
     </h1>
     {% include 'babybuddy/filter.html' %}
-    <div class="table-responsive">
+    {% mobile_record_cards object_list %}
+    <div class="table-responsive bb-desktop-records">
         <table class="table table-instances table-borderless table-striped table-hover align-middle">
             <thead>
                 <tr>
@@ -38,13 +41,13 @@
                                  role="group"
                                  aria-label="{% trans "Actions" %}">
                                 {% if perms.core.change_head_circumference %}
-                                    <a href="{% url 'core:head-circumference-update' head_circumference.id %}"
+                                    <a href="{% context_url 'core:head-circumference-update' head_circumference.id %}"
                                        class="btn btn-primary">
                                         <i class="icon-update" aria-hidden="true"></i>
                                     </a>
                                 {% endif %}
                                 {% if perms.core.delete_head_circumference %}
-                                    <a href="{% url 'core:head-circumference-delete' head_circumference.id %}"
+                                    <a href="{% context_url 'core:head-circumference-delete' head_circumference.id %}"
                                        class="btn btn-danger">
                                         <i class="icon-delete" aria-hidden="true"></i>
                                     </a>
@@ -54,7 +57,7 @@
                         <th scope="row">{{ head_circumference.date }}</th>
                         {% if not unique_child %}
                             <td>
-                                <a href="{% url 'core:child' head_circumference.child.slug %}">{{ head_circumference.child }}</a>
+                                <a href="{% context_url 'core:child' head_circumference.child.slug %}">{{ head_circumference.child }}</a>
                             </td>
                         {% endif %}
                         <td>{{ head_circumference.head_circumference }}</td>
@@ -69,7 +72,7 @@
                     {% endif %}
                 {% empty %}
                     <tr>
-                        <th colspan="5">{% trans "No head circumference entries found." %}</th>
+                        <th colspan="5">{{ empty_message }}</th>
                     </tr>
                 {% endfor %}
             </tbody>

@@ -1,7 +1,7 @@
 {% extends 'cards/base.html' %}
-{% load duration i18n %}
+{% load duration i18n navigation %}
 {% block header %}
-    <a href="{% url "core:sleep-list" %}">{% trans "Last Sleep" %}</a>
+    <a href="{% context_url 'core:sleep-list' %}">{% trans "Last Sleep" %}</a>
 {% endblock %}
 {% block title %}
     {% if timer %}

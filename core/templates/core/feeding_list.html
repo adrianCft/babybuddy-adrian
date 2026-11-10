@@ -1,4 +1,5 @@
 {% extends 'babybuddy/page.html' %}
+{% load navigation %}
 {% load datetime duration misc i18n widget_tweaks %}
 {% block title %}
     {% trans "Feedings" %}
@@ -7,20 +8,22 @@
     <li class="breadcrumb-item active" aria-current="page">{% trans "Feedings" %}</li>
 {% endblock %}
 {% block content %}
+    {% load mobile_records %}
     <h1>
         {% trans "Feedings" %}
         {% if perms.core.add_feeding %}
-            <a href="{% url 'core:feeding-add' %}" class="btn btn-sm btn-success">
+            <a href="{% context_url 'core:feeding-add' %}" class="btn btn-sm btn-success">
                 <i class="icon-feeding" aria-hidden="true"></i> {% trans "Add Feeding" %}
             </a>
-            <a href="{% url 'core:bottle-feeding-add' %}"
+            <a href="{% context_url 'core:bottle-feeding-add' %}"
                class="btn btn-sm btn-success">
                 <i class="icon-feeding" aria-hidden="true"></i> {% trans "Add Bottle Feeding" %}
             </a>
         {% endif %}
     </h1>
     {% include 'babybuddy/filter.html' %}
-    <div class="table-responsive">
+    {% mobile_record_cards object_list %}
+    <div class="table-responsive bb-desktop-records">
         <table class="table table-instances table-borderless table-striped table-hover align-middle">
             <thead>
                 <tr>
@@ -47,13 +50,13 @@
                                      role="group"
                                      aria-label="{% trans "Actions" %}">
                                     {% if perms.core.change_feeding %}
-                                        <a href="{% url 'core:feeding-update' feeding.id %}"
+                                        <a href="{% context_url 'core:feeding-update' feeding.id %}"
                                            class="btn btn-primary">
                                             <i class="icon-update" aria-hidden="true"></i>
                                         </a>
                                     {% endif %}
                                     {% if perms.core.delete_feeding %}
-                                        <a href="{% url 'core:feeding-delete' feeding.id %}"
+                                        <a href="{% context_url 'core:feeding-delete' feeding.id %}"
                                            class="btn btn-danger">
                                             <i class="icon-delete" aria-hidden="true"></i>
                                         </a>
@@ -63,7 +66,7 @@
                             <th scope="row">{{ feeding.start|datetime_short }}</th>
                             {% if not unique_child %}
                                 <td>
-                                    <a href="{% url 'core:child' feeding.child.slug %}">{{ feeding.child }}</a>
+                                    <a href="{% context_url 'core:child' feeding.child.slug %}">{{ feeding.child }}</a>
                                 </td>
                             {% endif %}
                             <td>{{ feeding.get_method_display }}</td>
@@ -90,7 +93,7 @@
                     {% endwith %}
                 {% empty %}
                     <tr>
-                        <th colspan="{% if not unique_child %} 9 {% else %} 8 {% endif %}">{% trans "No feedings found." %}</th>
+                        <th colspan="{% if not unique_child %} 9 {% else %} 8 {% endif %}">{{ empty_message }}</th>
                     </tr>
                 {% endfor %}
             </tbody>

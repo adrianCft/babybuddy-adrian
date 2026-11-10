@@ -78,7 +78,173 @@
 }
 
 .advanced-fields {
-    // removing this causes slight mis-alignment between fields in the details and the rest of the fields 
+    // removing this causes slight mis-alignment between fields in the details and the rest of the fields
     //on the form at the left hand side of the box
     padding-right: 0;
+}
+
+// Shared layout for activity, measurement and health forms.
+.bb-form-page {
+    max-width: 60rem;
+    margin-inline: auto;
+    padding-top: 1.25rem;
+
+    > h1 {
+        margin-bottom: 1.5rem;
+        font-size: clamp(1.65rem, 3vw, 2.1rem);
+    }
+}
+
+.bb-form-layout {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+}
+
+.bb-form-field {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .4rem;
+    margin-bottom: 1.25rem;
+}
+
+.bb-form-label {
+    margin: 0;
+    padding-top: .5rem;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.bb-form-control {
+    min-width: 0;
+
+    .help-block {
+        margin-top: .4rem;
+        color: var(--bs-secondary-color);
+    }
+
+    .pill-container {
+        min-width: 0;
+    }
+
+    .btn-group-toggle {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+    }
+
+    .pill-container > label {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+        min-height: 2.75rem;
+        white-space: normal;
+    }
+}
+
+.bb-form {
+    .form-control, .form-select {
+        min-height: 2.75rem;
+        font-size: 1rem;
+    }
+
+    textarea.form-control {
+        min-height: 6rem;
+    }
+
+    fieldset {
+        min-width: 0;
+    }
+
+    .submit-primary {
+        margin-top: 1rem;
+    }
+}
+
+.bb-form-section {
+    margin-bottom: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .5rem;
+
+    > summary {
+        min-height: 3.25rem;
+        padding: .9rem 1rem;
+        font-size: 1rem;
+        font-weight: 600;
+        text-align: start;
+        cursor: pointer;
+
+        &::marker {
+            color: var(--bs-primary);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bs-primary);
+            outline-offset: 3px;
+        }
+    }
+
+    &[open] > summary {
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+}
+
+.bb-form-section__body {
+    padding: 1rem;
+
+    > .bb-form-field:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.bb-prescriptions {
+    margin-top: 2rem;
+}
+
+.bb-prescription {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .5rem;
+
+    > .bb-form-field:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.bb-prescription__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    margin-bottom: 1rem;
+}
+
+@include media-breakpoint-up(md) {
+    .bb-form-field {
+        grid-template-columns: 12rem minmax(0, 1fr);
+        column-gap: 1.25rem;
+    }
+
+    .bb-form-layout {
+        padding-bottom: 2rem;
+    }
+
+    .bb-form .submit-primary {
+        min-height: 2.75rem;
+        padding: .65rem 1.25rem;
+    }
+}
+
+@include media-breakpoint-down(md) {
+    .bb-form-label {
+        padding-top: 0;
+    }
+
+    .bb-form-section__body, .bb-prescription {
+        padding: .85rem;
+    }
+
+    .bb-form .submit-primary {
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    }
 }

@@ -1,6 +1,10 @@
 {% load i18n %}
 {% trans "Remove dish name" as remove_dish_label %}
 {% trans "Could not save the dish. Please try again." as save_dish_error %}
+{% trans "Remove name" as remove_name_label %}
+{% trans "1 ingredient selected. Review the selection below." as selected_one_label %}
+{% trans "{count} ingredients selected. Review the selection below." as selected_many_label %}
+{% trans "Dish name removed. The ingredients remain selected." as name_removed_label %}
 <div data-meal-dishes>
     <input type="hidden"
            name="{{ widget.name }}"
@@ -8,6 +12,7 @@
            value="{{ widget.value|default:'[]' }}"
            data-dish-names>
     <div class="d-flex flex-wrap gap-2 mb-2" data-dish-applied></div>
+    <p class="small text-success" role="status" aria-live="polite" data-dish-status hidden></p>
     <div class="d-flex flex-wrap gap-2 mb-2">
         <select id="{{ widget.attrs.id }}"
                 class="form-select w-auto mw-100"
@@ -53,6 +58,15 @@
             const picker = panel.querySelector("[data-dish-picker]");
             const applied = panel.querySelector("[data-dish-applied]");
             const errorBox = panel.querySelector("[data-dish-error]");
+            const status = panel.querySelector("[data-dish-status]");
+            const announceSelection = (prefix) => {
+                const count = foods.querySelectorAll('input[type="checkbox"]:checked').length;
+                status.textContent = (prefix ? prefix + " · " : "") + (count === 1
+                    ? "{{ selected_one_label|escapejs }}"
+                    : "{{ selected_many_label|escapejs }}".replace("{count}", count));
+                status.hidden = false;
+            };
+            foods.addEventListener("change", () => { status.hidden = true; });
             let names;
             try { names = JSON.parse(input.value); } catch { names = []; }
             if (!Array.isArray(names)) names = [];
@@ -62,12 +76,15 @@
                 names.forEach((name) => {
                     const button = document.createElement("button");
                     button.type = "button";
-                    button.className = "btn btn-sm btn-outline-secondary";
-                    button.textContent = `${name} ×`;
+                    button.className = "btn btn-outline-secondary bb-dish-tag";
+                    button.textContent = `${name} · {{ remove_name_label|escapejs }}`;
                     button.setAttribute("aria-label", "{{ remove_dish_label|escapejs }}: " + name);
                     button.addEventListener("click", () => {
                         names = names.filter((value) => value !== name);
                         render();
+                        status.textContent = "{{ name_removed_label|escapejs }}";
+                        status.hidden = false;
+                        picker.focus();
                     });
                     applied.append(button);
                 });
@@ -86,6 +103,8 @@
                 foods.dispatchEvent(new Event("change", { bubbles: true }));
                 addName(option.dataset.name);
                 picker.value = "";
+                errorBox.hidden = true;
+                announceSelection(option.dataset.name);
             });
             const save = panel.querySelector("[data-dish-save]");
             if (save) save.addEventListener("click", async () => {
@@ -121,6 +140,7 @@
                     addName(result.name);
                     name.value = "";
                     panel.querySelector("[data-dish-save-panel]").open = false;
+                    announceSelection(result.name);
                 } catch {
                     errorBox.textContent = "{{ save_dish_error|escapejs }}";
                     errorBox.hidden = false;

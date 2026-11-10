@@ -1,0 +1,6 @@
+{% load i18n %}
+{% if return_url %}<input type="hidden" name="next" value="{{ return_url }}">{% endif %}
+<div class="bb-form-actions">
+    <button type="submit" class="submit-primary btn btn-primary btn-lg">{% if submit_label %}{{ submit_label }}{% else %}{% trans "Save" %}{% endif %}</button>
+    {% if cancel_url %}<a href="{{ cancel_url }}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>{% endif %}
+</div>

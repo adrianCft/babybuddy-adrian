@@ -1,5 +1,5 @@
 {% extends "babybuddy/page.html" %}
-{% load i18n %}
+{% load i18n navigation %}
 {% block title %}{% trans "Growth and percentiles" %} · {{ child }}{% endblock %}
 {% block breadcrumbs %}<li class="breadcrumb-item"><a href="{% url 'dashboard:dashboard-child' child.slug %}">{{ child }}</a></li><li class="breadcrumb-item active" aria-current="page">{% trans "Growth and percentiles" %}</li>{% endblock %}
 {% block content %}
@@ -7,19 +7,28 @@
     <div class="daily-overview" data-growth-overview>
         <h1>{% trans "Growth and percentiles" %}</h1>
         <p class="lead">{{ child }}</p>
-        <p><a href="{% url 'core:period-summary' %}?child={{ child.pk }}">← {% trans "Week and month" %}</a></p>
+        <h2 class="h5">{% trans "Latest measurements" %}</h2>
+        <dl class="bb-growth-latest">
+            {% for metric in growth.metrics %}
+                <div><dt>{{ metric.tab_label }}{% if metric.latest %}<span class="d-block small text-body-secondary">{{ metric.latest.date|date:"j M Y" }}</span>{% endif %}</dt><dd>{% if metric.latest %}<strong>{{ metric.latest.input|floatformat:2 }} {{ metric.input_unit }}</strong><span class="small">{% trans "Percentile" %}: {{ metric.latest.percentile|default:"—" }}</span>{% else %}<span class="small text-body-secondary">{% trans "No measurements recorded yet." %}</span>{% endif %}</dd></div>
+            {% endfor %}
+        </dl>
+        <p><a href="{% context_url 'core:period-summary' %}">← {% trans "Week and month" %}</a></p>
+        <details class="bb-growth-help"><summary>{% trans "How to read these charts" %}</summary>
         <p>{% trans "A percentile compares a measurement with children of the same reference sex and age. P50 is the middle of the reference, not a goal. A higher percentile is not better." %}</p>
-        <p class="small text-body-secondary">{% trans "These charts describe growth; they do not diagnose health or predict adult size. Review the series of measurements with your pediatrician." %}</p>
         <p class="small">{% trans "Available references" %}: <a href="https://www.aragon.es/documents/20127/1650151/Documento_Salud_Infantil_2019_web.pdf/d06e4a13-b089-7d1f-652b-9bde456b5ccc?t=1561465302955">{% trans "Aragon Child Health Record" %}</a> ({% trans "WHO curves from birth to 2 years" %}) · <a href="https://www.who.int/tools/child-growth-standards/standards/weight-for-age">{% trans "WHO 2006, birth to 5 years" %}</a>.</p>
+        </details>
+        <p class="small text-body-secondary">{% trans "These charts describe growth; they do not diagnose health or predict adult size. Review the series of measurements with your pediatrician." %}</p>
         <details class="border rounded p-3 mb-4"
                  {% if not growth.profile.sex or form.errors %}open{% endif %}>
             <summary class="fw-semibold">{% trans "Reference and measurement units" %}</summary>
+            <p class="small text-body-secondary">{% trans "Selected reference" %}: {{ growth.reference_label }} · {{ growth.profile.get_sex_display|default:"—" }} · {% trans "Weight" %}: {{ growth.profile.weight_unit|default:"—" }} · {% trans "Length / height" %}: cm · {% trans "Head Circumference" %}: cm.</p>
             {% if perms.core.change_child %}
                 <form method="post" class="mt-3" data-growth-settings>
                     {% csrf_token %}
                     {{ form.non_field_errors }}
                     <div class="row g-3">
-                        {% for field in form %}<div class="col-md-6"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}{% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}</div>{% endfor %}
+                        {% for field in form %}{% if field.is_hidden %}{{ field }}{% else %}<div class="col-md-6"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}{% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}</div>{% endif %}{% endfor %}
                     </div>
                     <p class="small mt-3">{% trans "Confirm the units used throughout the history. If they are mixed, correct individual entries first. Existing measurements are never rewritten by this setting." %}</p>
                     <button class="btn btn-primary" type="submit">{% trans "Save reference" %}</button>
@@ -28,46 +37,26 @@
                 <p class="mt-3 mb-0">{% trans "Ask someone with permission to edit this child to configure the reference and units." %}</p>
             {% endif %}
         </details>
-        <p class="small text-body-secondary">{% trans "Selected reference" %}: {{ growth.reference_label }} · {{ growth.profile.get_sex_display|default:"—" }} · {% trans "Weight" %}: {{ growth.profile.weight_unit|default:"—" }} · {% trans "Length / height" %}: cm · {% trans "Head Circumference" %}: cm.</p>
         {% if growth.profile.birth_status == "preterm" %}
             <p class="alert alert-info">{% trans "Premature birth: age is corrected to 40 weeks until 24 months of chronological age. Negative corrected ages are outside this reference. Confirm the correction with your pediatrician." %} {{ growth.profile.gestational_weeks }} + {{ growth.profile.gestational_days }} {% trans "weeks + days at birth" %}.</p>
         {% elif not growth.profile.birth_status %}
             <p class="alert alert-info">{% trans "Birth history unconfirmed: percentiles use age since birth and growth scenarios are disabled. Premature babies may need corrected age." %}</p>
         {% endif %}
         <p class="small">{% trans "Length assumes measurement lying down below 24 months and standing height thereafter. Measurements made differently need review before interpreting percentiles." %}</p>
+        <nav class="nav nav-tabs bb-growth-tabs" role="tablist" aria-label="{% trans 'Growth measurements' %}">
+            {% for metric in growth.metrics %}<a class="nav-link{% if metric.active %} active{% endif %}" id="growth-tab-{{ metric.kind }}" role="tab" aria-selected="{% if metric.active %}true{% else %}false{% endif %}" aria-controls="growth-panel-{{ metric.kind }}" data-bs-toggle="tab" data-bs-target="#growth-panel-{{ metric.kind }}" data-growth-tab="{{ metric.kind }}" href="?metric={{ metric.kind }}&amp;child={{ child.pk }}{% if record_context.display_date %}&amp;date={{ record_context.display_date|date:'Y-m-d' }}{% endif %}">{{ metric.tab_label }}</a>{% endfor %}
+        </nav>
+        <div class="tab-content">
         {% for metric in growth.metrics %}
-            <section class="mb-5"
-                     aria-labelledby="growth-{{ metric.kind }}"
+            <section class="tab-pane mb-5{% if metric.active %} show active{% endif %}" id="growth-panel-{{ metric.kind }}" role="tabpanel" aria-labelledby="growth-tab-{{ metric.kind }}" tabindex="0"
                      data-growth-metric="{{ metric.kind }}">
                 <h2 id="growth-{{ metric.kind }}">{{ metric.label }}</h2>
                 {% if metric.latest %}
-                    <div class="daily-cards mb-3">
-                        <div class="daily-card growth-card"><div class="small text-body-secondary">{% trans "Latest measurement" %} · {{ metric.latest.date|date:"j M Y" }}</div><div class="daily-card-value">{{ metric.latest.input|floatformat:2 }} {{ metric.input_unit }}</div><p class="mb-0">{% trans "Percentile" %}: <strong>{{ metric.latest.percentile|default:"—" }}</strong></p></div>
+                    <div class="daily-cards bb-growth-insights mb-3">
                         <div class="daily-card growth-card"><div class="small text-body-secondary">{% trans "Change since previous measurement" %}</div>{% if metric.previous %}<div class="daily-card-value">{{ metric.change }} {% trans "percentile points" %}</div><p class="small mb-0">{{ metric.previous.percentile }} → {{ metric.latest.percentile }} · {{ metric.previous.date|date:"j M Y" }}</p>{% else %}<p class="mt-2 mb-0">{% trans "Two valid measurement dates are needed." %}</p>{% endif %}</div>
                         <div class="daily-card growth-card" data-growth-projection><div class="small text-body-secondary">{% trans "Scenario in 30 days" %}</div>{% if metric.projection %}<div class="daily-card-value">≈ {{ metric.projection.value|floatformat:2 }} {{ metric.unit }}</div><p class="small mb-0">{{ metric.projection.date|date:"j M Y" }} · {% trans "If the latest percentile is maintained" %}: {{ metric.projection.percentile }}</p>{% else %}<p class="small mt-2 mb-0">{{ metric.projection_reason }}</p>{% endif %}</div>
                     </div>
-                    {% if metric.chart %}
-                        <p class="small">{% trans "Thin lines: WHO reference. Solid line and dots: measurements. Dashed line: conditional scenario, not a prediction or recommended target." %}</p>
-                        <p class="small daily-mobile-hint">{% trans "Swipe sideways to explore the chart." %}</p>
-                        <div class="growth-chart mb-3"
-                             role="region"
-                             tabindex="0"
-                             aria-label="{{ metric.label }}">
-                            <svg viewBox="0 0 740 260"
-                                 role="img"
-                                 aria-labelledby="growth-chart-title-{{ metric.kind }} growth-chart-desc-{{ metric.kind }}">
-                                <title id="growth-chart-title-{{ metric.kind }}">{{ metric.label }} · {{ child }}</title>
-                                <desc id="growth-chart-desc-{{ metric.kind }}">{% trans "Measurements against reference percentiles P3, P15, P50, P85 and P97. Exact values are available in the history table below." %}</desc>
-                                <text x="4" y="28" class="growth-axis">{{ metric.chart.maximum|floatformat:1 }}</text>
-                                <text x="4" y="220" class="growth-axis">{{ metric.chart.minimum|floatformat:1 }}</text>
-                                {% for curve in metric.chart.curves %}<polyline points="{{ curve.points }}" class="growth-reference" /><text x="686" y="{{ curve.y }}" class="growth-axis">{{ curve.label }}</text>{% endfor %}
-                                <polyline points="{{ metric.chart.line }}" class="growth-measured" />
-                                {% if metric.chart.forecast %}<polyline points="{{ metric.chart.forecast }}" class="growth-forecast" />{% endif %}
-                                {% for point in metric.chart.points %}<circle cx="{{ point.x }}" cy="{{ point.y }}" r="4" class="growth-point"><title>{{ point.date|date:"j M Y" }}: {{ point.value|floatformat:2 }} {{ metric.unit }} · {{ point.percentile }}</title></circle>{% endfor %}
-                                <text x="55" y="250" class="growth-axis">{{ metric.chart.first|date:"j M Y" }}</text><text x="675" y="250" text-anchor="end" class="growth-axis">{{ metric.chart.last|date:"j M Y" }}</text>
-                            </svg>
-                        </div>
-                    {% endif %}
+                    {% if metric.chart %}{% include 'core/growth_chart.html' %}{% endif %}
                     {% if not metric.latest.percentile %}
                         <p class="alert alert-info">{% blocktrans with reference=growth.reference_label %}Percentile unavailable. Confirm reference and units, and check the date and value. Selected range: {{ reference }}.{% endblocktrans %}</p>
                     {% endif %}
@@ -86,19 +75,20 @@
                 {% endif %}
                 {% if metric.kind == "weight" and perms.core.add_weight %}
                     <a class="btn btn-outline-primary mt-3"
-                       href="{% url 'core:weight-add' %}?child={{ child.pk }}">{% trans "Add a Weight" %}</a>
+                       href="{% context_url 'core:weight-add' %}">{% trans "Add a Weight" %}</a>
                 {% endif %}
                 {% if metric.kind == "height" and perms.core.add_height %}
                     <a class="btn btn-outline-primary mt-3"
-                       href="{% url 'core:height-add' %}?child={{ child.pk }}">{% trans "Add a Height" %}</a>
+                       href="{% context_url 'core:height-add' %}">{% trans "Add a Height" %}</a>
                 {% endif %}
                 {% if metric.kind == "head_circumference" and perms.core.add_headcircumference %}
                     <a class="btn btn-outline-primary mt-3"
-                       href="{% url 'core:head-circumference-add' %}?child={{ child.pk }}">{% trans "Add Head Circumference" %}</a>
+                       href="{% context_url 'core:head-circumference-add' %}">{% trans "Add Head Circumference" %}</a>
                 {% endif %}
             </section>
         {% empty %}
             <p class="alert alert-info">{% trans "You do not have permission to view growth measurements." %}</p>
         {% endfor %}
+        </div>
     </div>
 {% endblock %}

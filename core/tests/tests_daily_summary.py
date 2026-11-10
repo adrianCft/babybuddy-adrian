@@ -302,7 +302,9 @@ class DailySummaryTests(TestCase):
         self.assertEqual(len(response.context["daily"]["groups"]), 1)
         self.assertIn(f"child={self.child.pk}", response.context["previous_url"])
         self.assertIn("2026-06-19", response.context["previous_url"])
-        today = self.client.get(url)
+        remembered = self.client.get(url)
+        self.assertEqual(remembered.context["day"], self.day)
+        today = self.client.get(url, {"date": timezone.localdate()})
         self.assertIsNone(today.context["next_url"])
         for parameters in [
             {"date": "incorrecta"},

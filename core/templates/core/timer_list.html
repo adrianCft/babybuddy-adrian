@@ -1,4 +1,5 @@
 {% extends 'babybuddy/page.html' %}
+{% load navigation %}
 {% load bootstrap datetime duration i18n widget_tweaks %}
 {% block title %}
     {% trans "Timers" %}
@@ -7,16 +8,18 @@
     <li class="breadcrumb-item active" aria-current="page">{% trans "Timers" %}</li>
 {% endblock %}
 {% block content %}
+    {% load mobile_records %}
     <h1>
         {% trans "Timers" %}
         {% if perms.core.add_timer %}
-            <a href="{% url 'core:timer-add' %}" class="btn btn-sm btn-success">
+            <a href="{% context_url 'core:timer-add' %}" class="btn btn-sm btn-success">
                 <i class="icon-timer" aria-hidden="true"></i> {% trans "Start Timer" %}
             </a>
         {% endif %}
     </h1>
     {% include 'babybuddy/filter.html' %}
-    <div class="table-responsive">
+    {% mobile_record_cards object_list %}
+    <div class="table-responsive bb-desktop-records">
         <table class="table table-instances table-borderless table-striped table-hover align-middle">
             <thead>
                 <tr>
@@ -33,12 +36,12 @@
                     <tr>
                         <th scope="row">{{ timer.start|datetime_short }}</th>
                         <td>
-                            <a href="{% url 'core:timer-detail' timer.id %}">{{ timer }}</a>
+                            <a href="{% context_url 'core:timer-detail' timer.id %}">{{ timer }}</a>
                         </td>
                         {% if not unique_child %}
                             <td>
                                 {% if timer.child %}
-                                    <a href="{% url 'core:child' timer.child.slug %}">{{ timer.child }}</a>
+                                    <a href="{% context_url 'core:child' timer.child.slug %}">{{ timer.child }}</a>
                                 {% endif %}
                             </td>
                         {% endif %}
@@ -46,7 +49,7 @@
                     </tr>
                 {% empty %}
                     <tr>
-                        <th colspan="7">{% trans "No timer entries found." %}</th>
+                        <th colspan="7">{{ empty_message }}</th>
                     </tr>
                 {% endfor %}
             </tbody>

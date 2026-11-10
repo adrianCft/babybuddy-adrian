@@ -1,0 +1,58 @@
+{% load i18n %}
+<div class="bb-mobile-records" data-mobile-records>
+    {% for card in cards %}
+        {% if card.group_date %}
+            <div class="bb-record-day">
+                <h2 class="h6">{{ card.group_date|date:"DATE_FORMAT" }}</h2>
+                {% if card.day_summary %}
+                    <p class="small mb-0">{% blocktrans with total=card.day_summary.meal_count %}Meals: {{ total }}{% endblocktrans %} · {% blocktrans with total=card.day_summary.food_count %}Different foods: {{ total }}{% endblocktrans %}</p>
+                    {% if card.day_summary.category_counts %}<p class="small mb-0">{% trans "Categories" %}: {% for category, count in card.day_summary.category_counts %}{{ category }} ({{ count }}){% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+                    {% if card.day_summary.new_foods %}<p class="small mb-0">{% trans "First introductions" %}: {{ card.day_summary.new_foods|join:", " }}</p>{% endif %}
+                {% endif %}
+            </div>
+        {% endif %}
+        <article class="bb-record-card" data-record-card="{{ card.model }}" data-record-id="{{ card.object.pk }}">
+            {% if card.update_url or card.delete_url %}
+                <div class="dropdown bb-record-actions">
+                    <button class="btn btn-link" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{% trans 'Actions' %}: {{ card.title }}"><span aria-hidden="true">⋮</span></button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        {% if card.update_url %}<li><a class="dropdown-item" href="{{ card.update_url }}"><i class="icon-update me-2" aria-hidden="true"></i>{% trans "Update" %}</a></li>{% endif %}
+                        {% if card.delete_url %}
+                            {% if card.update_url %}<li><hr class="dropdown-divider"></li>{% endif %}
+                            <li><a class="dropdown-item text-danger" href="{{ card.delete_url }}"><i class="icon-delete me-2" aria-hidden="true"></i>{% trans "Delete" %}</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            {% endif %}
+            <details>
+                <summary class="bb-record-main">
+                    {% if card.date %}<span class="bb-record-date">{{ card.date }}</span>{% endif %}
+                    {% if card.picture %}<img src="{{ card.picture.url }}" class="bb-record-picture" alt="" loading="lazy">{% endif %}
+                    <h2 class="h6 mb-1">{{ card.title }}</h2>
+                    {% if card.child %}<span class="bb-record-child">{{ card.child }}</span>{% endif %}
+                    {% if card.status %}<span class="badge text-bg-secondary mt-1">{{ card.status }}</span>{% endif %}
+                    {% if card.summary %}<span class="bb-record-summary">{{ card.summary }}</span>{% endif %}
+                    <span class="bb-record-hint">{% trans "Details" %} <span aria-hidden="true">⌄</span></span>
+                </summary>
+                <div class="bb-record-details">
+                    <dl>{% for label, value in card.fields %}<dt>{{ label }}</dt><dd>{{ value|linebreaksbr }}</dd>{% endfor %}</dl>
+                    {% if card.meal_foods %}
+                        <p><strong>{% trans "Foods" %}:</strong> {% for item in card.meal_foods %}{{ item.food.name }}{% if item.is_first_introduction %} <span class="badge bg-info text-dark">{% trans "New" %}</span>{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                    {% elif card.foods %}
+                        <p><strong>{% trans "Foods" %}:</strong> {% for food in card.foods %}{{ food.name }}{% if not food.active %} ({% trans "Inactive" %}){% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                    {% endif %}
+                    {% if card.notes %}<p class="text-break">{{ card.notes|linebreaksbr }}</p>{% endif %}
+                    {% if card.tags %}{% include 'core/render_tag_list.html' with tags=card.tags %}{% endif %}
+                    {% if card.image %}<a href="{{ card.image.url }}" target="_blank" rel="noopener"><img class="img-fluid rounded" src="{{ card.image.url }}" alt="{% trans 'Image' %}" loading="lazy"></a>{% endif %}
+                    {% include 'core/health/photos.html' with photos=card.photos %}
+                    {% if card.detail_url or card.dose_url %}<div class="d-flex flex-wrap gap-2">
+                        {% if card.detail_url %}<a class="btn btn-outline-primary" href="{{ card.detail_url }}">{% trans "View record" %}</a>{% endif %}
+                        {% if card.dose_url %}<a class="btn btn-success" href="{{ card.dose_url }}">{% trans "Record dose" %}</a>{% endif %}
+                    </div>{% endif %}
+                </div>
+            </details>
+        </article>
+    {% empty %}
+        <p class="bb-record-empty">{{ empty_message }}</p>
+    {% endfor %}
+</div>
