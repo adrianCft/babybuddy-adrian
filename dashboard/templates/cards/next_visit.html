@@ -1,0 +1,24 @@
+{% extends 'cards/base.html' %}
+{% load datetime i18n navigation %}
+{% block header %}
+    {% if home.can_view_visits %}<a href="{% context_url 'core:visit-list' %}">{% trans "Next medical visit" %}</a>
+    {% else %}{% trans "Medical visits" %}{% endif %}
+{% endblock %}
+{% block title %}
+    {% if home.next_visit %}
+        <a href="{% context_url 'core:visit-detail' home.next_visit.pk %}">{{ home.next_visit.reason }}</a>
+        <small>{{ home.next_visit.date|datetime_short }}</small>
+    {% elif home.can_view_visits %}
+        <span class="bb-home-empty">{% trans "No scheduled visits." %}</span>
+    {% endif %}
+{% endblock %}
+{% block content %}
+    {% if home.next_visit.center %}<div>{{ home.next_visit.center }}</div>{% endif %}
+    {% if home.can_add_visit %}
+        <div class="bb-card-add">
+            <a class="btn btn-sm btn-dashboard-add-link text-decoration-none" href="{% context_url 'core:visit-add' %}" aria-label="{% trans 'Add medical visit' %}">
+                <i class="icon-add" aria-hidden="true"></i> {% trans "Add" %}
+            </a>
+        </div>
+    {% endif %}
+{% endblock %}

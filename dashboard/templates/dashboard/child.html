@@ -17,6 +17,7 @@
         <h2 class="bb-home-section-title">{% trans "Latest records" %}</h2>
         <div id="dashboard-child" class="bb-home-grid">
             {% for card in home.favorites %}<div data-dashboard-card="{{ card.key }}">{{ card.html }}</div>{% empty %}<p class="bb-record-empty">{% trans "No favorite cards to show." %}</p>{% endfor %}
+            {% if home.show_visit_card %}<div data-dashboard-card="visit-last">{% include 'cards/next_visit.html' with type='medication' %}</div>{% endif %}
         </div>
         <details class="bb-home-more mt-4"><summary>{% trans "More data" %}</summary>
             <div class="bb-home-grid mt-3">{% for card in home.others %}<div data-dashboard-card="{{ card.key }}">{{ card.html }}</div>{% empty %}<p class="text-body-secondary">{% trans "No more data to show." %}</p>{% endfor %}</div>
@@ -25,6 +26,29 @@
     </div>
 {% endblock %}
 {% block javascript %}
+    <script>
+        (() => {
+            const counters = document.querySelectorAll("[data-dose-deadline]");
+            if (!counters.length) return;
+            const duration = new Intl.NumberFormat(document.documentElement.lang);
+            const update = () => counters.forEach((counter) => {
+                const minutes = Math.ceil((Number(counter.dataset.doseDeadline) * 1000 - Date.now()) / 60000);
+                if (minutes <= 0) {
+                    counter.textContent = counter.dataset.elapsedLabel;
+                    return;
+                }
+                const days = Math.floor(minutes / 1440);
+                const hours = Math.floor(minutes % 1440 / 60);
+                const parts = [];
+                if (days) parts.push(duration.format(days) + " d");
+                if (hours) parts.push(duration.format(hours) + " h");
+                parts.push(duration.format(minutes % 60) + " min");
+                counter.textContent = parts.join(" ");
+            });
+            update();
+            window.setInterval(update, 1000);
+        })();
+    </script>
     {% if user.settings.dashboard_refresh_rate %}
         <script type="application/javascript">
             BabyBuddy.Dashboard.watch('dashboard-child', {{ user.settings.dashboard_refresh_rate_milliseconds }});

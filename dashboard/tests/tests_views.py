@@ -76,7 +76,7 @@ class ViewsTestCase(TestCase):
             page,
             "{}?child={}".format(reverse("core:feeding-list"), child.pk),
         )
-        self.assertContains(page, "btn-dashboard-add-link", count=5)
+        self.assertContains(page, "btn-dashboard-add-link", count=6)
         self.assertContains(page, "btn-dashboard-sleep", count=1)
         card_order = (
             'data-dashboard-card="feeding-last"',

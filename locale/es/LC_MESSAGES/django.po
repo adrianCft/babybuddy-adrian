@@ -4521,3 +4521,12 @@ msgstr "Aplicar"
 
 msgid "Any"
 msgstr "Cualquiera"
+
+msgid "Next medical visit"
+msgstr "Próxima visita médica"
+
+msgid "Next scheduled dose"
+msgstr "Próxima toma programada"
+
+msgid "Scheduled time reached"
+msgstr "Hora prevista alcanzada"

@@ -2,9 +2,10 @@
 
 from django import forms
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.models import Timer
+from core.models import HealthVisit, Timer
 from core.navigation import contextual_url, effective_url
 from dashboard.templatetags import cards
 
@@ -155,7 +156,19 @@ def home_layout(request, child, form=None):
     checked = list(dict.fromkeys(layout_form["cards"].value() or []))
     rows = [by_key[key] for key in checked if key in by_key]
     rows += [card for card in available if card["key"] not in checked]
+    can_view_visits = user.has_perm("core.view_healthvisit")
+    can_add_visit = user.has_perm("core.add_healthvisit")
+    next_visit = (
+        HealthVisit.objects.filter(
+            child=child, status="planned", date__gte=timezone.now()
+        ).order_by("date", "pk").first()
+        if can_view_visits else None
+    )
     return {
+        "show_visit_card": can_view_visits or can_add_visit,
+        "can_view_visits": can_view_visits,
+        "can_add_visit": can_add_visit,
+        "next_visit": next_visit,
         "favorites": [item for card in selected if (item := rendered(card))],
         "others": [item for card in others if (item := rendered(card))],
         "selected_rows": [card for card in rows if card["key"] in checked],

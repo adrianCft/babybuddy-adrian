@@ -7,7 +7,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from core.models import Child, Sleep, Timer
+from core.models import Child, HealthVisit, Medication, Sleep, Timer
 
 
 class HomeTests(TestCase):
@@ -24,6 +24,33 @@ class HomeTests(TestCase):
 
     def setUp(self):
         self.client.force_login(self.user)
+
+    def test_home_shows_only_the_next_scheduled_visit_for_this_child(self):
+        now = timezone.now()
+        for reason, days, status in (
+            ("Earlier cancelled appointment", 1, "cancelled"),
+            ("Past appointment", -1, "planned"),
+            ("Upcoming appointment", 2, "planned"),
+            ("Later appointment", 3, "planned"),
+        ):
+            HealthVisit.objects.create(
+                child=self.child, reason=reason, date=now + timedelta(days=days), status=status
+            )
+        response = self.client.get(self.url)
+        self.assertEqual(response.context["home"]["next_visit"].reason, "Upcoming appointment")
+        self.assertContains(response, reverse("core:visit-add"))
+        self.assertNotContains(response, "Later appointment")
+
+    def test_medication_countdown_uses_the_recorded_interval(self):
+        dose = Medication.objects.create(
+            child=self.child, name="Example", dosage=1, dosage_unit="ml",
+            time=timezone.now() - timedelta(minutes=5), next_dose_interval=timedelta(hours=4),
+        )
+        response = self.client.get(self.url)
+        self.assertContains(response, f'data-dose-deadline="{int(dose.next_dose_time.timestamp())}"')
+        dose.next_dose_interval = None
+        dose.save(update_fields=["next_dose_interval"])
+        self.assertNotContains(self.client.get(self.url), "data-dose-deadline=\"")
 
     def save_layout(self, **data):
         return self.client.post(self.url + "?date=2026-06-17", data)
@@ -168,7 +195,7 @@ class HomeTests(TestCase):
 
         parser = Links()
         parser.feed(response.content.decode())
-        self.assertEqual(len(parser.urls), 5)
+        self.assertEqual(len(parser.urls), 6)
         for url in parser.urls:
             query = parse_qs(urlsplit(url).query)
             self.assertEqual(query["child"], [self.child.slug])

@@ -1,5 +1,5 @@
 {% extends 'cards/base.html' %}
-{% load duration i18n navigation %}
+{% load datetime duration i18n navigation %}
 {% block header %}
     <a href="{% context_url 'core:medication-list' %}">{% trans "Last medication dose" %}</a>
 {% endblock %}
@@ -21,7 +21,13 @@
             <strong>{{ medication.name }}</strong>
         </div>
         <div>{{ medication.dosage }} {{ medication.get_dosage_unit_display }}</div>
-        {% if medication.next_dose_time %}
+        {% if home_card and medication.next_dose_time %}
+            <div class="mt-2">
+                <strong>{% trans "Next scheduled dose" %}</strong>
+                <div>{{ medication.next_dose_time|datetime_short }}</div>
+                <div class="text-primary-emphasis" data-dose-deadline="{{ medication.next_dose_time|date:'U' }}" data-elapsed-label="{% trans 'Scheduled time reached' %}"></div>
+            </div>
+        {% elif medication.next_dose_time %}
             <div class="mt-1">
                 {% if medication.next_dose_ready %}
                     <span class="badge bg-success">{% trans "Next dose ready" %}</span>
