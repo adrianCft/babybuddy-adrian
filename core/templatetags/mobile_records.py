@@ -1,6 +1,6 @@
 """Compact, read-only presentation of the same records as desktop lists."""
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from urllib.parse import urlencode
 
 from django import template
@@ -51,6 +51,7 @@ RECORDS = {
             "tests",
             "instructions",
             "follow_up",
+            "follow_up_time",
         ),
     ),
     "height": ("height", ("height",)),
@@ -60,7 +61,10 @@ RECORDS = {
         ("dosage", "dosage_unit", "next_dose_interval", "next_dose_time"),
     ),
     "note": ("note", ()),
-    "prescription": ("prescription", ("instructions", "start_date", "end_date")),
+    "prescription": (
+        "prescription",
+        ("dosage", "dosage_unit", "instructions", "start_date", "end_date"),
+    ),
     "pumping": ("pumping", ("end", "duration", "amount")),
     "sleep": ("sleep", ("end", "duration", "nap", "wakeups")),
     "tag": ("tag", ("color", "core_tagged_items__count", "last_used")),
@@ -81,6 +85,8 @@ def display_value(value):
         return datetime_short(value)
     if isinstance(value, date):
         return formats.date_format(value, "SHORT_DATE_FORMAT")
+    if isinstance(value, time):
+        return formats.time_format(value, "TIME_FORMAT")
     if isinstance(value, timedelta):
         return duration_string(value, "m")
     if isinstance(value, (int, float)):
@@ -183,7 +189,11 @@ def mobile_record_cards(context, objects):
         fields = [
             (field_label(obj, name), field_value(obj, name))
             for name in names
-            if name != "specialty" or obj.kind == "specialist"
+            if (name != "specialty" or obj.kind == "specialist")
+            and (
+                name not in ("follow_up", "follow_up_time")
+                or not hasattr(obj, "follow_up_visit")
+            )
         ]
         card = {
             "object": obj,

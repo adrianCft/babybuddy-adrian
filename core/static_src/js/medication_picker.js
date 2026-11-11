@@ -1,5 +1,46 @@
 // The real text field remains the submitted value, including with JavaScript off.
 (() => {
+  const bindDoseSuggestions = (picker, choice, form) => {
+    const source = picker.querySelector("[data-dose-source]");
+    if (!source) return;
+    const { date, children } = JSON.parse(
+      document.getElementById("medication-dose-suggestions").textContent,
+    );
+    const child = form.elements.namedItem("child");
+    const time = form.elements.namedItem("time");
+    const dosage = form.elements.namedItem("dosage");
+    const units = form.querySelectorAll('[name="dosage_unit"]');
+
+    const onSuggestionDate = () => time.value.slice(0, 10) === date;
+    const fill = () => {
+      const medications = children[child.value];
+      const [amount, unit, origin] =
+        onSuggestionDate() &&
+        medications &&
+        Object.hasOwn(medications, choice.value)
+          ? medications[choice.value]
+          : [];
+      dosage.value = amount ?? "";
+      units.forEach((radio) => (radio.checked = radio.value === unit));
+      source.textContent = origin ? source.dataset[origin] : "";
+      source.hidden = !origin;
+    };
+    const clearSource = () => {
+      source.hidden = true;
+      source.textContent = "";
+    };
+
+    choice.addEventListener("change", fill);
+    child.addEventListener("change", () => {
+      if (choice.value) fill();
+    });
+    time.addEventListener("change", () => {
+      if (!onSuggestionDate() && !source.hidden) fill();
+    });
+    dosage.addEventListener("input", clearSource);
+    units.forEach((radio) => radio.addEventListener("change", clearSource));
+  };
+
   const initPickers = (root) => {
     root.querySelectorAll("[data-medication-picker]").forEach((picker) => {
       if (picker.dataset.ready) return;
@@ -33,6 +74,7 @@
       });
       choice.addEventListener("change", () => update(true));
       update(false);
+      bindDoseSuggestions(picker, choice, input.form);
     });
   };
   document.addEventListener("bb:prescription-added", (event) =>

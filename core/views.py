@@ -21,6 +21,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormVi
 from babybuddy.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from babybuddy.views import BabyBuddyFilterView, BabyBuddyPaginatedView
 from core import filters, forms, models, timeline
+from core.medications import dose_suggestions, recorded_amount
 from core.navigation import (
     ReturnContextMixin,
     context_initial,
@@ -619,10 +620,11 @@ class MedicationSuggestions:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         names = set()
-        if self.request.user.has_perm("core.view_medication"):
-            names.update(models.Medication.objects.values_list("name", flat=True))
-        if self.request.user.has_perm("core.view_prescription"):
-            names.update(models.Prescription.objects.values_list("name", flat=True))
+        for model in (models.Medication, models.Prescription):
+            if self.request.user.has_perm("core.view_" + model._meta.model_name):
+                names.update(
+                    model.objects.order_by().values_list("name", flat=True).distinct()
+                )
         context["medication_names"] = sorted(names, key=str.casefold)
         context["medication_picker"] = True
         return context
@@ -659,6 +661,10 @@ class MedicationAdd(MedicationSuggestions, CoreAddView):
         prescription = self.get_source_prescription()
         if prescription:
             initial.update(name=prescription.name, child=prescription.visit.child)
+            amount = recorded_amount(prescription.dosage, prescription.dosage_unit)
+            if amount:
+                dosage, unit = amount
+                initial.update(dosage=dosage, dosage_unit=unit)
         return initial
 
     def get_form_kwargs(self):
@@ -671,7 +677,7 @@ class MedicationAdd(MedicationSuggestions, CoreAddView):
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         if self.get_source_prescription():
-            # Only name and child are copied. Dose, unit and time are confirmed here.
+            # The prescription fixes the identity; the administered dose is editable.
             form.fields["name"].disabled = True
             form.fields["child"].disabled = True
             form.fields["dosage"].required = True
@@ -681,6 +687,19 @@ class MedicationAdd(MedicationSuggestions, CoreAddView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["source_prescription"] = self.get_source_prescription()
+        if not context["source_prescription"] and context["medication_names"]:
+            time_field = context["form"]["time"]
+            try:
+                at = time_field.field.to_python(time_field.value())
+            except ValidationError:
+                at = None
+            if at and at <= timezone.now():
+                context["dose_suggestions"] = {
+                    "date": timezone.localdate(at).isoformat(),
+                    "children": dose_suggestions(
+                        self.request.user, at, context["medication_names"]
+                    ),
+                }
         context["submit_label"] = _("Record dose")
         return context
 

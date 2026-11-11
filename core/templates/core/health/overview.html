@@ -14,7 +14,12 @@
             <h2 class="h4">{% trans "Scheduled visits" %} {% if perms.core.view_healthvisit %}<a class="btn btn-sm btn-outline-primary float-end" href="{% context_url 'core:visit-list' %}">{% trans "View all" %}</a>{% endif %}</h2>
             {% for visit in upcoming_visits %}<p><a href="{% context_url 'core:visit-detail' visit.pk %}">{{ visit.reason }}</a><br>{{ visit.child }} · {{ visit.date }} · {{ visit.get_status_display }}</p>{% empty %}<p>{% trans "No scheduled visits." %}</p>{% endfor %}
             <h3 class="h5">{% trans "Follow-up" %}</h3>
-            {% for visit in follow_ups %}<p><a href="{% context_url 'core:visit-detail' visit.pk %}">{{ visit.child }} · {{ visit.reason }}</a> · {{ visit.follow_up }}</p>{% empty %}<p>—</p>{% endfor %}
+            {% for visit in follow_ups %}
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                    <span><a href="{% context_url 'core:visit-detail' visit.pk %}">{{ visit.child }} · {{ visit.reason }}</a> · {{ visit.follow_up }}{% if visit.follow_up_time != None %} · {{ visit.follow_up_time|time:"TIME_FORMAT" }}{% endif %}</span>
+                    {% if perms.core.add_healthvisit %}<a class="btn btn-sm btn-outline-primary" href="{% context_url 'core:visit-follow-up-add' visit.pk %}">{% trans "Add follow-up visit" %}</a>{% endif %}
+                </div>
+            {% empty %}<p>—</p>{% endfor %}
         </div></div></section>{% endif %}
         {% if perms.core.view_vaccination %}<section class="col-12 col-lg-6"><div class="card h-100"><div class="card-body">
             <h2 class="h4">{% trans "Scheduled vaccinations" %} {% if perms.core.view_vaccination %}<a class="btn btn-sm btn-outline-primary float-end" href="{% context_url 'core:vaccination-list' %}">{% trans "View all" %}</a>{% endif %}</h2>

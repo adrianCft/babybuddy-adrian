@@ -508,11 +508,11 @@ class MedicationForm(PhotoFormMixin, CoreModelForm, TaggableModelForm):
         {
             "fields": [
                 "child",
-                "time",
-                "next_dose_interval",
                 "name",
                 "dosage",
                 "dosage_unit",
+                "time",
+                "next_dose_interval",
             ],
             "layout": "required",
         },
@@ -531,8 +531,10 @@ class MedicationForm(PhotoFormMixin, CoreModelForm, TaggableModelForm):
             "notes",
             "tags",
         ]
+        help_texts = {"name": "", "dosage": ""}
         widgets = {
             "child": ChildRadioSelect,
+            "dosage": forms.NumberInput(attrs={"inputmode": "decimal"}),
             "dosage_unit": PillRadioSelect(),
             "time": DateTimeInput(),
             "name": forms.TextInput(

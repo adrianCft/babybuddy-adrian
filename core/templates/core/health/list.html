@@ -42,7 +42,12 @@
                         {% elif route == 'vaccination' %}
                             <td><a href="{{ record.url }}">{{ record.object.name }}</a></td><td>{{ record.object.dose|default:'—' }}</td><td><span class="badge bg-secondary">{{ record.object.get_status_display }}</span></td><td>{{ record.object.next_date|default:'—' }}</td>
                         {% else %}
-                            <td><a href="{{ record.url }}">{{ record.object.name }}</a></td><td class="text-break">{{ record.object.instructions }}</td><td><a href="{% url 'core:visit-detail' record.object.visit_id %}">{{ record.object.visit.reason }}</a></td>
+                            <td><a href="{{ record.url }}">{{ record.object.name }}</a></td>
+                            <td class="text-break">
+                                {% if record.object.dosage != None %}<div class="fw-semibold">{{ record.object.dosage }} {{ record.object.get_dosage_unit_display }}</div>{% endif %}
+                                {{ record.object.instructions }}
+                            </td>
+                            <td><a href="{% url 'core:visit-detail' record.object.visit_id %}">{{ record.object.visit.reason }}</a></td>
                         {% endif %}
                     </tr>
                     {% if route == 'visit' and record.object.assessment or route == 'vaccination' and record.object.notes or route == 'prescription' and record.object.notes %}

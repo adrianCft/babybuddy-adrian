@@ -18,6 +18,9 @@ from taggit.models import GenericTaggedItemBase, TagBase
 from babybuddy.site_settings import NapSettings, FeedingSettings
 from core.utils import random_color, timezone_aware_duration
 
+from .health_models import DosageUnit
+from .health_models import HealthPhoto, HealthVisit, Prescription, Vaccination  # noqa: F401
+
 
 def validate_date(date, field_name):
     """
@@ -1103,12 +1106,7 @@ class Medication(models.Model):
     )
     dosage_unit = models.CharField(
         max_length=20,
-        choices=[
-            ("mg", _("MG")),
-            ("ml", _("ML")),
-            ("tablets", _("Tablets")),
-            ("drops", _("Drops")),
-        ],
+        choices=DosageUnit.choices,
         blank=True,
         null=False,
         default="",
@@ -1192,6 +1190,3 @@ class WeightPercentile(models.Model):
 
     def __str__(self):
         return f"Sex: {self.sex}, Age: {self.age_in_days} days, p3: {self.p3_weight} kg, p15: {self.p15_weight} kg, p50: {self.p50_weight} kg, p85: {self.p85_weight} kg, p97: {self.p97_weight} kg"
-
-
-from .health_models import HealthVisit, Prescription, Vaccination, HealthPhoto  # noqa: E402,F401

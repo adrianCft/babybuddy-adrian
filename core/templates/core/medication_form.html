@@ -34,6 +34,7 @@
         </div></div>
     {% endif %}
     {% include 'babybuddy/form.html' %}
+    {% if dose_suggestions %}{{ dose_suggestions|json_script:"medication-dose-suggestions" }}{% endif %}
     {% if medication_names %}
         <datalist id="medication-names">
             {% for name in medication_names %}<option value="{{ name }}"></option>{% endfor %}

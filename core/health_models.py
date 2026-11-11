@@ -1,7 +1,8 @@
 """Health records; existing measurements and administered doses remain independent."""
 
-from uuid import uuid4
+from datetime import datetime
 from pathlib import Path
+from uuid import uuid4
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -10,6 +11,14 @@ from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
+
+class DosageUnit(models.TextChoices):
+    MILLIGRAMS = "mg", _("MG")
+    MILLILITERS = "ml", _("ML")
+    GRAMS = "g", "g"
+    TABLETS = "tablets", _("Tablets")
+    DROPS = "drops", _("Drops")
 
 
 class HealthVisit(models.Model):
@@ -60,6 +69,17 @@ class HealthVisit(models.Model):
     follow_up = models.DateField(
         blank=True, null=True, verbose_name=_("Follow-up date")
     )
+    follow_up_time = models.TimeField(
+        blank=True, null=True, verbose_name=_("Follow-up time")
+    )
+    follow_up_of = models.OneToOneField(
+        "self",
+        blank=True,
+        null=True,
+        editable=False,
+        on_delete=models.SET_NULL,
+        related_name="follow_up_visit",
+    )
 
     class Meta:
         ordering = ["-date", "-pk"]
@@ -69,20 +89,40 @@ class HealthVisit(models.Model):
     def __str__(self):
         return self.reason
 
+    @property
+    def follow_up_datetime(self):
+        if self.follow_up and self.follow_up_time is not None:
+            return datetime.combine(self.follow_up, self.follow_up_time)
+        return None
+
     def clean(self):
         super().clean()
         if self.date and self.status == "completed" and self.date > timezone.now():
             raise ValidationError(
                 {"date": _("A completed visit cannot be in the future.")}
             )
-        if (
-            self.date
-            and self.follow_up
-            and self.follow_up < timezone.localtime(self.date).date()
-        ):
-            raise ValidationError(
-                {"follow_up": _("Follow-up cannot precede the visit.")}
-            )
+        errors = {}
+        if self.follow_up_time is not None and not self.follow_up:
+            errors["follow_up"] = _("Enter a date for the follow-up time.")
+        if self.date and self.follow_up:
+            local_date = timezone.localtime(self.date).replace(tzinfo=None)
+            if self.follow_up < local_date.date():
+                errors["follow_up"] = _("Follow-up cannot precede the visit.")
+            elif self.follow_up_datetime and self.follow_up_datetime < local_date:
+                errors["follow_up_time"] = _("Follow-up cannot precede the visit.")
+        if self.follow_up_of_id:
+            if self.child_id != self.follow_up_of.child_id:
+                errors["child"] = _("Linked visits must belong to the same child.")
+            if self.date and self.date < self.follow_up_of.date:
+                errors["date"] = _("Follow-up cannot precede the visit.")
+        linked_visit = getattr(self, "follow_up_visit", None) if self.pk else None
+        if linked_visit:
+            if self.child_id != linked_visit.child_id:
+                errors["child"] = _("Linked visits must belong to the same child.")
+            if self.date and self.date > linked_visit.date:
+                errors["date"] = _("This visit cannot be after its linked follow-up.")
+        if errors:
+            raise ValidationError(errors)
 
 
 class Prescription(models.Model):
@@ -93,6 +133,14 @@ class Prescription(models.Model):
         verbose_name=_("Medical visit"),
     )
     name = models.CharField(max_length=255, verbose_name=_("Medication Name"))
+    dosage = models.FloatField(blank=True, null=True, verbose_name=_("Prescribed dose"))
+    dosage_unit = models.CharField(
+        max_length=20,
+        choices=DosageUnit.choices,
+        blank=True,
+        null=True,
+        verbose_name=_("Dosage Unit"),
+    )
     instructions = models.TextField(
         verbose_name=_("Prescribed instructions"),
         help_text=_(
@@ -113,10 +161,18 @@ class Prescription(models.Model):
 
     def clean(self):
         super().clean()
+        errors = {}
         if self.start_date and self.end_date and self.end_date < self.start_date:
-            raise ValidationError(
-                {"end_date": _("End date cannot precede start date.")}
-            )
+            errors["end_date"] = _("End date cannot precede start date.")
+        if self.dosage is None and self.dosage_unit:
+            errors["dosage"] = _("Enter the prescribed amount.")
+        elif self.dosage is not None:
+            if self.dosage <= 0:
+                errors["dosage"] = _("Enter an amount greater than zero.")
+            if not self.dosage_unit:
+                errors["dosage_unit"] = _("Select the unit for this amount.")
+        if errors:
+            raise ValidationError(errors)
 
 
 class Vaccination(models.Model):

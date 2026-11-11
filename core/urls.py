@@ -25,6 +25,11 @@ urlpatterns = [
         name="visit-update",
     ),
     path(
+        "health/visits/<int:pk>/follow-up/add/",
+        health_views.VisitFollowUpAdd.as_view(),
+        name="visit-follow-up-add",
+    ),
+    path(
         "health/visits/<int:pk>/delete/",
         health_views.VisitDelete.as_view(),
         name="visit-delete",

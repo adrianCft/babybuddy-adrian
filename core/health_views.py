@@ -1,9 +1,10 @@
 from django.http import FileResponse, Http404
 from django.core.exceptions import PermissionDenied
-from django.db import transaction
-from django.shortcuts import get_object_or_404
+from django.db import IntegrityError, transaction
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import cached_property
 from core.presentation import record_value
 from django.utils.translation import gettext_lazy as _
 from django.views import View
@@ -100,8 +101,8 @@ class HealthOverview(HealthAccess, TemplateView):
                 "-date"
             )[:5]
             context["follow_ups"] = visits.filter(
-                status="completed", follow_up__gte=today
-            ).order_by("follow_up")[:5]
+                status="completed", follow_up__gte=today, follow_up_visit__isnull=True
+            ).order_by("follow_up", "follow_up_time")[:5]
         if self.request.user.has_perm("core.view_vaccination"):
             vaccines = scoped(models.Vaccination.objects.select_related("child"))
             context["upcoming_vaccines"] = vaccines.filter(status="planned").order_by(
@@ -164,7 +165,8 @@ class HealthRecordContext:
                     ),
                 )
                 for field in obj._meta.fields
-                if field.name not in ("id", "visit")
+                if field.name
+                not in ("id", "visit", "follow_up", "follow_up_time", "follow_up_of")
                 and (field.name != "specialty" or obj.kind == "specialist")
             ]
             if self.route == "visit":
@@ -231,7 +233,7 @@ class VisitList(RecordList):
     route = "visit"
     permission_required = "core.view_healthvisit"
     filterset_class = VisitFilter
-    queryset = models.HealthVisit.objects.select_related("child")
+    queryset = models.HealthVisit.objects.select_related("child", "follow_up_visit")
 
 
 class VisitDetail(HealthRecordContext, PermissionRequiredMixin, DetailView):
@@ -239,6 +241,9 @@ class VisitDetail(HealthRecordContext, PermissionRequiredMixin, DetailView):
     route = "visit"
     permission_required = "core.view_healthvisit"
     template_name = "core/health/detail.html"
+    queryset = models.HealthVisit.objects.select_related(
+        "follow_up_of", "follow_up_visit"
+    )
 
 
 class VisitPrescriptions:
@@ -313,6 +318,72 @@ class VisitAdd(
     permission_required = "core.add_healthvisit"
     form_class = HealthVisitForm
     template_name = "core/health/form.html"
+
+
+class VisitFollowUpAdd(VisitAdd):
+    permission_required = ("core.view_healthvisit", "core.add_healthvisit")
+
+    @cached_property
+    def source_visit(self):
+        return get_object_or_404(
+            models.HealthVisit.objects.select_related("child", "follow_up_visit"),
+            pk=self.kwargs["pk"],
+        )
+
+    def get(self, request, *args, **kwargs):
+        linked_visit = getattr(self.source_visit, "follow_up_visit", None)
+        if linked_visit:
+            return redirect("core:visit-detail", pk=linked_visit.pk)
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        linked_visit = getattr(self.source_visit, "follow_up_visit", None)
+        if linked_visit:
+            return redirect("core:visit-detail", pk=linked_visit.pk)
+        return super().post(request, *args, **kwargs)
+
+    def get_initial(self):
+        source = self.source_visit
+        if not source.follow_up:
+            raise Http404
+        return {
+            **super().get_initial(),
+            "date": source.follow_up_datetime,
+            "kind": source.kind,
+            "specialty": source.specialty,
+            "reason": source.reason,
+            "center": source.center,
+            "professional": source.professional,
+        }
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.pop("child", None)
+        kwargs.pop("timer", None)
+        kwargs["instance"] = models.HealthVisit(
+            child=self.source_visit.child, follow_up_of=self.source_visit
+        )
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["follow_up_source"] = self.source_visit
+        return context
+
+    def form_valid(self, form):
+        try:
+            return super().form_valid(form)
+        except IntegrityError:
+            # The unique link also protects simultaneous submissions.
+            linked_visit = models.HealthVisit.objects.filter(
+                follow_up_of=self.source_visit
+            ).first()
+            if linked_visit:
+                return redirect("core:visit-detail", pk=linked_visit.pk)
+            raise
+
+    def get_success_url(self):
+        return reverse("core:visit-detail", args=[self.object.pk])
 
 
 class VisitUpdate(

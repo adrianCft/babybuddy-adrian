@@ -75,7 +75,7 @@ class MedicationWorkflowTests(TestCase):
             "prescriptions-0-instructions": "Pauta indicada",
         }
 
-    def test_prescription_link_prefills_only_identity_and_never_creates_a_dose_on_get(
+    def test_legacy_prescription_prefills_identity_and_never_creates_a_dose_on_get(
         self,
     ):
         self.grant("view_prescription", "add_medication")
@@ -133,6 +133,48 @@ class MedicationWorkflowTests(TestCase):
         )
         self.assertFalse(models.Medication.objects.exists())
 
+    def test_saved_prescription_prefills_an_editable_amount_and_unit(self):
+        self.grant(
+            "add_prescription",
+            "view_healthvisit",
+            "view_prescription",
+            "add_medication",
+        )
+        url = reverse("core:prescription-add", args=[self.visit.pk])
+        data = {
+            "name": "Medicación con dosis",
+            "instructions": "Pauta",
+            "dosage": "0.5",
+        }
+        invalid = self.client.post(url, data)
+        self.assertIn("dosage_unit", invalid.context["form"].errors)
+        self.assertFalse(models.Prescription.objects.filter(name=data["name"]).exists())
+        data["dosage_unit"] = "g"
+        self.assertEqual(self.client.post(url, data).status_code, 302)
+        prescription = models.Prescription.objects.get(name=data["name"])
+        self.assertEqual((prescription.dosage, prescription.dosage_unit), (0.5, "g"))
+
+        dose_url = reverse("core:medication-add") + f"?prescription={prescription.pk}"
+        response = self.client.get(dose_url)
+        form = response.context["form"]
+        self.assertEqual(
+            (form["dosage"].value(), form["dosage_unit"].value()), (0.5, "g")
+        )
+        self.assertFalse(models.Medication.objects.exists())
+        response = self.client.post(
+            dose_url,
+            {
+                "time": timezone.now() - timedelta(minutes=2),
+                "dosage": "0.25",
+                "dosage_unit": "ml",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        dose = models.Medication.objects.get()
+        self.assertEqual((dose.dosage, dose.dosage_unit), (0.25, "ml"))
+        prescription.refresh_from_db()
+        self.assertEqual((prescription.dosage, prescription.dosage_unit), (0.5, "g"))
+
     def test_suggestions_and_free_text_both_work(self):
         self.grant("add_medication", "view_medication", "view_prescription")
         models.Medication.objects.create(child=self.child, name="Usado anteriormente")
@@ -153,6 +195,91 @@ class MedicationWorkflowTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(
             models.Medication.objects.filter(name="Nombre completamente nuevo").exists()
+        )
+
+    def test_dose_suggestions_are_scoped_by_child_date_and_permission(self):
+        self.grant("add_medication", "view_medication", "view_prescription")
+        self.prescription.dosage = 2.5
+        self.prescription.dosage_unit = "ml"
+        self.prescription.save()
+        today = timezone.localdate()
+        models.Prescription.objects.create(
+            visit=self.visit,
+            name="Receta caducada",
+            instructions="Pauta antigua",
+            dosage=9,
+            dosage_unit="g",
+            end_date=today - timedelta(days=1),
+        )
+        models.Medication.objects.create(
+            child=self.child,
+            name=self.prescription.name.lower(),
+            dosage=1,
+            dosage_unit="ml",
+        )
+        models.Medication.objects.create(
+            child=self.other_child,
+            name=self.prescription.name,
+            dosage=3,
+            dosage_unit="drops",
+        )
+        for dosage, minutes in ((4, 4), (5, 2)):
+            models.Medication.objects.create(
+                child=self.child,
+                name="Medicación del historial",
+                dosage=dosage,
+                dosage_unit="mg",
+                time=timezone.now() - timedelta(minutes=minutes),
+            )
+        url = reverse("core:medication-add")
+        response = self.client.get(url)
+        doses = response.context["dose_suggestions"]["children"]
+        self.assertEqual(
+            doses[self.child.pk][self.prescription.name], (2.5, "ml", "prescription")
+        )
+        self.assertEqual(
+            doses[self.child.pk][self.prescription.name.lower()],
+            (2.5, "ml", "prescription"),
+        )
+        self.assertEqual(
+            doses[self.other_child.pk][self.prescription.name], (3, "drops", "history")
+        )
+        self.assertEqual(
+            doses[self.child.pk]["Medicación del historial"], (5, "mg", "history")
+        )
+        self.assertNotIn("Receta caducada", doses[self.child.pk])
+        self.user.user_permissions.remove(
+            Permission.objects.get(
+                content_type__app_label="core", codename="view_prescription"
+            )
+        )
+        doses = self.client.get(url).context["dose_suggestions"]["children"]
+        self.assertEqual(
+            doses[self.child.pk][self.prescription.name.lower()], (1, "ml", "history")
+        )
+        self.assertNotIn("Receta caducada", doses[self.child.pk])
+
+    def test_incomplete_or_conflicting_prescription_leaves_dose_unspecified(self):
+        self.grant("add_medication", "view_medication", "view_prescription")
+        models.Medication.objects.create(
+            child=self.child, name=self.prescription.name, dosage=1, dosage_unit="ml"
+        )
+        url = reverse("core:medication-add")
+        self.assertEqual(
+            self.client.get(url).context["dose_suggestions"]["children"], {}
+        )
+        self.prescription.dosage = 2
+        self.prescription.dosage_unit = "ml"
+        self.prescription.save()
+        models.Prescription.objects.create(
+            visit=self.visit,
+            name=self.prescription.name,
+            instructions="Otra pauta",
+            dosage=3,
+            dosage_unit="ml",
+        )
+        self.assertEqual(
+            self.client.get(url).context["dose_suggestions"]["children"], {}
         )
 
     def test_recent_doses_are_scoped_to_child_and_medication_and_permissions(self):
@@ -177,6 +304,8 @@ class MedicationWorkflowTests(TestCase):
             {
                 "photos": [photo("visit.png")],
                 "prescriptions-0-photos": [photo("recipe.png"), photo("box.png")],
+                "prescriptions-0-dosage": "2.5",
+                "prescriptions-0-dosage_unit": "ml",
             }
         )
         response = self.client.post(reverse("core:visit-add"), data)
@@ -184,6 +313,7 @@ class MedicationWorkflowTests(TestCase):
         visit = models.HealthVisit.objects.get(reason=data["reason"])
         prescription = visit.prescriptions.get()
         self.assertEqual(visit.photos.count(), 1)
+        self.assertEqual((prescription.dosage, prescription.dosage_unit), (2.5, "ml"))
         self.assertEqual(prescription.photos.count(), 2)
         self.assertTrue(all(p.visit_id is None for p in prescription.photos.all()))
         self.assertFalse(models.Medication.objects.exists())

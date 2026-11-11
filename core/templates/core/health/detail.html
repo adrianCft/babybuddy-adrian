@@ -17,12 +17,35 @@
     </dl>
     {% include "core/health/photos.html" with photos=object.photos.all %}
     {% if route == 'visit' %}
+        {% if object.follow_up_of_id %}
+            <p><strong>{% trans "Follow-up to" %}</strong>
+                <a href="{% context_url 'core:visit-detail' object.follow_up_of_id %}">{{ object.follow_up_of.reason }}</a>
+                · {{ object.follow_up_of.date|datetime_short }}
+            </p>
+        {% endif %}
+        {% with linked_visit=object.follow_up_visit %}
+            {% if linked_visit or object.follow_up %}
+                <section class="mb-4">
+                    <h2 class="h4">{% trans "Follow-up" %}</h2>
+                    {% if linked_visit %}
+                        <p><a href="{% context_url 'core:visit-detail' linked_visit.pk %}">{{ linked_visit.reason }}</a>
+                            · {{ linked_visit.date|datetime_short }} · {{ linked_visit.get_status_display }}</p>
+                    {% else %}
+                        <p>{{ object.follow_up }}{% if object.follow_up_time != None %} · {{ object.follow_up_time|time:"TIME_FORMAT" }}{% endif %}</p>
+                        {% if can_add %}
+                            <a class="btn btn-outline-primary" href="{% context_url 'core:visit-follow-up-add' object.pk %}">{% trans "Add follow-up visit" %}</a>
+                        {% endif %}
+                    {% endif %}
+                </section>
+            {% endif %}
+        {% endwith %}
         {% if perms.core.add_prescription %}<a class="btn btn-success mb-3" href="{% context_url 'core:prescription-add' object.pk %}">{% trans "Add prescription" %}</a>{% endif %}
         {% if perms.core.view_prescription %}
             <h2 class="h4">{% trans "Prescriptions" %}</h2>
             {% for prescription in prescriptions %}
                 <div class="card mb-3"><div class="card-body">
                     <h3 class="h6"><a href="{% context_url 'core:prescription-detail' prescription.pk %}">{{ prescription.name }}</a></h3>
+                    {% if prescription.dosage != None %}<p class="mb-1"><strong>{{ prescription.dosage }} {{ prescription.get_dosage_unit_display }}</strong></p>{% endif %}
                     <p class="text-break mb-0">{{ prescription.instructions|linebreaksbr }}</p>
                 </div></div>
             {% empty %}<p>{% trans "No prescriptions recorded." %}</p>{% endfor %}

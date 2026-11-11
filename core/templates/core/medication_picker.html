@@ -9,4 +9,10 @@
         <label class="visually-hidden" for="{{ field.id_for_label }}">{% trans "New medication name" %}</label>
         {% if field.errors %}{{ field|add_class:"form-control is-invalid" }}{% else %}{{ field|add_class:"form-control" }}{% endif %}
     </div>
+    {% if dose_suggestions %}
+        <p class="form-text mb-0" role="status" data-dose-source
+           data-prescription="{% trans 'Dose copied from the prescription. You can change it for this administration.' %}"
+           data-history="{% trans 'Dose copied from the last administration. You can change it for this administration.' %}"
+           hidden></p>
+    {% endif %}
 </div>

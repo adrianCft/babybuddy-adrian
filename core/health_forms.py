@@ -1,7 +1,11 @@
+from datetime import datetime
+
 from django import forms
+from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory
+from django.forms.utils import from_current_timezone
 from django.utils.translation import gettext_lazy as _
-from babybuddy.widgets import DateInput, DateTimeInput
+from babybuddy.widgets import DateInput, DateTimeInput, TimeInput
 from core import models
 from core.forms import CoreModelForm
 from core.photo_forms import PhotoFormMixin
@@ -53,7 +57,7 @@ class HealthVisitForm(PhotoFormMixin, CoreModelForm):
         },
         {
             "title": _("Follow-up"),
-            "fields": ["instructions", "follow_up"],
+            "fields": ["instructions", "follow_up", "follow_up_time"],
             "layout": "section",
         },
     ]
@@ -75,6 +79,7 @@ class HealthVisitForm(PhotoFormMixin, CoreModelForm):
             "tests",
             "instructions",
             "follow_up",
+            "follow_up_time",
         ]
         labels = {
             "professional": _("Person's name"),
@@ -84,6 +89,7 @@ class HealthVisitForm(PhotoFormMixin, CoreModelForm):
             "child": ChildRadioSelect(),
             "date": DateTimeInput(),
             "follow_up": DateInput(),
+            "follow_up_time": TimeInput(attrs={"step": 1}),
             **{
                 field: forms.Textarea(attrs={"rows": 3})
                 for field in ("symptoms", "assessment", "tests", "instructions")
@@ -92,6 +98,10 @@ class HealthVisitForm(PhotoFormMixin, CoreModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.instance.follow_up_of_id or (
+            self.instance.pk and hasattr(self.instance, "follow_up_visit")
+        ):
+            self.fields["child"].disabled = True
         specialty = self.initial.get("specialty")
         if specialty:
             self.initial["specialty_choice"] = next(
@@ -105,6 +115,14 @@ class HealthVisitForm(PhotoFormMixin, CoreModelForm):
 
     def clean(self):
         cleaned = super().clean()
+        follow_up_date = cleaned.get("follow_up")
+        follow_up_time = cleaned.get("follow_up_time")
+        if follow_up_date and follow_up_time is not None:
+            try:
+                from_current_timezone(datetime.combine(follow_up_date, follow_up_time))
+            except ValidationError as error:
+                self.add_error("follow_up_time", error)
+
         choice = cleaned.get("specialty_choice")
         if choice in self.specialties:
             if choice != self.initial.get("specialty_choice"):
@@ -124,7 +142,10 @@ class HealthVisitForm(PhotoFormMixin, CoreModelForm):
 class PrescriptionForm(PhotoFormMixin, CoreModelForm):
     photo_owner = "prescription"
     fieldsets = [
-        {"fields": ["name", "instructions"], "layout": "required"},
+        {
+            "fields": ["name", "dosage", "dosage_unit", "instructions"],
+            "layout": "required",
+        },
         {
             "title": _("Dates and notes"),
             "fields": ["start_date", "end_date", "notes"],
@@ -135,11 +156,20 @@ class PrescriptionForm(PhotoFormMixin, CoreModelForm):
     class Meta:
         model = models.Prescription
         # The view binds the visit, never a hidden client-provided child/visit.
-        fields = ["name", "instructions", "start_date", "end_date", "notes"]
+        fields = [
+            "name",
+            "dosage",
+            "dosage_unit",
+            "instructions",
+            "start_date",
+            "end_date",
+            "notes",
+        ]
         widgets = {
             "name": forms.TextInput(
                 attrs={"list": "medication-names", "autocomplete": "off"}
             ),
+            "dosage": forms.NumberInput(attrs={"inputmode": "decimal"}),
             "start_date": DateInput(),
             "end_date": DateInput(),
             "instructions": forms.Textarea(attrs={"rows": 3}),
@@ -152,15 +182,9 @@ class PrescriptionInlineForm(PhotoFormMixin, forms.ModelForm):
 
     photo_owner = "prescription"
 
-    class Meta:
-        model = models.Prescription
-        fields = ["name", "instructions", "start_date", "end_date", "notes"]
+    class Meta(PrescriptionForm.Meta):
         widgets = {
-            "name": forms.TextInput(
-                attrs={"list": "medication-names", "autocomplete": "off"}
-            ),
-            "start_date": DateInput(),
-            "end_date": DateInput(),
+            **PrescriptionForm.Meta.widgets,
             "instructions": forms.Textarea(attrs={"rows": 2}),
             "notes": forms.Textarea(attrs={"rows": 2}),
         }

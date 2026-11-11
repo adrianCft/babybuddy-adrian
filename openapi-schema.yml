@@ -2244,6 +2244,7 @@ paths:
             enum:
               - mg
               - ml
+              - g
               - tablets
               - drops
         - name: name
@@ -2362,6 +2363,7 @@ paths:
             enum:
               - mg
               - ml
+              - g
               - tablets
               - drops
         - name: name
@@ -2434,6 +2436,7 @@ paths:
             enum:
               - mg
               - ml
+              - g
               - tablets
               - drops
         - name: name
@@ -2517,6 +2520,7 @@ paths:
             enum:
               - mg
               - ml
+              - g
               - tablets
               - drops
         - name: name
@@ -2600,6 +2604,7 @@ paths:
             enum:
               - mg
               - ml
+              - g
               - tablets
               - drops
         - name: name
@@ -5829,6 +5834,7 @@ components:
           enum:
             - mg
             - ml
+            - g
             - tablets
             - drops
           type: string

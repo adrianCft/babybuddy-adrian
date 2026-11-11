@@ -1,10 +1,17 @@
 {% extends "babybuddy/page.html" %}
 {% load navigation %}
 {% load i18n %}
-{% block title %}{% if object %}{% trans "Update" %} · {{ object }}{% elif route == 'visit' %}{% trans "Add medical visit" %}{% elif route == 'vaccination' %}{% trans "Add vaccination" %}{% else %}{% trans "Add prescription" %}{% endif %}{% endblock %}
+{% block title %}{% if object %}{% trans "Update" %} · {{ object }}{% elif follow_up_source %}{% trans "Add follow-up visit" %}{% elif route == 'visit' %}{% trans "Add medical visit" %}{% elif route == 'vaccination' %}{% trans "Add vaccination" %}{% else %}{% trans "Add prescription" %}{% endif %}{% endblock %}
 {% block breadcrumbs %}<li class="breadcrumb-item"><a href="{% context_url 'core:health-overview' %}">{% trans "Health" %}</a></li><li class="breadcrumb-item"><a href="{{ list_url }}">{{ title }}</a></li><li class="breadcrumb-item active">{% if object %}{% trans "Update" %}{% else %}{% trans "Add" %}{% endif %}</li>{% endblock %}
 {% block content %}
-    <h1>{% if object %}{% trans "Update" %} <span class="text-info">{{ object }}</span>{% elif route == 'visit' %}{% trans "Add medical visit" %}{% elif route == 'vaccination' %}{% trans "Add vaccination" %}{% else %}{% trans "Add prescription" %}{% endif %}</h1>
+    <h1>{% if object %}{% trans "Update" %} <span class="text-info">{{ object }}</span>{% elif follow_up_source %}{% trans "Add follow-up visit" %}{% elif route == 'visit' %}{% trans "Add medical visit" %}{% elif route == 'vaccination' %}{% trans "Add vaccination" %}{% else %}{% trans "Add prescription" %}{% endif %}</h1>
+    {% if follow_up_source %}
+        <p class="text-body-secondary">
+            {% trans "Follow-up to" %} <a href="{% context_url 'core:visit-detail' follow_up_source.pk %}">{{ follow_up_source.reason }}</a>
+            · {{ follow_up_source.follow_up }}
+            {% if follow_up_source.follow_up_time == None %}<br>{% trans "Enter the date and time for this visit." %}{% endif %}
+        </p>
+    {% endif %}
     {% if form.instance.visit_id %}<p>{{ form.instance.visit.child }} · {{ form.instance.visit }}</p>{% endif %}
     {% if route == 'visit' %}
         {{ form.media.js }}

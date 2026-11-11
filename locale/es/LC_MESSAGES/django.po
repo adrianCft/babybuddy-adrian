@@ -3649,8 +3649,29 @@ msgstr "Indicaciones y seguimiento"
 msgid "Follow-up date"
 msgstr "Fecha de seguimiento"
 
+msgid "Follow-up time"
+msgstr "Hora de seguimiento"
+
+msgid "Enter a date for the follow-up time."
+msgstr "Indica la fecha de seguimiento para poder guardar la hora."
+
 msgid "Follow-up"
 msgstr "Seguimiento"
+
+msgid "Follow-up to"
+msgstr "Seguimiento de"
+
+msgid "Add follow-up visit"
+msgstr "Añadir visita de seguimiento"
+
+msgid "Enter the date and time for this visit."
+msgstr "Indica la fecha y la hora de esta visita."
+
+msgid "Linked visits must belong to the same child."
+msgstr "Las visitas enlazadas deben corresponder al mismo niño."
+
+msgid "This visit cannot be after its linked follow-up."
+msgstr "Esta visita no puede ser posterior al seguimiento enlazado."
 
 msgid "A completed visit cannot be in the future."
 msgstr "Una visita realizada no puede tener una fecha futura."
@@ -3663,6 +3684,24 @@ msgstr "Receta"
 
 msgid "Prescriptions"
 msgstr "Medicación recetada"
+
+msgid "Prescribed dose"
+msgstr "Cantidad prescrita"
+
+msgid "Enter the prescribed amount."
+msgstr "Indica la cantidad prescrita."
+
+msgid "Enter an amount greater than zero."
+msgstr "Indica una cantidad mayor que cero."
+
+msgid "Select the unit for this amount."
+msgstr "Selecciona la unidad de esta cantidad."
+
+msgid "Dose copied from the prescription. You can change it for this administration."
+msgstr "Dosis copiada de la receta. Puedes editarla antes de guardar."
+
+msgid "Dose copied from the last administration. You can change it for this administration."
+msgstr "Dosis copiada de la última toma. Puedes editarla antes de guardar."
 
 msgid "Prescribed instructions"
 msgstr "Pauta indicada"

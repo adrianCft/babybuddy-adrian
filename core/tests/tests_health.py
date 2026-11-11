@@ -1,5 +1,5 @@
 import io
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
 from PIL import Image
 from django.conf import settings
@@ -182,6 +182,102 @@ class HealthTests(TestCase):
         )
         self.assertFalse(models.HealthVisit.objects.filter(pk=visit.pk).exists())
 
+    def test_follow_up_can_be_scheduled_once_and_completed_as_a_separate_visit(self):
+        self.grant("view_healthvisit", "add_healthvisit", "change_healthvisit")
+        other_child = models.Child.objects.create(
+            first_name="Otro", birth_date=self.child.birth_date
+        )
+        day = timezone.localdate() + timedelta(days=2)
+        at = datetime.combine(day, time(15, 30))
+        source_detail = reverse("core:visit-detail", args=[self.visit.pk])
+        source_update = reverse("core:visit-update", args=[self.visit.pk])
+        follow_up_add = reverse("core:visit-follow-up-add", args=[self.visit.pk])
+        data = {
+            "child": self.child.pk,
+            "date": self.visit.date,
+            "kind": "specialist",
+            "status": "completed",
+            "reason": self.visit.reason,
+            "specialty": "Pediatría",
+            "professional": "Profesional de prueba",
+            "assessment": "Informe de la primera consulta",
+            "follow_up_time": "15:30",
+        }
+        invalid = self.client.post(source_update, data)
+        self.assertIn("follow_up", invalid.context["form"].errors)
+        data["follow_up"] = day
+        self.assertEqual(self.client.post(source_update, data).status_code, 302)
+        self.visit.refresh_from_db()
+        self.assertEqual(self.visit.follow_up_datetime, at)
+        self.assertContains(self.client.get(source_detail), follow_up_add)
+        overview = self.client.get(reverse("core:health-overview"))
+        self.assertContains(overview, follow_up_add)
+
+        form = self.client.get(follow_up_add).context["form"]
+        self.assertEqual(form["date"].value(), at)
+        self.assertEqual(form["child"].value(), self.child.pk)
+        self.assertEqual(form["professional"].value(), data["professional"])
+        self.assertFalse(form["assessment"].value())
+        self.assertFalse(
+            models.HealthVisit.objects.filter(follow_up_of=self.visit).exists()
+        )
+        child_data = {
+            "child": other_child.pk,
+            "date": at.isoformat(),
+            "kind": "specialist",
+            "status": "planned",
+            "reason": "Revisión de seguimiento",
+            "specialty": "Pediatría",
+            "assessment": "Datos de la nueva consulta",
+        }
+        response = self.client.post(follow_up_add, child_data)
+        self.assertEqual(response.status_code, 302)
+        follow_up = models.HealthVisit.objects.get(follow_up_of=self.visit)
+        self.assertEqual(follow_up.child, self.child)
+        self.assertEqual(follow_up.assessment, child_data["assessment"])
+        detail = reverse("core:visit-detail", args=[follow_up.pk])
+        self.assertEqual(response.url, detail)
+        self.assertContains(self.client.get(detail), source_detail)
+        self.assertContains(self.client.get(source_detail), detail)
+        self.assertEqual(self.client.post(follow_up_add, child_data).url, detail)
+        self.assertEqual(
+            models.HealthVisit.objects.filter(follow_up_of=self.visit).count(), 1
+        )
+        overview = self.client.get(reverse("core:health-overview"))
+        self.assertIn(follow_up, overview.context["upcoming_visits"])
+        self.assertNotIn(self.visit, overview.context["follow_ups"])
+
+        child_data.update(
+            date=timezone.now() - timedelta(minutes=1), status="completed"
+        )
+        update = reverse("core:visit-update", args=[follow_up.pk])
+        self.assertEqual(self.client.post(update, child_data).status_code, 302)
+        follow_up.refresh_from_db()
+        self.assertEqual(follow_up.status, "completed")
+        self.assertEqual(follow_up.child, self.child)
+        self.assertEqual(follow_up.follow_up_of_id, self.visit.pk)
+        self.grant("delete_healthvisit")
+        self.assertEqual(
+            self.client.post(
+                reverse("core:visit-delete", args=[self.visit.pk])
+            ).status_code,
+            302,
+        )
+        follow_up.refresh_from_db()
+        self.assertIsNone(follow_up.follow_up_of_id)
+
+    def test_date_only_follow_up_does_not_invent_an_hour_and_requires_permission(self):
+        self.visit.follow_up = timezone.localdate() + timedelta(days=2)
+        self.visit.save()
+        url = reverse("core:visit-follow-up-add", args=[self.visit.pk])
+        self.grant("add_healthvisit")
+        self.assertEqual(self.client.get(url).status_code, 403)
+        self.assertEqual(self.client.post(url).status_code, 403)
+        self.grant("view_healthvisit")
+        response = self.client.get(url)
+        self.assertContains(response, "Enter the date and time for this visit.")
+        self.assertIsNone(response.context["form"]["date"].value())
+
     def test_visit_saves_person_and_specialty_and_preserves_previous_names(self):
         self.grant("add_healthvisit", "view_healthvisit", "change_healthvisit")
         data = {
@@ -254,7 +350,9 @@ class HealthTests(TestCase):
         self.assertEqual(visit.specialty, "Clinical genetics")
         response = self.client.get(url)
         self.assertEqual(response.context["form"]["specialty_choice"].value(), "other")
-        self.assertEqual(response.context["form"]["specialty"].value(), "Clinical genetics")
+        self.assertEqual(
+            response.context["form"]["specialty"].value(), "Clinical genetics"
+        )
 
     def test_visit_form_saves_prescribed_medication(self):
         self.grant("add_healthvisit", "view_healthvisit", "add_prescription")

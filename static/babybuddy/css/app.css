@@ -13507,8 +13507,13 @@ textarea.form-control-lg {
   height: 100%;
   margin: 0;
   border-color: var(--bs-border-color);
+  border-color: color-mix(in srgb, var(--bs-border-color), var(--bb-card-accent) 14%);
   border-radius: 0.85rem;
   background: var(--bs-tertiary-bg);
+  background: color-mix(in srgb, var(--bs-tertiary-bg), var(--bb-card-accent) 8%);
+}
+.bb-home-grid .card-dashboard .list-group-item {
+  background-color: transparent;
 }
 .bb-home-grid .card-dashboard .card-header {
   display: flex;
