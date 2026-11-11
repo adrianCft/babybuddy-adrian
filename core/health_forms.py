@@ -10,12 +10,35 @@ from core.widgets import ChildRadioSelect
 
 class HealthVisitForm(PhotoFormMixin, CoreModelForm):
     photo_owner = "visit"
+    specialties = {
+        "pediatrics": _("Pediatrics"),
+        "allergy": _("Allergy and immunology"),
+        "cardiology": _("Cardiology"),
+        "dermatology": _("Dermatology"),
+        "gastroenterology": _("Gastroenterology"),
+        "neurology": _("Neurology"),
+        "ophthalmology": _("Ophthalmology"),
+        "ent": _("Otolaryngology"),
+        "orthopedics": _("Orthopedics and traumatology"),
+        "pulmonology": _("Pulmonology"),
+        "dentistry": _("Pediatric dentistry"),
+    }
+    specialty_choice = forms.ChoiceField(
+        label=_("Specialty"),
+        required=False,
+        choices=[
+            ("", "---------"),
+            *specialties.items(),
+            ("other", _("Other specialty")),
+        ],
+    )
     fieldsets = [
         {
             "fields": [
                 "child",
                 "date",
                 "kind",
+                "specialty_choice",
                 "specialty",
                 "status",
                 "reason",
@@ -53,7 +76,10 @@ class HealthVisitForm(PhotoFormMixin, CoreModelForm):
             "instructions",
             "follow_up",
         ]
-        labels = {"professional": _("Person's name")}
+        labels = {
+            "professional": _("Person's name"),
+            "specialty": _("Specify the specialty"),
+        }
         widgets = {
             "child": ChildRadioSelect(),
             "date": DateTimeInput(),
@@ -63,6 +89,36 @@ class HealthVisitForm(PhotoFormMixin, CoreModelForm):
                 for field in ("symptoms", "assessment", "tests", "instructions")
             },
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        specialty = self.initial.get("specialty")
+        if specialty:
+            self.initial["specialty_choice"] = next(
+                (
+                    key
+                    for key, label in self.specialties.items()
+                    if specialty.casefold() == str(label).casefold()
+                ),
+                "other",
+            )
+
+    def clean(self):
+        cleaned = super().clean()
+        choice = cleaned.get("specialty_choice")
+        if choice in self.specialties:
+            if choice != self.initial.get("specialty_choice"):
+                cleaned["specialty"] = str(self.specialties[choice])
+            else:
+                cleaned["specialty"] = self.initial["specialty"]
+        elif (
+            choice == "other"
+            and cleaned.get("kind") == "specialist"
+            and "specialty" in cleaned
+            and not cleaned["specialty"]
+        ):
+            self.add_error("specialty", _("Enter the specialty."))
+        return cleaned
 
 
 class PrescriptionForm(PhotoFormMixin, CoreModelForm):

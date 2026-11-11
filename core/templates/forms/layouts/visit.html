@@ -1,7 +1,26 @@
 {% for field in fieldset.fields %}
-    {% if field.name == 'specialty' %}
-        <div data-visit-specialty>{% include 'babybuddy/form_field.html' %}</div>
-    {% else %}
+    {% if field.name == 'specialty_choice' %}
+        <div data-visit-specialty>
+            {% include 'babybuddy/form_field.html' %}
+            <div data-custom-specialty>
+                {% include 'babybuddy/form_field.html' with field=form.specialty %}
+            </div>
+        </div>
+    {% elif field.name != 'specialty' %}
         {% include 'babybuddy/form_field.html' %}
     {% endif %}
 {% endfor %}
+<script>
+    (() => {
+        const row = document.currentScript.closest("form").querySelector("[data-visit-specialty]");
+        const choice = row.querySelector("select");
+        const custom = row.querySelector("[data-custom-specialty]");
+        const input = custom.querySelector("input");
+        const update = () => {
+            custom.hidden = choice.value !== "other" && !custom.querySelector(".invalid-feedback");
+            input.disabled = custom.hidden;
+        };
+        choice.addEventListener("change", update);
+        update();
+    })();
+</script>

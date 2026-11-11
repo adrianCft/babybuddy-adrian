@@ -219,6 +219,43 @@ class HealthTests(TestCase):
         self.assertEqual(visit.professional, "Persona de prueba")
         self.assertEqual(visit.specialty, "Dermatología")
 
+    def test_visit_specialty_choices_and_custom_specialty(self):
+        self.grant("add_healthvisit", "view_healthvisit", "change_healthvisit")
+        data = {
+            "child": self.child.pk,
+            "date": timezone.now() - timedelta(hours=1),
+            "kind": "specialist",
+            "status": "completed",
+            "reason": "Specialty choice",
+            "professional": "Example name",
+            "specialty_choice": "dermatology",
+        }
+        response = self.client.post(reverse("core:visit-add"), data)
+        self.assertEqual(response.status_code, 302)
+        visit = models.HealthVisit.objects.get(reason=data["reason"])
+        self.assertEqual(visit.specialty, "Dermatology")
+        self.assertEqual(visit.professional, "Example name")
+
+        url = reverse("core:visit-update", args=[visit.pk])
+        response = self.client.get(url)
+        self.assertEqual(
+            response.context["form"]["specialty_choice"].value(), "dermatology"
+        )
+        self.assertContains(response, "data-custom-specialty")
+
+        data.update(specialty_choice="other")
+        response = self.client.post(url, data)
+        self.assertFormError(
+            response.context["form"], "specialty", "Enter the specialty."
+        )
+        data.update(specialty="Clinical genetics")
+        self.assertEqual(self.client.post(url, data).status_code, 302)
+        visit.refresh_from_db()
+        self.assertEqual(visit.specialty, "Clinical genetics")
+        response = self.client.get(url)
+        self.assertEqual(response.context["form"]["specialty_choice"].value(), "other")
+        self.assertEqual(response.context["form"]["specialty"].value(), "Clinical genetics")
+
     def test_visit_form_saves_prescribed_medication(self):
         self.grant("add_healthvisit", "view_healthvisit", "add_prescription")
         response = self.client.post(

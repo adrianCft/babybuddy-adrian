@@ -3822,6 +3822,48 @@ msgstr "Nombre de la persona"
 msgid "Specialty"
 msgstr "Especialidad"
 
+msgid "Pediatrics"
+msgstr "Pediatría"
+
+msgid "Allergy and immunology"
+msgstr "Alergología e inmunología"
+
+msgid "Cardiology"
+msgstr "Cardiología"
+
+msgid "Dermatology"
+msgstr "Dermatología"
+
+msgid "Gastroenterology"
+msgstr "Digestivo"
+
+msgid "Neurology"
+msgstr "Neurología"
+
+msgid "Ophthalmology"
+msgstr "Oftalmología"
+
+msgid "Otolaryngology"
+msgstr "Otorrinolaringología"
+
+msgid "Orthopedics and traumatology"
+msgstr "Traumatología y ortopedia"
+
+msgid "Pulmonology"
+msgstr "Neumología"
+
+msgid "Pediatric dentistry"
+msgstr "Odontopediatría"
+
+msgid "Specify the specialty"
+msgstr "Indica la especialidad"
+
+msgid "Enter the specialty."
+msgstr "Escribe la especialidad."
+
+msgid "Other specialty"
+msgstr "Otra"
+
 msgid "View record"
 msgstr "Ver registro"
 
