@@ -9,18 +9,20 @@
     const child = form.elements.namedItem("child");
     const time = form.elements.namedItem("time");
     const dosage = form.elements.namedItem("dosage");
+    const interval = form.elements.namedItem("next_dose_interval");
     const units = form.querySelectorAll('[name="dosage_unit"]');
 
     const onSuggestionDate = () => time.value.slice(0, 10) === date;
     const fill = () => {
       const medications = children[child.value];
-      const [amount, unit, origin] =
+      const [amount, unit, origin, hours] =
         onSuggestionDate() &&
         medications &&
         Object.hasOwn(medications, choice.value)
           ? medications[choice.value]
           : [];
       dosage.value = amount ?? "";
+      interval.value = hours ?? "";
       units.forEach((radio) => (radio.checked = radio.value === unit));
       source.textContent = origin ? source.dataset[origin] : "";
       source.hidden = !origin;
@@ -38,6 +40,7 @@
       if (!onSuggestionDate() && !source.hidden) fill();
     });
     dosage.addEventListener("input", clearSource);
+    interval.addEventListener("input", clearSource);
     units.forEach((radio) => radio.addEventListener("change", clearSource));
   };
 

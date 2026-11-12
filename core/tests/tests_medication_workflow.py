@@ -1,4 +1,5 @@
 from datetime import timedelta
+from decimal import Decimal
 from urllib.parse import parse_qs, urlencode, urlsplit
 
 from django.conf import settings
@@ -145,6 +146,7 @@ class MedicationWorkflowTests(TestCase):
             "name": "Medicación con dosis",
             "instructions": "Pauta",
             "dosage": "0.5",
+            "interval_hours": "6.5",
         }
         invalid = self.client.post(url, data)
         self.assertIn("dosage_unit", invalid.context["form"].errors)
@@ -160,19 +162,23 @@ class MedicationWorkflowTests(TestCase):
         self.assertEqual(
             (form["dosage"].value(), form["dosage_unit"].value()), (0.5, "g")
         )
+        self.assertEqual(form["next_dose_interval"].value(), Decimal("6.5"))
         self.assertFalse(models.Medication.objects.exists())
         response = self.client.post(
             dose_url,
             {
                 "time": timezone.now() - timedelta(minutes=2),
                 "dosage": "0.25",
+                "next_dose_interval": "8",
                 "dosage_unit": "ml",
             },
         )
         self.assertEqual(response.status_code, 302)
         dose = models.Medication.objects.get()
         self.assertEqual((dose.dosage, dose.dosage_unit), (0.25, "ml"))
+        self.assertEqual(dose.next_dose_interval, timedelta(hours=8))
         prescription.refresh_from_db()
+        self.assertEqual(prescription.interval_hours, Decimal("6.5"))
         self.assertEqual((prescription.dosage, prescription.dosage_unit), (0.5, "g"))
 
     def test_suggestions_and_free_text_both_work(self):
@@ -199,6 +205,7 @@ class MedicationWorkflowTests(TestCase):
 
     def test_dose_suggestions_are_scoped_by_child_date_and_permission(self):
         self.grant("add_medication", "view_medication", "view_prescription")
+        self.prescription.interval_hours = Decimal("6.5")
         self.prescription.dosage = 2.5
         self.prescription.dosage_unit = "ml"
         self.prescription.save()
@@ -222,6 +229,7 @@ class MedicationWorkflowTests(TestCase):
             name=self.prescription.name,
             dosage=3,
             dosage_unit="drops",
+            next_dose_interval=timedelta(hours=4),
         )
         for dosage, minutes in ((4, 4), (5, 2)):
             models.Medication.objects.create(
@@ -235,17 +243,19 @@ class MedicationWorkflowTests(TestCase):
         response = self.client.get(url)
         doses = response.context["dose_suggestions"]["children"]
         self.assertEqual(
-            doses[self.child.pk][self.prescription.name], (2.5, "ml", "prescription")
+            doses[self.child.pk][self.prescription.name],
+            (2.5, "ml", "prescription", Decimal("6.5")),
         )
         self.assertEqual(
             doses[self.child.pk][self.prescription.name.lower()],
-            (2.5, "ml", "prescription"),
+            (2.5, "ml", "prescription", Decimal("6.5")),
         )
         self.assertEqual(
-            doses[self.other_child.pk][self.prescription.name], (3, "drops", "history")
+            doses[self.other_child.pk][self.prescription.name],
+            (3, "drops", "history", 4),
         )
         self.assertEqual(
-            doses[self.child.pk]["Medicación del historial"], (5, "mg", "history")
+            doses[self.child.pk]["Medicación del historial"], (5, "mg", "history", None)
         )
         self.assertNotIn("Receta caducada", doses[self.child.pk])
         self.user.user_permissions.remove(
@@ -255,7 +265,8 @@ class MedicationWorkflowTests(TestCase):
         )
         doses = self.client.get(url).context["dose_suggestions"]["children"]
         self.assertEqual(
-            doses[self.child.pk][self.prescription.name.lower()], (1, "ml", "history")
+            doses[self.child.pk][self.prescription.name.lower()],
+            (1, "ml", "history", None),
         )
         self.assertNotIn("Receta caducada", doses[self.child.pk])
 

@@ -665,6 +665,8 @@ class MedicationAdd(MedicationSuggestions, CoreAddView):
             if amount:
                 dosage, unit = amount
                 initial.update(dosage=dosage, dosage_unit=unit)
+            if prescription.interval_hours is not None:
+                initial["next_dose_interval"] = prescription.interval_hours
         return initial
 
     def get_form_kwargs(self):

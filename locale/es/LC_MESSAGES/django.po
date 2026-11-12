@@ -3688,6 +3688,9 @@ msgstr "Medicación recetada"
 msgid "Prescribed dose"
 msgstr "Cantidad prescrita"
 
+msgid "Interval between doses (hours)"
+msgstr "Intervalo entre tomas (horas)"
+
 msgid "Enter the prescribed amount."
 msgstr "Indica la cantidad prescrita."
 
@@ -3697,11 +3700,11 @@ msgstr "Indica una cantidad mayor que cero."
 msgid "Select the unit for this amount."
 msgstr "Selecciona la unidad de esta cantidad."
 
-msgid "Dose copied from the prescription. You can change it for this administration."
-msgstr "Dosis copiada de la receta. Puedes editarla antes de guardar."
+msgid "Values copied from the prescription. You can edit them before saving."
+msgstr "Datos copiados de la receta. Puedes editarlos antes de guardar."
 
-msgid "Dose copied from the last administration. You can change it for this administration."
-msgstr "Dosis copiada de la última toma. Puedes editarla antes de guardar."
+msgid "Values copied from the last dose. You can edit them before saving."
+msgstr "Datos copiados de la última toma. Puedes editarlos antes de guardar."
 
 msgid "Prescribed instructions"
 msgstr "Pauta indicada"
@@ -4608,6 +4611,17 @@ msgstr "Próxima visita médica"
 
 msgid "Next scheduled dose"
 msgstr "Próxima toma programada"
+
+msgid "Next dose"
+msgstr "Próxima toma"
+
+#, python-format
+msgid "Today at %(time)s"
+msgstr "Hoy a las %(time)s"
+
+#, python-format
+msgid "in %(duration)s"
+msgstr "en %(duration)s"
 
 msgid "Scheduled time reached"
 msgstr "Hora prevista alcanzada"

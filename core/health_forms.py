@@ -143,7 +143,13 @@ class PrescriptionForm(PhotoFormMixin, CoreModelForm):
     photo_owner = "prescription"
     fieldsets = [
         {
-            "fields": ["name", "dosage", "dosage_unit", "instructions"],
+            "fields": [
+                "name",
+                "dosage",
+                "dosage_unit",
+                "interval_hours",
+                "instructions",
+            ],
             "layout": "required",
         },
         {
@@ -160,6 +166,7 @@ class PrescriptionForm(PhotoFormMixin, CoreModelForm):
             "name",
             "dosage",
             "dosage_unit",
+            "interval_hours",
             "instructions",
             "start_date",
             "end_date",
@@ -170,6 +177,7 @@ class PrescriptionForm(PhotoFormMixin, CoreModelForm):
                 attrs={"list": "medication-names", "autocomplete": "off"}
             ),
             "dosage": forms.NumberInput(attrs={"inputmode": "decimal"}),
+            "interval_hours": forms.NumberInput(attrs={"inputmode": "decimal"}),
             "start_date": DateInput(),
             "end_date": DateInput(),
             "instructions": forms.Textarea(attrs={"rows": 3}),

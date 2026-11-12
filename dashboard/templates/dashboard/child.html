@@ -8,17 +8,17 @@
     <div class="bb-home">
         <header class="bb-home-heading">
             <div><p class="bb-home-date">{% trans "Today" %} · {% now "j F" %}</p><h1>{% trans "Dashboard" %}</h1><p class="bb-home-child">{{ object }}</p></div>
-            <nav class="bb-home-links" aria-label="{% trans 'Summaries' %}">
-                <a href="{% context_url 'core:daily-summary' %}"><i class="icon-timeline" aria-hidden="true"></i><span>{% trans "Summaries" %}</span><span aria-hidden="true">›</span></a>
-                <a href="{% context_url 'core:growth-summary' object.slug %}"><i class="icon-graph" aria-hidden="true"></i><span>{% trans "Growth and percentiles" %}</span><span aria-hidden="true">›</span></a>
-            </nav>
         </header>
-        {% include 'dashboard/home_sleep.html' %}
+        {% include 'dashboard/home_status.html' %}
         <h2 class="bb-home-section-title">{% trans "Latest records" %}</h2>
         <div id="dashboard-child" class="bb-home-grid">
             {% for card in home.favorites %}<div data-dashboard-card="{{ card.key }}">{{ card.html }}</div>{% empty %}<p class="bb-record-empty">{% trans "No favorite cards to show." %}</p>{% endfor %}
             {% if home.show_visit_card %}<div data-dashboard-card="visit-last">{% include 'cards/next_visit.html' with type='medication' %}</div>{% endif %}
         </div>
+        <nav class="bb-home-links mt-4" aria-label="{% trans 'Summaries' %}">
+            <a href="{% context_url 'core:daily-summary' %}"><i class="icon-timeline" aria-hidden="true"></i><span>{% trans "Summaries" %}</span><span aria-hidden="true">›</span></a>
+            <a href="{% context_url 'core:growth-summary' object.slug %}"><i class="icon-graph" aria-hidden="true"></i><span>{% trans "Growth and percentiles" %}</span><span aria-hidden="true">›</span></a>
+        </nav>
         <details class="bb-home-more mt-4"><summary>{% trans "More data" %}</summary>
             <div class="bb-home-grid mt-3">{% for card in home.others %}<div data-dashboard-card="{{ card.key }}">{{ card.html }}</div>{% empty %}<p class="text-body-secondary">{% trans "No more data to show." %}</p>{% endfor %}</div>
         </details>
@@ -34,6 +34,14 @@
             const update = () => counters.forEach((counter) => {
                 const minutes = Math.ceil((Number(counter.dataset.doseDeadline) * 1000 - Date.now()) / 60000);
                 if (minutes <= 0) {
+                    const reminder = counter.closest("[data-pending-dose]");
+                    if (reminder) {
+                        reminder.hidden = true;
+                        if (!reminder.parentElement.querySelector(":scope > :not([hidden])")) {
+                            reminder.parentElement.hidden = true;
+                        }
+                        return;
+                    }
                     counter.textContent = counter.dataset.elapsedLabel;
                     return;
                 }
@@ -42,8 +50,9 @@
                 const parts = [];
                 if (days) parts.push(duration.format(days) + " d");
                 if (hours) parts.push(duration.format(hours) + " h");
-                parts.push(duration.format(minutes % 60) + " min");
-                counter.textContent = parts.join(" ");
+                if (minutes % 60) parts.push(duration.format(minutes % 60) + " min");
+                const remaining = new Intl.ListFormat(document.documentElement.lang).format(parts);
+                counter.textContent = counter.dataset.remainingLabel.replace("%s", remaining);
             });
             update();
             window.setInterval(update, 1000);

@@ -12,6 +12,7 @@
     {% include 'babybuddy/form_field.html' with field=prescription_form.name %}
     {% include 'babybuddy/form_field.html' with field=prescription_form.dosage %}
     {% include 'babybuddy/form_field.html' with field=prescription_form.dosage_unit %}
+    {% include 'babybuddy/form_field.html' with field=prescription_form.interval_hours %}
     {% include 'babybuddy/form_field.html' with field=prescription_form.instructions %}
     <details class="bb-form-section" {% if prescription_form.start_date.value or prescription_form.end_date.value or prescription_form.notes.value or prescription_form.start_date.errors or prescription_form.end_date.errors or prescription_form.notes.errors %}open{% endif %}>
         <summary>{% trans "Dates and notes" %}</summary>

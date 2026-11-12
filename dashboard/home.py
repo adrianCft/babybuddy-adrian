@@ -1,11 +1,13 @@
 """A small personal home layout built from the existing dashboard cards."""
 
 from django import forms
+from django.db.models import F, Window
+from django.db.models.functions import Lower, RowNumber
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.models import HealthVisit, Timer
+from core.models import HealthVisit, Medication, Timer
 from core.navigation import contextual_url, effective_url
 from dashboard.templatetags import cards
 
@@ -120,6 +122,29 @@ class HomeLayoutForm(forms.Form):
         return selected
 
 
+def pending_dose(child, now):
+    latest_doses = (
+        Medication.objects.filter(child=child, time__lte=now)
+        .annotate(
+            latest=Window(
+                expression=RowNumber(),
+                partition_by=Lower("name"),
+                order_by=[F("time").desc(), F("pk").desc()],
+            )
+        )
+        .filter(latest=1)
+    )
+    return min(
+        (
+            dose
+            for dose in latest_doses
+            if dose.next_dose_time and dose.next_dose_time > now
+        ),
+        key=lambda dose: dose.next_dose_time,
+        default=None,
+    )
+
+
 def home_layout(request, child, form=None):
     user = request.user
     available = available_cards(user)
@@ -158,17 +183,29 @@ def home_layout(request, child, form=None):
     rows += [card for card in available if card["key"] not in checked]
     can_view_visits = user.has_perm("core.view_healthvisit")
     can_add_visit = user.has_perm("core.add_healthvisit")
+    now = timezone.now()
     next_visit = (
-        HealthVisit.objects.filter(
-            child=child, status="planned", date__gte=timezone.now()
-        ).order_by("date", "pk").first()
-        if can_view_visits else None
+        HealthVisit.objects.filter(child=child, status="planned", date__gte=now)
+        .order_by("date", "pk")
+        .first()
+        if can_view_visits
+        else None
     )
     return {
         "show_visit_card": can_view_visits or can_add_visit,
         "can_view_visits": can_view_visits,
         "can_add_visit": can_add_visit,
         "next_visit": next_visit,
+        "visit_reminder": (
+            next_visit
+            if next_visit
+            and timezone.localdate(next_visit.date)
+            <= timezone.localdate(now) + timezone.timedelta(days=5)
+            else None
+        ),
+        "pending_dose": (
+            pending_dose(child, now) if user.has_perm("core.view_medication") else None
+        ),
         "favorites": [item for card in selected if (item := rendered(card))],
         "others": [item for card in others if (item := rendered(card))],
         "selected_rows": [card for card in rows if card["key"] in checked],

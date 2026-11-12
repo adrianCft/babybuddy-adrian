@@ -61,7 +61,11 @@ class ViewsTestCase(TestCase):
         meal.foods.add(Food.objects.get(name="Plátano"))
         page = self.c.get("/children/{}/dashboard/".format(child.slug))
         self.assertContains(page, "Plátano")
-        self.assertContains(page, "Meals: 1")
+        self.assertNotContains(page, "Meals: 1")
+        self.assertNotContains(page, "Different foods: 1")
+        html = page.content
+        self.assertLess(html.index(b'id="dashboard-child"'), html.index(b'class="bb-home-links'))
+        self.assertLess(html.index(b'class="bb-home-links'), html.index(b'class="bb-home-more'))
         for route in (
             "core:feeding-add",
             "core:diaperchange-add",

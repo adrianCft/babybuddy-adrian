@@ -1,10 +1,12 @@
 """Health records; existing measurements and administered doses remain independent."""
 
 from datetime import datetime
+from decimal import Decimal
 from pathlib import Path
 from uuid import uuid4
 
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db import transaction
 from django.db.models.signals import post_delete
@@ -140,6 +142,14 @@ class Prescription(models.Model):
         blank=True,
         null=True,
         verbose_name=_("Dosage Unit"),
+    )
+    interval_hours = models.DecimalField(
+        max_digits=8,
+        decimal_places=3,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(Decimal("0.001"))],
+        verbose_name=_("Interval between doses (hours)"),
     )
     instructions = models.TextField(
         verbose_name=_("Prescribed instructions"),

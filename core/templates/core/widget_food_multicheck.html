@@ -28,10 +28,11 @@
                     <div class="food-multicheck__option col-12 col-md-6 col-lg-4 fs-6"
                          data-food-option
                          data-food-name="{{ option.label|lower }}">
-                        {% include option.template_name with widget=option %}
-                        <span class="badge bg-secondary ms-1"
-                              data-food-recent-badge
-                              hidden>{% translate "Recent" %}</span>
+                        <label{% if option.attrs.id %} for="{{ option.attrs.id }}"{% endif %}>
+                            {% include 'django/forms/widgets/input.html' with widget=option %}
+                            <span class="text-break">{{ option.label }}</span>
+                            <span class="badge bg-secondary" data-food-recent-badge hidden>{% translate "Recent" %}</span>
+                        </label>
                     </div>
                 {% endfor %}
             {% endfor %}

@@ -1,6 +1,6 @@
 {% load datetime i18n %}
 {% if home_sleep.visible %}
-    <div class="bb-home-sleep{% if home_sleep.timer %} bb-home-sleep--active{% endif %}" data-home-sleep>
+    <div class="bb-home-sleep border-0 mb-0{% if home_sleep.timer %} bb-home-sleep--active{% endif %}" data-home-sleep>
         <span><span class="text-body-secondary">{% trans "Now" %} · </span><i class="icon-sleep me-1" aria-hidden="true"></i>
             {% if home_sleep.timer %}<strong>{% trans "Sleeping" %}</strong> · {{ home_sleep.timer.start|datetime_short }}{% else %}{% trans "No sleep in progress" %}{% endif %}
         </span>

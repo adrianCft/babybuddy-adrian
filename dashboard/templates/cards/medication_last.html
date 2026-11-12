@@ -23,9 +23,13 @@
         <div>{{ medication.dosage }} {{ medication.get_dosage_unit_display }}</div>
         {% if home_card and medication.next_dose_time %}
             <div class="mt-2">
-                <strong>{% trans "Next scheduled dose" %}</strong>
-                <div>{{ medication.next_dose_time|datetime_short }}</div>
-                <div class="text-primary-emphasis" data-dose-deadline="{{ medication.next_dose_time|date:'U' }}" data-elapsed-label="{% trans 'Scheduled time reached' %}"></div>
+                <strong>{% trans "Next dose" %}</strong>
+                {% with deadline=medication.next_dose_time %}
+                    <div>
+                        {% if deadline|date:"Y-m-d" == record_context.today|date:"Y-m-d" %}
+                            {% blocktrans with time=deadline|time:"H:i" %}Today at {{ time }}{% endblocktrans %}{% else %}{{ deadline|datetime_short }}{% endif %}, {% include 'dashboard/dose_countdown.html' %}
+                    </div>
+                {% endwith %}
             </div>
         {% elif medication.next_dose_time %}
             <div class="mt-1">

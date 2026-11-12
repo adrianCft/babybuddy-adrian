@@ -29,7 +29,7 @@
                     {% if card.date %}<span class="bb-record-date">{{ card.date }}</span>{% endif %}
                     {% if card.picture %}<img src="{{ card.picture.url }}" class="bb-record-picture" alt="" loading="lazy">{% endif %}
                     <h2 class="h6 mb-1">{{ card.title }}</h2>
-                    {% if card.child %}<span class="bb-record-child">{{ card.child }}</span>{% endif %}
+                    {% if card.child and not single_child %}<span class="bb-record-child">{{ card.child }}</span>{% endif %}
                     {% if card.status %}<span class="badge text-bg-secondary mt-1">{{ card.status }}</span>{% endif %}
                     {% if card.summary %}<span class="bb-record-summary">{{ card.summary }}</span>{% endif %}
                     <span class="bb-record-hint">{% trans "Details" %} <span aria-hidden="true">⌄</span></span>

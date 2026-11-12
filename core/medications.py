@@ -28,6 +28,13 @@ def recorded_amount(dosage, unit):
     return None
 
 
+def dose_suggestion(dosage, unit, origin, hours):
+    amount = recorded_amount(dosage, unit)
+    if amount or hours:
+        return (*(amount or (None, None)), origin, hours)
+    return None
+
+
 def dose_suggestions(user, at, names):
     """Return complete, child-specific doses entered in records the user can read."""
     defaults = {}
@@ -42,16 +49,19 @@ def dose_suggestions(user, at, names):
                 | Q(start_date__isnull=True, visit__date__lte=cutoff),
                 Q(end_date__isnull=True) | Q(end_date__gte=day),
             )
-            .values_list("visit__child_id", "name", "dosage", "dosage_unit")
+            .values_list(
+                "visit__child_id", "name", "dosage", "dosage_unit", "interval_hours"
+            )
         )
-        for child_id, name, dosage, unit in prescriptions.iterator():
+        for child_id, name, dosage, unit, hours in prescriptions.iterator():
             key = (child_id, name.casefold())
-            amount = recorded_amount(dosage, unit)
-            suggestion = (*amount, "prescription") if amount else None
+            suggestion = dose_suggestion(dosage, unit, "prescription", hours)
             previous = defaults.setdefault(key, suggestion)
             if previous and suggestion and previous != suggestion:
                 # The name alone cannot identify which prescription is intended.
-                defaults[key] = None
+                defaults[key] = (
+                    (*previous[:3], None) if previous[:3] == suggestion[:3] else None
+                )
 
     if user.has_perm("core.view_medication"):
         doses = (
@@ -65,12 +75,19 @@ def dose_suggestions(user, at, names):
             )
             .filter(latest=1)
             .order_by("-time", "-pk")
-            .values_list("child_id", "name", "dosage", "dosage_unit")
+            .values_list(
+                "child_id", "name", "dosage", "dosage_unit", "next_dose_interval"
+            )
         )
-        for child_id, name, dosage, unit in doses.iterator():
-            amount = recorded_amount(dosage, unit)
+        for child_id, name, dosage, unit, interval in doses.iterator():
+            hours = (
+                interval.total_seconds() / 3600
+                if interval and interval.total_seconds() > 0
+                else None
+            )
             defaults.setdefault(
-                (child_id, name.casefold()), (*amount, "history") if amount else None
+                (child_id, name.casefold()),
+                dose_suggestion(dosage, unit, "history", hours),
             )
 
     aliases = {}

@@ -34,23 +34,54 @@ class HomeTests(TestCase):
             ("Later appointment", 3, "planned"),
         ):
             HealthVisit.objects.create(
-                child=self.child, reason=reason, date=now + timedelta(days=days), status=status
+                child=self.child,
+                reason=reason,
+                date=now + timedelta(days=days),
+                status=status,
             )
         response = self.client.get(self.url)
-        self.assertEqual(response.context["home"]["next_visit"].reason, "Upcoming appointment")
+        self.assertEqual(
+            response.context["home"]["next_visit"].reason, "Upcoming appointment"
+        )
+        self.assertContains(response, "data-visit-reminder")
         self.assertContains(response, reverse("core:visit-add"))
         self.assertNotContains(response, "Later appointment")
 
-    def test_medication_countdown_uses_the_recorded_interval(self):
-        dose = Medication.objects.create(
-            child=self.child, name="Example", dosage=1, dosage_unit="ml",
-            time=timezone.now() - timedelta(minutes=5), next_dose_interval=timedelta(hours=4),
+    def test_visit_outside_reminder_window_still_appears_in_its_card(self):
+        visit = HealthVisit.objects.create(
+            child=self.child,
+            reason="Later appointment",
+            date=timezone.now() + timedelta(days=6),
+            status="planned",
         )
         response = self.client.get(self.url)
-        self.assertContains(response, f'data-dose-deadline="{int(dose.next_dose_time.timestamp())}"')
+        self.assertEqual(response.context["home"]["next_visit"], visit)
+        self.assertNotContains(response, "data-visit-reminder")
+
+    def test_medication_countdown_uses_the_recorded_interval(self):
+        dose = Medication.objects.create(
+            child=self.child,
+            name="Example",
+            dosage=1,
+            dosage_unit="ml",
+            time=timezone.now() - timedelta(minutes=5),
+            next_dose_interval=timedelta(hours=4),
+        )
+        response = self.client.get(self.url)
+        self.assertContains(
+            response, f'data-dose-deadline="{int(dose.next_dose_time.timestamp())}"'
+        )
+        self.assertContains(response, "data-pending-dose")
+        self.assertEqual(response.context["home"]["pending_dose"], dose)
+        Medication.objects.create(
+            child=self.child, name="Another medication", time=timezone.now()
+        )
+        self.assertEqual(
+            self.client.get(self.url).context["home"]["pending_dose"], dose
+        )
         dose.next_dose_interval = None
         dose.save(update_fields=["next_dose_interval"])
-        self.assertNotContains(self.client.get(self.url), "data-dose-deadline=\"")
+        self.assertNotContains(self.client.get(self.url), 'data-dose-deadline="')
 
     def save_layout(self, **data):
         return self.client.post(self.url + "?date=2026-06-17", data)

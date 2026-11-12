@@ -1,0 +1,5 @@
+{% load i18n %}
+<span class="text-primary-emphasis"
+      data-dose-deadline="{{ deadline|date:'U' }}"
+      data-elapsed-label="{% trans 'Scheduled time reached' %}"
+      data-remaining-label="{% blocktrans with duration='%s' %}in {{ duration }}{% endblocktrans %}"></span>

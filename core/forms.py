@@ -402,7 +402,7 @@ class MealForm(CoreModelForm, TaggableModelForm):
         ).values_list("meal__child_id", "food_id")
         for child_id, food_id in recent_foods:
             child_foods = recent_by_child.setdefault(child_id, [])
-            if food_id not in child_foods and len(child_foods) < 8:
+            if food_id not in child_foods and len(child_foods) < 10:
                 child_foods.append(food_id)
         widget.recent_by_child = recent_by_child
         dish_widget = MealDishesWidget()

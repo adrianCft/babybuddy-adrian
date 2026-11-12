@@ -12,7 +12,7 @@ from django.utils.translation import gettext as _
 
 from core.models import Child
 from core.medications import prescription_dose_url
-from core.navigation import contextual_url
+from core.navigation import contextual_url, navigation
 from core.templatetags.datetime import datetime_short
 from core.utils import duration_string
 
@@ -63,7 +63,14 @@ RECORDS = {
     "note": ("note", ()),
     "prescription": (
         "prescription",
-        ("dosage", "dosage_unit", "instructions", "start_date", "end_date"),
+        (
+            "dosage",
+            "dosage_unit",
+            "interval_hours",
+            "instructions",
+            "start_date",
+            "end_date",
+        ),
     ),
     "pumping": ("pumping", ("end", "duration", "amount")),
     "sleep": ("sleep", ("end", "duration", "nap", "wakeups")),
@@ -245,6 +252,7 @@ def mobile_record_cards(context, objects):
         cards.append(card)
     return {
         "cards": cards,
+        "single_child": len(navigation(request)["children"]) == 1,
         "empty_message": context.get("empty_message", _("No records yet.")),
     }
 

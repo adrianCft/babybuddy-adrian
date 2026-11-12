@@ -1,0 +1,20 @@
+{% load datetime i18n navigation %}
+{% if home_sleep.visible or home.pending_dose or home.visit_reminder %}
+    <div class="border rounded-3 bg-body-tertiary mb-3">
+        {% include 'dashboard/home_sleep.html' %}
+        {% if home.pending_dose %}
+            <div class="px-3 py-2 small{% if home_sleep.visible %} border-top{% endif %}" data-pending-dose>
+                <i class="icon-medication me-1" aria-hidden="true"></i>
+                <a href="{% context_url 'core:medication-list' %}">{% trans "Next dose" %}</a>
+                · {{ home.pending_dose.name }} · {% include 'dashboard/dose_countdown.html' with deadline=home.pending_dose.next_dose_time %}
+            </div>
+        {% endif %}
+        {% if home.visit_reminder %}
+            <div class="px-3 py-2 small{% if home_sleep.visible or home.pending_dose %} border-top{% endif %}" data-visit-reminder>
+                <i class="icon-medication me-1" aria-hidden="true"></i>
+                <a href="{% context_url 'core:visit-detail' home.visit_reminder.pk %}">{% trans "Next medical visit" %}</a>
+                · {{ home.visit_reminder.date|datetime_short }} · {{ home.visit_reminder.reason }}
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
