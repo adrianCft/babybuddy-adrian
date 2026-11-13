@@ -1,12 +1,14 @@
 {% load navigation %}
 {% load i18n mobile_records %}
 <nav class="bb-bottom-nav d-md-none" aria-label="{% trans 'Main navigation' %}">
-    <a href="{% context_url 'dashboard:dashboard' %}"{% if request.resolver_match.app_name == 'dashboard' or request.path == '/' %} aria-current="page"{% endif %}>
+    <a href="{% context_url 'dashboard:dashboard' %}"{% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'dashboard-child' or request.path == '/' %} aria-current="page"{% endif %}>
         <i class="icon-dashboard" aria-hidden="true"></i><span>{% trans "Home" %}</span>
     </a>
-    <a href="{% context_url 'core:timeline' %}"{% if request.path == '/timeline/' %} aria-current="page"{% endif %}>
-        <i class="icon-timeline" aria-hidden="true"></i><span>{% trans "Timeline" %}</span>
-    </a>
+    {% if perms.core.view_child %}
+        <a href="{% context_url 'dashboard:daycare' %}"{% if request.resolver_match.view_name == 'dashboard:daycare' %} aria-current="page"{% endif %}>
+            <i class="icon-child" aria-hidden="true"></i><span>{% trans "Daycare" %}</span>
+        </a>
+    {% endif %}
     <button type="button" class="bb-bottom-record" data-bs-toggle="offcanvas" data-bs-target="#quick-record-panel" aria-controls="quick-record-panel">
         <i class="icon-add" aria-hidden="true"></i><span>{% trans "Record" %}</span>
     </button>

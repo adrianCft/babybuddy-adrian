@@ -139,7 +139,7 @@ def contextual_url(request, target, *args, remember_return=True, **kwargs):
             else ""
         )
     day = state["date"]
-    if day and "date" not in query:
+    if day and "date" not in query and match.view_name != "dashboard:daycare":
         query["date"] = day.isoformat()
     is_action = match.url_name.endswith(("-add", "-update", "-delete"))
     is_detail = match.url_name in (

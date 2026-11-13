@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
+from datetime import timedelta
+
 from django.http import HttpResponseRedirect
 from django.contrib import messages
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.urls import reverse
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
 
 from babybuddy.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from core.models import Child, Timer
+from core.models import Child, DiaperChange, Feeding, Meal, Sleep, Timer
 from core.navigation import contextual_url, navigation
+from core.utils import timezone_aware_duration
 from dashboard.home import HomeLayoutForm, home_layout, sleep_status
 
 
@@ -88,3 +92,48 @@ class ChildDashboard(PermissionRequiredMixin, DetailView):
                 remember_return=False,
             )
         )
+
+
+class Daycare(PermissionRequiredMixin, TemplateView):
+    permission_required = ("core.view_child",)
+    template_name = "dashboard/daycare.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        state = navigation(self.request)
+        child = state["child"]
+        context.update(child=child, children=state["children"])
+        if child is None:
+            return context
+
+        user = self.request.user
+        now = timezone.now()
+        cutoff = now - timedelta(hours=4)
+        context.update(now=now, cutoff=cutoff)
+        if user.has_perm("core.view_sleep"):
+            sleep = (
+                Sleep.objects.filter(child=child, end__lte=now)
+                .order_by("-end", "-pk")
+                .first()
+            )
+            if sleep and timezone.localdate(sleep.end) == timezone.localdate(now):
+                context.update(
+                    sleep=sleep,
+                    sleep_duration=timezone_aware_duration(sleep.start, sleep.end),
+                )
+        if user.has_perm("core.view_feeding"):
+            context["feedings"] = Feeding.objects.filter(
+                child=child, end__range=(cutoff, now)
+            ).order_by("-end", "-pk")
+        if user.has_perm("core.view_diaperchange"):
+            context["diapers"] = DiaperChange.objects.filter(
+                child=child, time__range=(cutoff, now)
+            ).order_by("-time", "-pk")
+        if user.has_perm("core.view_meal"):
+            context["meal"] = (
+                Meal.objects.filter(child=child, time__range=(cutoff, now))
+                .prefetch_related("foods")
+                .order_by("-time", "-pk")
+                .first()
+            )
+        return context

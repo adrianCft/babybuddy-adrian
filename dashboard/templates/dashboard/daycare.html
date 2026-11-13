@@ -1,0 +1,98 @@
+{% extends 'babybuddy/page.html' %}
+{% load duration i18n %}
+{% block title %}{% trans "Daycare" %}{% endblock %}
+{% block breadcrumb_nav %}{% endblock %}
+{% block content %}
+    <div class="bb-home">
+        <header class="mb-3">
+            <h1 class="h2 mb-1">{% trans "Daycare" %}</h1>
+            {% if child %}
+                <p class="text-body-secondary mb-0">
+                    {{ child.first_name }} · {{ now|date:"j F" }}
+                </p>
+                <p class="text-body-secondary mb-0">
+                    {% blocktrans trimmed with start=cutoff|time:"H:i" end=now|time:"H:i" %}
+                        Last 4 hours · {{ start }}–{{ end }}
+                    {% endblocktrans %}
+                </p>
+            {% endif %}
+        </header>
+        {% if not child %}
+            {% for option in children %}
+                <a class="btn btn-outline-primary me-2 mb-2"
+                   href="{% url 'dashboard:daycare' %}?child={{ option.pk }}">{{ option }}</a>
+            {% empty %}
+                <p>{% trans "No children found." %}</p>
+            {% endfor %}
+        {% else %}
+            <div class="row g-3">
+                {% if perms.core.view_sleep %}
+                    <section class="col-12 col-md-6" aria-labelledby="daycare-sleep">
+                        <div class="card h-100"><div class="card-body">
+                            <h2 id="daycare-sleep" class="h5">{% trans "Sleep" %}</h2>
+                            {% if sleep %}
+                                <p class="mb-1 fw-semibold">
+                                    {% if sleep.start|date:"Y-m-d" != sleep.end|date:"Y-m-d" %}{{ sleep.start|date:"j M" }} {% endif %}
+                                    {{ sleep.start|time:"H:i" }}–{{ sleep.end|time:"H:i" }}
+                                </p>
+                                <p class="mb-0">{{ sleep_duration|duration_string:"m" }} {% trans "in total" %}</p>
+                            {% else %}
+                                <p class="mb-0 text-body-secondary">{% trans "No completed sleep recorded today." %}</p>
+                            {% endif %}
+                        </div></div>
+                    </section>
+                {% endif %}
+                {% if perms.core.view_feeding %}
+                    <section class="col-12 col-md-6" aria-labelledby="daycare-feeding">
+                        <div class="card h-100"><div class="card-body">
+                            <h2 id="daycare-feeding" class="h5">{% trans "Feedings" %}</h2>
+                            <ul class="list-unstyled mb-0">
+                                {% for feeding in feedings %}
+                                    <li class="py-1">
+                                        <strong>{{ feeding.end|time:"H:i" }}</strong> · {{ feeding.get_type_display }} · {{ feeding.get_method_display }}
+                                        {% if feeding.amount != None %}
+                                            · <strong>{{ feeding.amount|floatformat:"-2" }}{% if feeding.method == "bottle" %} ml{% endif %}</strong>
+                                        {% endif %}
+                                    </li>
+                                {% empty %}
+                                    <li class="alert alert-warning py-2 mb-0"><strong aria-hidden="true">!</strong> {% trans "No feeding recorded in the last 4 hours." %}</li>
+                                {% endfor %}
+                            </ul>
+                        </div></div>
+                    </section>
+                {% endif %}
+                {% if perms.core.view_diaperchange %}
+                    <section class="col-12 col-md-6" aria-labelledby="daycare-diapers">
+                        <div class="card h-100"><div class="card-body">
+                            <h2 id="daycare-diapers" class="h5">{% trans "Diapers" %}</h2>
+                            <ul class="list-unstyled mb-0">
+                                {% for diaper in diapers %}
+                                    <li class="py-1">
+                                        <strong>{{ diaper.time|time:"H:i" }}</strong> · {% if diaper.solid %}{% trans "Poop" %}{% else %}{% trans "No poop" %}{% endif %}
+                                    </li>
+                                {% empty %}
+                                    <li class="alert alert-warning py-2 mb-0"><strong aria-hidden="true">!</strong> {% trans "No diaper change recorded in the last 4 hours." %}</li>
+                                {% endfor %}
+                            </ul>
+                        </div></div>
+                    </section>
+                {% endif %}
+                {% if perms.core.view_meal %}
+                    <section class="col-12 col-md-6" aria-labelledby="daycare-meal">
+                        <div class="card h-100"><div class="card-body">
+                            <h2 id="daycare-meal" class="h5">{% trans "Meal" %}</h2>
+                            {% if meal %}
+                                <p class="mb-1"><strong>{{ meal.time|time:"H:i" }}</strong> · {{ meal.get_meal_type_display }}</p>
+                                {% if meal.dish_names %}<p class="mb-1 fw-semibold">{{ meal.dish_names|join:", " }}</p>{% endif %}
+                                <p class="mb-0">{{ meal.foods.all|join:", " }}</p>
+                            {% else %}
+                                <p class="fw-semibold mb-1">{% trans "Early birds" %}</p>
+                                <p class="text-body-secondary mb-0">{% trans "No meal recorded in the last 4 hours." %}</p>
+                            {% endif %}
+                        </div></div>
+                    </section>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

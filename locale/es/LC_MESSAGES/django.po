@@ -4625,3 +4625,34 @@ msgstr "en %(duration)s"
 
 msgid "Scheduled time reached"
 msgstr "Hora prevista alcanzada"
+
+msgid "Daycare"
+msgstr "Guarde"
+
+#, python-format
+msgid "Last 4 hours · %(start)s–%(end)s"
+msgstr "Últimas 4 horas · %(start)s–%(end)s"
+
+msgid "in total"
+msgstr "en total"
+
+msgid "No completed sleep recorded today."
+msgstr "Hoy aún no hay ningún sueño terminado registrado."
+
+msgid "No feeding recorded in the last 4 hours."
+msgstr "Sin tomas registradas en las últimas 4 horas."
+
+msgid "Poop"
+msgstr "Con caca"
+
+msgid "No poop"
+msgstr "Sin caca"
+
+msgid "No diaper change recorded in the last 4 hours."
+msgstr "Sin cambios de pañal registrados en las últimas 4 horas."
+
+msgid "Early birds"
+msgstr "Madrugadores"
+
+msgid "No meal recorded in the last 4 hours."
+msgstr "Sin comida registrada en las últimas 4 horas."

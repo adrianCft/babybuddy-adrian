@@ -7,6 +7,7 @@ app_name = "dashboard"
 
 urlpatterns = [
     path("dashboard/", views.Dashboard.as_view(), name="dashboard"),
+    path("daycare/", views.Daycare.as_view(), name="daycare"),
     path(
         "children/<str:slug>/dashboard/",
         views.ChildDashboard.as_view(),
